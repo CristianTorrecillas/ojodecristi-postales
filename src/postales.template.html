@@ -56,7 +56,7 @@
 }
 
 *{box-sizing:border-box}
-html,body{background:var(--paper)}
+html,body{background:var(--paper);overscroll-behavior-y:none}
 body{margin:0;color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
 .wrap{max-width:1380px;margin:0 auto;padding-inline:max(20px,env(safe-area-inset-left,0px)) max(20px,env(safe-area-inset-right,0px));padding-block:22px 56px;display:flex;flex-direction:column;gap:18px}
 button,input,select{font:inherit;color:inherit}
@@ -100,6 +100,9 @@ select.inp{padding-right:28px;cursor:pointer;font-size:15px}
 @media (max-width:1040px){.cols{grid-template-columns:minmax(0,1fr)}}
 .col-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;border-bottom:1px solid var(--ink);padding-bottom:6px;margin-bottom:12px}
 .col-head h2{margin:0;font-family:var(--mono);font-weight:500;font-size:13px;letter-spacing:.14em;text-transform:uppercase}
+.col-tools{display:inline-flex;align-items:baseline;gap:14px}
+.linkbtn{border:0;background:transparent;padding:4px 0;font-family:var(--mono);font-size:12px;color:var(--stamp);cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.linkbtn.armed{font-weight:500;text-decoration:none;background:var(--stamp);color:var(--on-stamp);padding:4px 8px}
 .count{font-family:var(--mono);font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
 .side{display:flex;flex-direction:column;gap:22px;min-width:0}
 
@@ -365,7 +368,7 @@ textarea.inp{height:auto;padding:8px 10px;font-family:var(--mono);font-size:14px
 
   <main class="cols">
     <section aria-labelledby="hPhotos">
-      <div class="col-head"><h2 id="hPhotos">Fotos</h2><span id="photoCount" class="count"></span></div>
+      <div class="col-head"><h2 id="hPhotos">Fotos</h2><span class="col-tools"><span id="photoCount" class="count"></span><button type="button" id="clearAll" class="linkbtn" hidden>Vaciar</button></span></div>
       <ol id="photoList" class="plist"></ol>
       <div class="drop picker"><span id="drop">Elegí fotos o soltalas acá<small>Hasta 16, en el orden del carrusel</small></span><input type="file" class="pick" accept="image/*" multiple aria-label="Elegir fotos"></div>
     </section>
@@ -2104,13 +2107,13 @@ function renderOutputs(){
   $('#outCount').textContent = outs.length ? `${outs.length} ${outs.length === 1 ? 'imagen' : 'imágenes'}` : 'vacío';
 }
 let outT = 0;
-function scheduleOut(){ resetShare(); clearTimeout(outT); outT = setTimeout(() => requestAnimationFrame(() => { renderOutputs(); renderShapeThumbsSoon(); savePrefs(); }), 90); }
+function scheduleOut(){ resetShare(); saveSessionSoon(); clearTimeout(outT); outT = setTimeout(() => requestAnimationFrame(() => { renderOutputs(); renderShapeThumbsSoon(); savePrefs(); }), 90); }
 let shapeT = 0, lastShapeSig = '';
 function renderShapeThumbsSoon(){
   const sig = state.photos[0] ? state.photos[0].colors.map(c => c.hex).join() : 'demo';
   if (sig === lastShapeSig) return; lastShapeSig = sig; clearTimeout(shapeT); shapeT = setTimeout(renderShapeThumbs, 60);
 }
-function afterStructure(){ resetShare(); state.picking = null; renderPhotos(); renderGridTitles(); renderRecipePhotos(); renderOutputs(); renderStyleThumbs(); renderShapeThumbsSoon(); updateEmpty(); }
+function afterStructure(){ resetShare(); saveSessionSoon(); $('#clearAll').hidden = state.sample || !state.photos.length; state.picking = null; renderPhotos(); renderGridTitles(); renderRecipePhotos(); renderOutputs(); renderStyleThumbs(); renderShapeThumbsSoon(); updateEmpty(); }
 function updateEmpty(){ const none = !state.photos.length; $('#zipBtn').disabled = none; $('#oneBtn').disabled = none; $('#mSave').disabled = none; }
 
 outList.addEventListener('click', async e => {
@@ -2292,6 +2295,73 @@ document.addEventListener('drop', e => {
 });
 
 /* ---------- boot ---------- */
+/* ---------- autosave: the work survives reloads, closed tabs and the phone killing the app ---------- */
+const DBP = (() => { let p = null; return () => p || (p = new Promise((res, rej) => {
+  if (!window.indexedDB) return rej(new Error('no idb'));
+  const r = indexedDB.open('postales-ojodecristi', 1);
+  r.onupgradeneeded = () => { r.result.createObjectStore('blobs'); r.result.createObjectStore('kv'); };
+  r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+})); })();
+function idbDo(store, mode, fn){
+  return DBP().then(db => new Promise((res, rej) => {
+    const t = db.transaction(store, mode), st = t.objectStore(store), req = fn(st);
+    t.oncomplete = () => res(req && 'result' in req ? req.result : undefined); t.onerror = t.onabort = () => rej(t.error);
+  }));
+}
+const SAVED = new Set(); let sessT = 0, sessBusy = null, restoring = false;
+function saveSessionSoon(){ if (restoring) return; clearTimeout(sessT); sessT = setTimeout(saveSession, 500); }
+async function saveSession(){
+  clearTimeout(sessT); if (restoring) return;
+  if (sessBusy) await sessBusy.catch(() => {});
+  sessBusy = (async () => {
+    if (state.sample || !state.photos.length){
+      await idbDo('kv', 'readwrite', st => st.delete('session'));
+      await idbDo('blobs', 'readwrite', st => st.clear()); SAVED.clear(); return;
+    }
+    const ids = new Set(state.photos.map(p => p.id));
+    const fresh = state.photos.filter(p => !SAVED.has(p.id)), gone = [...SAVED].filter(id => !ids.has(id));
+    if (fresh.length || gone.length) await idbDo('blobs', 'readwrite', st => { fresh.forEach(p => st.put(p.fullBlob, p.id)); gone.forEach(id => st.delete(id)); });
+    fresh.forEach(p => SAVED.add(p.id)); gone.forEach(id => SAVED.delete(id));
+    const meta = state.photos.map(p => ({id:p.id, fw:p.fw, fh:p.fh, place:p.place, focus:p.focus, date:p.date, title:p.title, file:p.file || '',
+      tech:p.tech, colors:p.colors.map(c => ({hex:c.hex, name:c.name, auto:!!c.auto, pt:c.pt || null}))}));
+    await idbDo('kv', 'readwrite', st => st.put({v:1, at:Date.now(), startNum:state.startNum, place:state.place, titles:state.titles, photos:meta}, 'session'));
+  })();
+  try { await sessBusy; } catch(e){} finally { sessBusy = null; }
+}
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') saveSession(); });
+window.addEventListener('pagehide', () => saveSession());
+async function restoreSession(){
+  let sess; try { sess = await idbDo('kv', 'readonly', st => st.get('session')); } catch(e){ return false; }
+  if (!sess || !Array.isArray(sess.photos) || !sess.photos.length) return false;
+  restoring = true;
+  try {
+    $('#drop').textContent = 'Recuperando tu trabajo…';
+    const photos = [];
+    for (const m of sess.photos){
+      try {
+        const blob = await idbDo('blobs', 'readonly', st => st.get(m.id)); if (!blob) continue;
+        const src = await decodeFile(blob, null, 2400), prev = downscale(src, 900); if (src.close) src.close();
+        photos.push({...m, fullBlob: blob, prev, techOpen:false, tech: Object.assign({cam:'', lens:'', focal:'', ap:'', sh:'', iso:'', time:'', gps:''}, m.tech)});
+        SAVED.add(m.id);
+      } catch(e){}
+    }
+    if (!photos.length) return false;
+    state.photos = photos; state.sample = false; state.titles = Array.isArray(sess.titles) ? sess.titles : [];
+    state.place = sess.place || ''; $('#place').value = state.place; setStart(sess.startNum || 1);
+    $('#sampleNote').hidden = true;
+    uidN = Math.max(uidN, ...photos.map(p => parseInt(String(p.id).slice(1), 10) || 0));
+    return photos.length;
+  } finally { restoring = false; $('#drop').innerHTML = DROP_TEXT; }
+}
+if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
+{ let armT = 0; $('#clearAll').addEventListener('click', e => {
+  const b = e.currentTarget;
+  if (!b.classList.contains('armed')){ b.classList.add('armed'); b.textContent = '¿Vaciar todo? Tocá de nuevo'; clearTimeout(armT); armT = setTimeout(() => { b.classList.remove('armed'); b.textContent = 'Vaciar'; }, 3500); return; }
+  clearTimeout(armT); b.classList.remove('armed'); b.textContent = 'Vaciar';
+  state.photos.forEach(p => { dropFull(p); releaseCanvas(p.prev); }); state.photos = []; state.titles = []; outSig = '';
+  afterStructure(); toast('Listo: carrusel vacío. Agregá las fotos del próximo');
+}); }
+
 async function boot(){
   loadPrefs();
   const [paperI, stampI, tapeI, clipI] = await Promise.all([ASSETS.paper, ASSETS.stamp, ASSETS.tape, ASSETS.clip].map(loadImg));
@@ -2300,7 +2370,9 @@ async function boot(){
   paperSmallData = IMG.paperSmall.getContext('2d', {willReadFrequently:true}).getImageData(0, 0, IMG.paperSmall.width, IMG.paperSmall.height);
   { const d = paperSmallData.data; let s = 0; for (let i=0;i<d.length;i+=4) s += 0.299*d[i] + 0.587*d[i+1] + 0.114*d[i+2]; paperMean = s / (d.length/4); }
   try { await Promise.all([document.fonts.load(`400 20px ${MONO}`), document.fonts.load(`400 20px ${SANS}`), document.fonts.load(`500 20px ${MONO}`), document.fonts.load(`600 24px ${HAND}`), document.fonts.load(`400 24px ${HAND}`), document.fonts.load(`700 24px ${HAND}`)]); } catch(e){}
-  if (state.sample){
+  const restored = await restoreSession();
+  if (restored) toast(`Recuperé tu trabajo: ${restored} ${restored === 1 ? 'foto' : 'fotos'}`);
+  else if (state.sample){
     const imgs = await Promise.all(SAMPLE.map(s => loadImg(s.src)));
     state.photos = await Promise.all(imgs.map((im, i) => makePhoto(im, {date:'04-09-2025', colors: SAMPLE[i].colors.map(([hex, name]) => ({hex, name, auto:false}))})));
   }
