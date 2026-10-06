@@ -275,8 +275,6 @@ body.lb-open .mbar{display:none}
   .out .col-head{margin-bottom:0}
   .design{grid-column:3;grid-row:1;position:sticky;top:calc(var(--topH,64px) + 16px);max-height:calc(100vh - var(--topH,64px) - 32px);overflow:auto;padding:0 8px 20px 0;scrollbar-width:thin}
   .tabs{display:flex}
-  .design .pane-off{display:none !important}
-  .design .dgroup{border-top:0;padding-top:2px}
   .stage{display:flex;flex-direction:column;gap:10px}
   .olist{display:flex;overflow-x:auto;gap:12px;padding:4px 3px 10px;scroll-snap-type:x proximity;scrollbar-width:thin}
   .olist .ocard{flex:0 0 108px;scroll-snap-align:start}
@@ -287,6 +285,32 @@ body.lb-open .mbar{display:none}
   section[aria-labelledby="hPhotos"] .gt{grid-template-columns:minmax(0,1fr) auto;gap:5px 8px}
   section[aria-labelledby="hPhotos"] .gt label{grid-column:1/-1}
   .out .hint{display:none}
+}
+.design .pane-off{display:none !important}
+.design .dgroup{border-top:0;padding-top:2px}
+.views{display:none}
+@media (max-width:1099px){
+  .views{display:flex;position:sticky;top:0;z-index:11;background:var(--paper);border-bottom:1px solid var(--rule);margin-inline:-20px;padding-inline:12px}
+  .views button{flex:1;display:flex;align-items:baseline;justify-content:center;gap:6px;border:0;background:transparent;padding:13px 4px 12px;font-family:var(--sans);font-size:15.5px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+  .views button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--stamp)}
+  .views .n{font-family:var(--mono);font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+  .cols{grid-template-columns:minmax(0,1fr)}
+  .side{gap:14px}
+  body:not([data-view="fotos"]) .bar, body:not([data-view="fotos"]) #sampleNote, body:not([data-view="fotos"]) section[aria-labelledby="hPhotos"]{display:none}
+  body:not([data-view="diseno"]) .design, body:not([data-view="diseno"]) .peek{display:none}
+  body:not([data-view="carrusel"]) .out{display:none}
+  .peek{top:var(--viewsH,48px)}
+  .tabs{display:flex;top:calc(var(--viewsH,48px) + var(--peekH,0px));overflow-x:auto}
+  .tabs button{flex:1 0 auto}
+  .design .col-head{display:none}
+  .out .stage{display:flex;flex-direction:column;gap:10px}
+  .out .stage-view{height:auto;min-height:0}
+  .out .stage-view canvas{width:100%;height:auto}
+  .olist{display:flex;overflow-x:auto;gap:10px;padding:4px 3px 10px;scroll-snap-type:x proximity}
+  .olist .ocard{flex:0 0 96px;scroll-snap-align:start}
+  .olist .o-save{display:none}
+  .out .hint{display:none}
+  section[aria-labelledby="hPhotos"] .gtitles{margin-bottom:14px}
 }
 .picker{position:relative;overflow:hidden}
 .pick{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;font-size:200px;z-index:2}
@@ -330,6 +354,12 @@ textarea.inp{height:auto;padding:8px 10px;font-family:var(--mono);font-size:14px
     </div>
   </section>
   </div>
+
+  <nav class="views" role="tablist" aria-label="Secciones">
+    <button type="button" role="tab" data-view="fotos" aria-selected="true">Fotos <span class="n" id="vnFotos"></span></button>
+    <button type="button" role="tab" data-view="diseno" aria-selected="false">Diseño</button>
+    <button type="button" role="tab" data-view="carrusel" aria-selected="false">Carrusel <span class="n" id="vnOut"></span></button>
+  </nav>
 
   <p id="sampleNote" class="note">Ejemplo de muestra. Se reemplaza cuando agregás tus fotos.</p>
 
@@ -2085,7 +2115,7 @@ function updateEmpty(){ const none = !state.photos.length; $('#zipBtn').disabled
 
 outList.addEventListener('click', async e => {
   const open = e.target.closest('[data-k]'), sv = e.target.closest('[data-save]');
-  if (open){ if (isWide()) selectOut(+open.dataset.k); else openLB(+open.dataset.k); }
+  if (open){ const k = +open.dataset.k; if (isWide()) selectOut(k); else if (document.body.dataset.view === 'carrusel'){ if (k === selK) openLB(k); else selectOut(k); } else openLB(k); }
   else if (sv){
     const k = +sv.dataset.save, o = outputs()[k]; if (!o) return;
     sv.textContent = '…';
@@ -2100,17 +2130,18 @@ function selectOut(k){ selK = k; renderStage(); }
 function renderStage(){
   const outs = outputs();
   document.querySelectorAll('#outList .ocard').forEach((li, k) => li.classList.toggle('sel', k === selK));
-  if (!isWide() || !outs.length) return;
+  const vn = $('#vnOut'); if (vn) vn.textContent = outs.length || ''; const vf = $('#vnFotos'); if (vf) vf.textContent = state.photos.length || '';
+  if (!(isWide() || document.body.dataset.view === 'carrusel') || !outs.length) return;
   if (selK >= outs.length) selK = outs.length - 1;
   const c = $('#stageC'), view = $('#stageView'), dpr = Math.min(2, window.devicePixelRatio || 1);
-  const box = Math.min(view.clientWidth, view.clientHeight / (FORMATS[state.format] || 1)) || 600;
+  const box = (isWide() ? Math.min(view.clientWidth, view.clientHeight / (FORMATS[state.format] || 1)) : view.clientWidth) || 600;
   renderTo(c, outs[selK], Math.max(480, Math.min(1600, Math.round(box * dpr))), false);
   $('#stageCap').textContent = `${String(selK+1).padStart(2,'0')} / ${String(outs.length).padStart(2,'0')} · ${outName(outs[selK], selK).label}`;
 }
 $('#stageView').addEventListener('click', () => openLB(selK));
 $('#stageSave').addEventListener('click', async e => {
   const o = outputs()[selK]; if (!o) return; const b = e.currentTarget, t = b.textContent; b.textContent = '…';
-  try { await saveBlob(outName(o, selK).file, await renderBlob(o, state.size)); } finally { b.textContent = t; }
+  try { await shareOrSave(outName(o, selK).file, await renderBlob(o, state.size)); } finally { b.textContent = t; }
 });
 document.addEventListener('keydown', e => {
   if (!isWide() || !lb.hidden || /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement && document.activeElement.tagName)) return;
@@ -2131,16 +2162,30 @@ document.querySelector('.tabs').addEventListener('keydown', e => {
   const nb = bs[(i + (e.key === 'ArrowRight' ? 1 : -1) + bs.length) % bs.length]; setTab(nb.dataset.tab); nb.focus(); e.preventDefault();
 });
 { let t = 'estilo'; try { t = localStorage.getItem(TAB_KEY) || t; } catch(e){} setTab(t); }
-const gtHome = $('#gridTitles').parentNode, gtNext = $('#gridTitles').nextSibling;
-function placeGridTitles(){
-  const gt = $('#gridTitles'), ph = $('#photoList');
-  if (isWide()){ if (gt.nextSibling !== ph) ph.parentNode.insertBefore(gt, ph); }
-  else if (gt.parentNode !== gtHome) gtHome.insertBefore(gt, gtNext);
+function placeBar(){
+  const bar = $('.bar'), top = $('.top'), views = $('.views');
+  if (isWide()){ if (bar.parentNode !== top) top.appendChild(bar); }
+  else if (bar.previousElementSibling !== views) views.after(bar);
 }
+placeBar();
+function placeGridTitles(){ const gt = $('#gridTitles'), ph = $('#photoList'); if (gt.nextSibling !== ph) ph.parentNode.insertBefore(gt, ph); }
 placeGridTitles();
-function setTopH(){ document.documentElement.style.setProperty('--topH', $('.top').offsetHeight + 'px'); }
+function setTopH(){
+  const r = document.documentElement.style; r.setProperty('--topH', $('.top').offsetHeight + 'px');
+  r.setProperty('--viewsH', ($('.views').offsetHeight || 0) + 'px'); r.setProperty('--peekH', ($('#peek').offsetHeight || 0) + 'px');
+}
+const VIEW_KEY = 'postales-ojodecristi-view';
+function setView(v, keepScroll){
+  document.body.dataset.view = v;
+  document.querySelectorAll('.views [data-view]').forEach(b => { const on = b.dataset.view === v; b.setAttribute('aria-selected', String(on)); b.tabIndex = on ? 0 : -1; });
+  try { localStorage.setItem(VIEW_KEY, v); } catch(e){}
+  if (!keepScroll && !isWide()) window.scrollTo(0, 0);
+  requestAnimationFrame(() => { setTopH(); if (v === 'carrusel') renderStage(); if (v === 'diseno') renderPeek(); });
+}
+document.querySelector('.views').addEventListener('click', e => { const b = e.target.closest('[data-view]'); if (b) setView(b.dataset.view); });
+{ let v = 'fotos'; try { v = localStorage.getItem(VIEW_KEY) || v; } catch(e){} setView(v, true); }
 setTopH();
-window.addEventListener('resize', () => { setTopH(); placeGridTitles(); clearTimeout(stageT); stageT = setTimeout(renderStage, 120); });
+window.addEventListener('resize', () => { placeBar(); setTopH(); placeGridTitles(); clearTimeout(stageT); stageT = setTimeout(renderStage, 120); });
 
 /* ---------- lightbox ---------- */
 const lb = $('#lightbox'), lbImg = $('#lbImg');
