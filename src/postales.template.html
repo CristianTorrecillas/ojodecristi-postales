@@ -138,6 +138,10 @@ select.inp{padding-right:28px;cursor:pointer;font-size:15px}
 .sw-name:focus{outline:none}
 .sw-ai{display:none;flex:none;width:30px;height:30px;align-items:center;justify-content:center;border:0;background:transparent;color:var(--stamp);cursor:pointer;border-radius:2px;padding:0}
 .sw-ai:hover{background:var(--well)}
+.sw-alt{display:inline-flex;flex:none;width:32px;height:32px;align-items:center;justify-content:center;border:0;background:transparent;color:var(--muted);cursor:pointer;border-radius:2px;padding:0}
+.sw-alt:hover{background:var(--well);color:var(--ink)}
+.sw-alt svg{width:15px;height:15px}
+@media (max-width:520px){.sws{grid-template-columns:minmax(0,1fr);gap:6px}.sw{flex-direction:row;align-items:center;gap:10px}.sw-chip{width:84px;flex:none}.sw-namebox{flex:1}.sw-name{font-size:15px}}
 .sw-ai svg{width:15px;height:15px}
 body.can-name .sw-ai{display:inline-flex}
 .sw-ai.busy svg{animation:spin 1s linear infinite}
@@ -608,38 +612,112 @@ function rgbHex(r,g,b){ return '#' + [r,g,b].map(v => Math.round(v).toString(16)
 const SHADE = new Map();
 function shade(hex, dl){ const k = hex + (Math.round(dl*200)/200); if (SHADE.has(k)) return SHADE.get(k); const o = hex2ok(hex); const v = ok2hex([Math.min(0.98, Math.max(0.02, o[0] + dl)), o[1], o[2]]); SHADE.set(k, v); return v; }
 
-function colorName(hex){
-  const [L,a,b] = hex2ok(hex); const C = Math.hypot(a,b); let h = Math.atan2(b,a)*180/Math.PI; if (h < 0) h += 360;
-  if (C < 0.022){ if(L<0.3)return 'Negro Carbón'; if(L<0.45)return 'Gris Grafito'; if(L<0.6)return 'Gris Plomo'; if(L<0.75)return 'Gris Piedra'; if(L<0.88)return 'Gris Perla'; return 'Blanco Humo'; }
-  if (C < 0.05){
-    if (h>=30 && h<115){ if(L>0.84)return 'Crema'; if(L>0.68)return 'Arena'; if(L>0.48)return 'Gris Topo'; return 'Marrón Humo'; }
-    if (h>=115 && h<185) return L>0.6 ? 'Gris Salvia' : 'Verde Oliva';
-    if (h>=185 && h<290) return L>0.75 ? 'Gris Niebla' : (L>0.45 ? 'Gris Azulado' : 'Pizarra');
-    return L>0.6 ? 'Rosa Viejo' : 'Gris Ciruela';
-  }
-  if (h>=345 || h<22) return L<0.45 ? 'Bordó' : (L>0.78 ? 'Rosa' : 'Rojo');
-  if (h<45)  return L<0.48 ? 'Marrón Óxido' : (L>0.74 ? 'Coral' : 'Terracota');
-  if (h<78)  return L<0.5 ? 'Marrón' : (L<0.64 ? 'Canela' : (L>0.88 ? 'Durazno' : 'Naranja'));
-  if (h<112) return L<0.5 ? 'Oliva' : (L<0.74 ? 'Ocre' : (C<0.09 ? 'Crema' : 'Amarillo'));
-  if (h<160) return L<0.45 ? 'Verde Musgo' : (L>0.82 ? 'Verde Menta' : 'Verde');
-  if (h<200) return L<0.45 ? 'Verde Petróleo' : (L>0.8 ? 'Verde Agua' : 'Turquesa');
-  if (h<280) return L<0.38 ? 'Azul Noche' : (L>0.74 ? 'Celeste' : 'Azul');
-  if (h<318) return L>0.75 ? 'Lavanda' : 'Violeta';
-  return L>0.75 ? 'Rosa' : 'Magenta';
+/* Color names: nearest real name in OKLab (how the eye sees distance), chosen together so a palette never repeats. */
+const NAMES = [
+  // neutros
+  ['#111111','Negro'],['#22252A','Negro Carbón'],['#34373C','Grafito'],['#4B4E53','Gris Asfalto'],['#6C6F73','Gris Plomo'],
+  ['#8E9194','Gris Piedra'],['#B3B5B7','Gris Plata'],['#D2D3D3','Gris Perla'],['#EDEDEA','Blanco Nube'],['#F8F6F0','Blanco Hueso'],
+  ['#A9B4BE','Gris Niebla'],['#73828F','Gris Azulado'],['#4A5560','Pizarra'],['#A8AE9A','Gris Salvia'],['#7B7F6D','Gris Liquen'],
+  ['#857A6E','Gris Topo'],['#9C8E80','Taupe'],
+  // tierras y cálidos claros
+  ['#F2E8D5','Crema'],['#E8D8BC','Marfil'],['#DDC7A2','Beige'],['#D2B98E','Arena'],['#C3A57A','Trigo'],['#B39A73','Caqui'],
+  ['#C19A6B','Camel'],['#A9845A','Avellana'],['#8B6B4A','Marrón Tierra'],['#6E5038','Marrón Café'],['#4F3828','Chocolate'],
+  ['#3A2A21','Marrón Oscuro'],['#7B4B2A','Cuero'],['#9A5B2E','Canela'],['#B07338','Caramelo'],['#B5652E','Cobre'],
+  ['#8E3E1F','Óxido'],['#A34A2C','Ladrillo'],['#C0623E','Terracota'],['#D2793F','Naranja Tostado'],['#E58B3A','Naranja'],
+  ['#F0A24B','Mandarina'],['#F3B27A','Damasco'],['#F6CBA6','Durazno'],['#E9967A','Salmón'],['#F07F68','Coral'],
+  // amarillos
+  ['#C9A227','Mostaza'],['#E5B04A','Ámbar'],['#B8913A','Oro Viejo'],['#D9B45A','Dorado'],['#E9C873','Miel'],['#F2D24B','Amarillo'],
+  ['#F6E08E','Amarillo Pálido'],['#F2E6B0','Vainilla'],['#A68C3A','Ocre'],
+  // rojos y rosas
+  ['#D63A2F','Rojo'],['#B22222','Rojo Fuego'],['#8E1B1E','Carmín'],['#6E1A26','Bordó'],['#4F1A24','Vino'],
+  ['#F4B9C3','Rosa'],['#E79AAA','Rosa Chicle'],['#C98B8B','Rosa Viejo'],['#C2456B','Frambuesa'],['#B7246A','Fucsia'],
+  ['#6B2F4E','Ciruela'],['#E8C4B8','Rosa Arena'],
+  // violetas
+  ['#D9C9E8','Lila'],['#B7A4D6','Lavanda'],['#8E6BB5','Violeta'],['#5B3F8C','Morado'],['#3E2A5E','Uva'],
+  // azules
+  ['#0F1C33','Azul Noche'],['#1B2D57','Azul Marino'],['#2D4FA0','Azul Rey'],['#3F6FB4','Azul'],['#5A88C2','Azul Francia'],
+  ['#78A6D6','Azul Cielo'],['#9FC6E8','Celeste'],['#CBE2F2','Celeste Claro'],['#4F6D9A','Azul Jean'],['#4A6A86','Azul Acero'],
+  ['#6E8AA3','Azul Pizarra'],['#8FA9BE','Azul Niebla'],['#1E6091','Azul Océano'],['#245E78','Azul Petróleo'],
+  // turquesas y verdes azulados
+  ['#1F5A60','Petróleo'],['#2A8C82','Verde Azulado'],['#3FB8AF','Turquesa'],['#7FD1C8','Aguamarina'],['#B6E2DA','Verde Agua'],
+  // verdes
+  ['#1F3A2B','Verde Bosque'],['#2E5A3C','Verde Pino'],['#3E7B4A','Verde'],['#5DA35E','Verde Pasto'],['#8DB84A','Verde Manzana'],
+  ['#A8D8B9','Verde Menta'],['#6B7B3A','Verde Oliva'],['#4F5A2A','Verde Musgo'],['#4B5320','Verde Militar'],['#9CAF88','Verde Salvia'],
+  ['#BFC97E','Pistacho'],['#7FA35E','Verde Hoja'],['#2E8B57','Esmeralda']
+];
+let NAME_REFS = null;
+function nameCands(hex, k, pt){
+  if (!NAME_REFS) NAME_REFS = NAMES.map(([h, n]) => ({n, o: hex2ok(h)}));
+  const o = hex2ok(hex), sky = !pt || pt.y < 0.5;
+  return NAME_REFS.filter(r => sky || !/Cielo/.test(r.n))
+    .map(r => ({n: r.n, d: Math.hypot(r.o[0]-o[0], (r.o[1]-o[1])*1.2, (r.o[2]-o[2])*1.2)})).sort((a, b) => a.d - b.d).slice(0, k || 8);
 }
+function colorName(hex){ return nameCands(hex, 1)[0].n; }
+const headWord = n => n.trim().split(/\s+/)[0].toLowerCase();
 function nameSet(colors){
-  const names = colors.map(c => colorName(c.hex));
-  for (let i=0;i<3;i++) for (let j=i+1;j<3;j++) if (names[i] === names[j]){
-    const li = hex2ok(colors[i].hex)[0], lj = hex2ok(colors[j].hex)[0];
-    names[i] += li > lj ? ' Claro' : ' Oscuro'; names[j] += li > lj ? ' Oscuro' : ' Claro';
+  const C = colors.map(c => nameCands(c.hex, 7, c.pt)); let best = null, bs = Infinity;
+  for (const a of C[0]) for (const b of C[1]) for (const c of C[2]){
+    const ns = [a.n, b.n, c.n]; if (new Set(ns).size < 3) continue;
+    const h = ns.map(headWord), pen = (h[0] === h[1]) + (h[0] === h[2]) + (h[1] === h[2]);
+    const sc = a.d + b.d + c.d + pen*0.025; if (sc < bs){ bs = sc; best = ns; }
   }
-  return names;
+  return best || colors.map(c => colorName(c.hex));
 }
 function freshName(p, k){
-  let n = colorName(p.colors[k].hex);
-  const clash = p.colors.findIndex((c, j) => j !== k && c.name.trim().toLowerCase() === n.toLowerCase());
-  if (clash >= 0) n += hex2ok(p.colors[k].hex)[0] > hex2ok(p.colors[clash].hex)[0] ? ' Claro' : ' Oscuro';
-  return n;
+  const others = p.colors.filter((_, j) => j !== k).map(c => c.name.trim().toLowerCase()), oh = others.map(n => n.split(/\s+/)[0]);
+  let best = null, bs = Infinity;
+  for (const c of nameCands(p.colors[k].hex, 8, p.colors[k].pt)){
+    if (others.includes(c.n.toLowerCase())) continue;
+    const sc = c.d + (oh.includes(headWord(c.n)) ? 0.025 : 0); if (sc < bs){ bs = sc; best = c.n; }
+  }
+  return best || colorName(p.colors[k].hex);
+}
+/* Alternatives for the ↻ button: other close names, plus "color + what it might be" by where it sits in the photo. */
+function colorFamily(hex){
+  const [L, a, b] = hex2ok(hex), C = Math.hypot(a, b); let h = Math.atan2(b, a)*180/Math.PI; if (h < 0) h += 360;
+  if (C < 0.03) return L < 0.28 ? 'negro' : L > 0.9 ? 'blanco' : 'gris';
+  if (h >= 345 || h < 22) return L > 0.78 ? 'rosa' : 'rojo';
+  if (h < 75) return L < 0.55 ? 'marrón' : 'naranja';
+  if (h < 112) return (L > 0.78 && C > 0.09) ? 'amarillo' : 'ocre';
+  if (h < 168) return 'verde';
+  if (h < 212) return 'turquesa';
+  if (h < 268) return L > 0.74 ? 'celeste' : 'azul';
+  if (h < 322) return 'violeta';
+  return 'rosa';
+}
+const FAMILY_WORD = {negro:'Negro', blanco:'Blanco', gris:'Gris', rojo:'Rojo', rosa:'Rosa', marrón:'Marrón', naranja:'Naranja', ocre:'Ocre', amarillo:'Amarillo', verde:'Verde', turquesa:'Turquesa', celeste:'Celeste', azul:'Azul', violeta:'Violeta'};
+function contextNouns(fam, pt, L){
+  const top = pt && pt.y < 0.42, low = pt && pt.y > 0.58;
+  switch (fam){
+    case 'azul': case 'celeste': return top ? ['Cielo', 'Lago', 'Mar', L < 0.4 ? 'Noche' : 'Río'] : low ? ['Lago', 'Mar', 'Agua', 'Río', 'Cielo'] : ['Cielo', 'Lago', 'Mar', 'Agua'];
+    case 'turquesa': return ['Mar', 'Laguna', 'Glaciar', 'Agua'];
+    case 'verde': return low ? ['Pasto', 'Hoja', 'Monte', 'Musgo'] : ['Hoja', 'Pino', 'Monte', 'Musgo'];
+    case 'naranja': return ['Atardecer', 'Roca', 'Óxido', 'Fuego'];
+    case 'marrón': return ['Roca', 'Tierra', 'Cuero', 'Madera', 'Óxido'];
+    case 'ocre': case 'amarillo': return ['Sol', 'Trigo', 'Arena', 'Miel'];
+    case 'rojo': return ['Ladrillo', 'Cereza', 'Vino', 'Fuego'];
+    case 'rosa': return ['Atardecer', 'Flor', 'Pétalo'];
+    case 'violeta': return ['Crepúsculo', 'Lavanda', 'Uva'];
+    case 'negro': return ['Sombra', 'Carbón', 'Noche', 'Asfalto'];
+    case 'blanco': return ['Nube', 'Espuma', 'Nieve', 'Sal'];
+    default: return ['Asfalto', 'Niebla', 'Piedra', 'Acero', 'Cromo'];
+  }
+}
+function altNames(p, k){
+  const c = p.colors[k], others = new Set(p.colors.filter((_, j) => j !== k).map(o => o.name.trim().toLowerCase()));
+  const pt = c.pt || colorSpot(p, c.hex);
+  const plain = nameCands(c.hex, 10, pt).map(x => x.n).filter(n => !others.has(n.toLowerCase())).slice(0, 4);
+  const fam = colorFamily(c.hex);
+  const poetic = contextNouns(fam, pt, hex2ok(c.hex)[0]).map(w => FAMILY_WORD[fam] + ' ' + w).filter(n => !others.has(n.toLowerCase()));
+  const out = []; for (let i = 0; i < Math.max(plain.length, poetic.length); i++){ if (poetic[i]) out.push(poetic[i]); if (plain[i]) out.push(plain[i]); }
+  return [...new Set(out)];
+}
+function cycleName(p, k){
+  const c = p.colors[k];
+  if (!c.alt || c.alt.hex !== c.hex){ c.alt = {hex: c.hex, list: altNames(p, k), i: -1}; toast('Tocá de nuevo para ver otro nombre'); }
+  const L = c.alt.list; if (!L.length) return;
+  do { c.alt.i = (c.alt.i + 1) % L.length; } while (L.length > 1 && L[c.alt.i].toLowerCase() === c.name.trim().toLowerCase());
+  setName(p, k, L[c.alt.i]);
 }
 
 function extractPalette(src){
@@ -684,6 +762,7 @@ function extractPalette(src){
   }
   while (sel.length < 3) sel.push(sel[sel.length-1]);
   const colors = sel.map(s => ({hex: ok2hex(s.rep), name:'', auto:true}));
+  colors.forEach(col => col.pt = colorSpot({prev: src}, col.hex));
   nameSet(colors).forEach((n,i) => colors[i].name = n);
   releaseCanvas(c);
   return colors;
@@ -1676,6 +1755,7 @@ function setTitle(p, t){
 
 /* ---------- UI: photo list ---------- */
 const photoList = $('#photoList'), outList = $('#outList');
+const CYCLE = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13.2 6.2A5.4 5.4 0 0 0 3.1 5M2.8 9.8A5.4 5.4 0 0 0 12.9 11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M3.4 1.9v3.4h3.4M12.6 14.1v-3.4H9.2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const STAR = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 .8l1.7 5.1 5.3 1.9-5.3 1.9L8 15.2l-1.7-5.5L1 7.8l5.3-1.9z" fill="currentColor"/></svg>';
 function drawThumb(p){
   const c = document.getElementById('thumb-' + p.id); if (!c) return;
@@ -1708,6 +1788,7 @@ function renderPhotos(){
             <button type="button" class="sw-chip" id="chip-${id}-${k}" data-chip="${k}" style="--c:${c.hex}" aria-pressed="${!!(picking && state.picking.k === k)}" title="${c.hex} · tocá y después tocá la foto para cambiarlo" aria-label="Color ${k+1}, ${c.hex}. Tocá y después tocá la foto para cambiarlo"><i></i></button>
             <div class="sw-namebox">
               <input class="sw-name" id="name-${id}-${k}" data-name="${k}" value="${esc(c.name)}" aria-label="Nombre del color ${k+1}" autocomplete="off">
+              <button type="button" class="sw-alt" data-alt="${k}" title="Otro nombre (tocá varias veces para ver opciones)" aria-label="Otro nombre para el color ${k+1}">${CYCLE}</button>
               <button type="button" class="sw-ai" data-ai="${k}" title="Sugerir un nombre con Claude según lo que hay en la foto (tocá de nuevo para otra opción)" aria-label="Sugerir nombre para el color ${k+1} con Claude">${STAR}</button>
             </div>
           </div>`).join('')}
@@ -1749,6 +1830,7 @@ photoList.addEventListener('click', e => {
   const li = e.target.closest('.pcard'); if (!li) return; const p = photoById(li.dataset.id); if (!p) return;
   const chip = e.target.closest('[data-chip]'), act = e.target.closest('[data-act]'), ai = e.target.closest('[data-ai]'), ait = e.target.closest('[data-aititle]');
   if (ai){ suggestName(p, +ai.dataset.ai, ai); return; }
+  const alt = e.target.closest('[data-alt]'); if (alt){ cycleName(p, +alt.dataset.alt); return; }
   if (ait){ suggestTitle(p, ait); return; }
   if (chip){
     const k = +chip.dataset.chip;
@@ -1996,14 +2078,30 @@ if (useShare()) $('#lbSave').textContent = 'Compartir / guardar';
 
 /* ---------- adding photos ---------- */
 const DROP_TEXT = 'Tocá para elegir fotos de la galería del celu o de la compu, o soltalas acá<br>JPG, PNG o WebP · hasta 16 · el orden de acá es el del carrusel';
+const isImageFile = f => /^image\//.test(f.type) || /\.(jpe?g|png|webp|heic|heif|avif)$/i.test(f.name) || (!f.type && f.size > 0);
+const typeOf = f => f.type || (/\.png$/i.test(f.name) ? 'image/png' : /\.webp$/i.test(f.name) ? 'image/webp' : /\.hei[cf]$/i.test(f.name) ? 'image/heic' : 'image/jpeg');
+// Read every picked file right away: on Android the gallery/Google Photos files can stop being readable
+// while earlier photos are still being processed, which made only the first one or two load.
+async function readAll(files){
+  const once = f => f.arrayBuffer().then(b => new File([b], f.name || 'foto.jpg', {type: typeOf(f), lastModified: f.lastModified || Date.now()}));
+  const res = await Promise.allSettled(files.map(once));
+  for (let i = 0; i < res.length; i++) if (res[i].status === 'rejected'){
+    await new Promise(r => setTimeout(r, 300));
+    try { res[i] = {status:'fulfilled', value: await once(files[i])}; } catch(e){}
+  }
+  return res.map(r => r.status === 'fulfilled' ? r.value : null);
+}
 let adding = false;
 async function addFiles(fileList){
   const all = [...fileList];
-  const files = all.filter(f => /^image\//.test(f.type) || /\.(jpe?g|png|webp|heic|heif)$/i.test(f.name));
+  const files = all.filter(isImageFile);
   if (!files.length){ toast('No llegó ninguna foto'); return; }
   if (adding){ toast('Esperá a que terminen de cargar las anteriores'); return; }
   adding = true;
+  $('#drop').textContent = files.length > 1 ? `Leyendo ${files.length} fotos…` : 'Leyendo la foto…';
   try{
+    const room0 = MAX_PHOTOS - (state.sample ? 0 : state.photos.length);
+    const read = await readAll(files.slice(0, Math.max(0, room0)));
     if (state.sample){
       state.sample = false; state.photos.forEach(p => { dropFull(p); releaseCanvas(p.prev); }); state.photos = []; state.titles = []; state.place = ''; $('#place').value = '';
       $('#sampleNote').hidden = true; outSig = '';
@@ -2012,17 +2110,22 @@ async function addFiles(fileList){
     }
     const room = MAX_PHOTOS - state.photos.length;
     if (room <= 0){ toast('Ya hay 16 fotos: sacá alguna para agregar otra'); return; }
-    const take = files.slice(0, room);
-    let fails = 0, heic = 0, i = 0;
-    for (const f of take){
-      i++; $('#drop').textContent = `Cargando foto ${i} de ${take.length}…`;
-      try { state.photos.push(await loadFile(f)); afterStructure(); }
+    let unread = 0, fails = 0, heic = 0, ok = 0;
+    const take = read.slice(0, room);
+    for (let i = 0; i < take.length; i++){
+      $('#drop').textContent = `Cargando foto ${i+1} de ${take.length}…`;
+      const f = take[i]; take[i] = null;
+      if (!f){ unread++; continue; }
+      try { state.photos.push(await loadFile(f)); ok++; renderPhotos(); renderGridTitles(); renderRecipePhotos(); renderOutputs(); updateEmpty(); }
       catch(e){ fails++; if (/hei[cf]/i.test(f.type) || /\.hei[cf]$/i.test(f.name)) heic++; }
       await new Promise(r => setTimeout(r, 0));
     }
-    if (files.length > room) toast(`Entraron ${room} de ${files.length}: el máximo es 16`);
+    afterStructure();
+    if (files.length > room0) toast(`Entraron ${Math.min(room, read.length)} de ${files.length}: el máximo es 16`);
     else if (heic) toast(`${heic} foto(s) en HEIC no se pudieron abrir en este navegador. En el iPhone: Ajustes → Cámara → Formatos → “Más compatible”, o exportalas como JPG.`);
+    else if (unread) toast(`${unread} foto(s) no se pudieron leer. Si están solo en la nube de Google Fotos, esperá a que se descarguen o elegilas desde Galería o Archivos.`);
     else if (fails) toast(`${fails} archivo(s) no se pudieron abrir. Si son RAW, exportalos como JPG.`);
+    else if (ok > 1) toast(`Listo: ${ok} fotos cargadas`);
   } finally { adding = false; $('#drop').innerHTML = DROP_TEXT; }
 }
 document.querySelectorAll('input.pick').forEach(inp => inp.addEventListener('change', e => { const fl = e.target.files; if (fl && fl.length) addFiles([...fl]); e.target.value = ''; }));
