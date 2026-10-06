@@ -13,6 +13,7 @@
 <meta property="og:type" content="website">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <style>
@@ -62,12 +63,11 @@ button,input,select{font:inherit;color:inherit}
 :focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 
 /* masthead */
-.mast{display:flex;align-items:center;gap:16px}
-.mast img{width:62px;height:62px;flex:none;transform:rotate(-14deg)}
-.mast h1{margin:0;font-family:var(--mono);font-weight:500;font-size:24px;letter-spacing:.02em;text-wrap:balance}
+.mast{display:flex;align-items:center;gap:12px;min-width:0}
+.mast .logo{width:40px;height:40px;border-radius:10px;flex:none;display:block}
+.mast h1{margin:0;font-family:var(--mono);font-weight:500;font-size:20px;letter-spacing:.01em;white-space:nowrap}
 .mast h1 span{color:var(--stamp)}
-.mast p{margin:3px 0 0;color:var(--muted);max-width:72ch;font-size:14.5px}
-@media (max-width:520px){.mast{align-items:flex-start}.mast img{width:46px;height:46px}.mast h1{font-size:21px}}
+.top{display:flex;flex-direction:column;gap:14px}
 
 /* toolbar */
 .bar{display:flex;flex-wrap:wrap;align-items:flex-end;gap:14px 18px;padding:14px 16px;background:var(--panel);border:1px solid var(--rule);box-shadow:var(--shadow)}
@@ -92,7 +92,7 @@ select.inp{padding-right:28px;cursor:pointer;font-size:15px}
 .bar .saves{display:flex;gap:8px;flex-wrap:wrap}
 .mini{height:32px;padding:0 10px;font-size:11px}
 
-.note{margin:0;padding:10px 14px;border-left:3px solid var(--stamp);background:var(--well);font-size:14px;color:var(--ink)}
+.note{margin:0;padding:8px 12px;border-left:3px solid var(--stamp);background:var(--well);font-size:13.5px;color:var(--ink)}
 .note b{font-weight:500}
 
 /* columns */
@@ -168,6 +168,7 @@ body.can-name .sw-ai{display:inline-flex}
 
 .drop{display:flex;align-items:center;justify-content:center;text-align:center;min-height:86px;margin-top:12px;padding:14px;border:1.5px dashed var(--frame);color:var(--muted);font-family:var(--mono);font-size:12.5px;cursor:pointer;background:transparent;line-height:1.6}
 .drop:hover{border-color:var(--stamp);color:var(--ink);background:var(--well)}
+.drop small{display:block;margin-top:4px;font-size:11.5px;color:var(--muted);letter-spacing:.02em}
 body.dragging .drop{border-color:var(--stamp);color:var(--ink);background:var(--well)}
 
 /* design panel */
@@ -218,6 +219,7 @@ body.dragging .drop{border-color:var(--stamp);color:var(--ink);background:var(--
 @media (max-width:700px){
   .mbar{display:flex;gap:10px;position:fixed;left:0;right:0;bottom:0;z-index:15;padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));background:var(--panel);border-top:1px solid var(--rule);box-shadow:0 -6px 18px -12px rgba(0,0,0,.4)}
   .mbar .btn{flex:1;height:44px}
+  .bar .saves{display:none}
   .wrap{padding-block-end:96px}
   .toast{bottom:calc(84px + env(safe-area-inset-bottom,0px)) !important}
 }
@@ -238,6 +240,54 @@ body.lb-open .mbar{display:none}
 .toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(20px);opacity:0;pointer-events:none;background:var(--ink);color:var(--paper);font-family:var(--mono);font-size:12.5px;padding:10px 14px;max-width:calc(100% - 32px);transition:opacity .2s,transform .2s;z-index:30}
 .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 @media (prefers-reduced-motion:reduce){.toast{transition:none}}
+/* tabs + stage exist only in the wide layout */
+.tabs{display:none;gap:2px;border-bottom:1px solid var(--rule);position:sticky;top:0;background:var(--paper);z-index:3}
+.tabs button{border:0;background:transparent;padding:10px 12px 9px;font-family:var(--sans);font-size:14.5px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+.tabs button:hover{color:var(--ink)}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--stamp)}
+.stage{display:none}
+.stage-view{padding:0;border:0;background:transparent;cursor:zoom-in;display:flex;align-items:center;justify-content:center;width:100%;height:calc(100vh - var(--topH,64px) - 330px);min-height:320px}
+.stage-view canvas{display:block;max-width:100%;max-height:100%;width:auto;height:auto;box-shadow:0 1px 0 rgba(60,45,20,.08),0 18px 40px -22px rgba(60,45,20,.55);background:#EEE6CD}
+.stage-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0}
+.stage-cap{font-family:var(--mono);font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ocard.sel .o-open{outline:2px solid var(--ink);outline-offset:3px}
+.pc-body{container-type:inline-size}
+@container (max-width:340px){
+  .sws{grid-template-columns:minmax(0,1fr);gap:6px}
+  .sw{flex-direction:row;align-items:center;gap:10px}
+  .sw-chip{width:58px;flex:none}
+  .sw-namebox{flex:1}
+  .pc-top{grid-template-columns:auto minmax(0,1fr)}
+  .pc-top .pc-place{grid-column:1/-1}
+}
+@media (min-width:1100px){
+  .wrap{max-width:1760px;padding-inline:28px;padding-block:0 40px;gap:16px}
+  .top{position:sticky;top:0;z-index:12;flex-direction:row;align-items:center;gap:28px;padding-block:10px}
+  .top::before{content:"";position:absolute;inset:0 calc(50% - 50vw);background:var(--panel);border-bottom:1px solid var(--rule);z-index:-1}
+  .top .bar{flex:1;background:transparent;border:0;box-shadow:none;padding:0;flex-wrap:nowrap;align-items:flex-end;gap:14px;min-width:0}
+  .top .field.grow{flex:1 1 140px;max-width:280px}
+  .note{align-self:flex-start;padding:6px 12px;font-size:13px}
+  .cols{grid-template-columns:minmax(360px,440px) minmax(0,1fr) minmax(330px,390px);gap:28px}
+  .side{display:contents}
+  .peek{display:none}
+  .pcard{grid-template-columns:150px minmax(0,1fr)}
+  .out{grid-column:2;grid-row:1;position:sticky;top:calc(var(--topH,64px) + 16px);display:flex;flex-direction:column;gap:12px;min-width:0}
+  .out .col-head{margin-bottom:0}
+  .design{grid-column:3;grid-row:1;position:sticky;top:calc(var(--topH,64px) + 16px);max-height:calc(100vh - var(--topH,64px) - 32px);overflow:auto;padding:0 8px 20px 0;scrollbar-width:thin}
+  .tabs{display:flex}
+  .design .pane-off{display:none !important}
+  .design .dgroup{border-top:0;padding-top:2px}
+  .stage{display:flex;flex-direction:column;gap:10px}
+  .olist{display:flex;overflow-x:auto;gap:12px;padding:4px 3px 10px;scroll-snap-type:x proximity;scrollbar-width:thin}
+  .olist .ocard{flex:0 0 108px;scroll-snap-align:start}
+  .olist .o-save{display:none}
+  .olist .o-open{cursor:pointer}
+  .gtitles{order:3;margin-bottom:0}
+  section[aria-labelledby="hPhotos"] .gtitles{margin-bottom:14px}
+  section[aria-labelledby="hPhotos"] .gt{grid-template-columns:minmax(0,1fr) auto;gap:5px 8px}
+  section[aria-labelledby="hPhotos"] .gt label{grid-column:1/-1}
+  .out .hint{display:none}
+}
 .picker{position:relative;overflow:hidden}
 .pick{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;font-size:200px;z-index:2}
 .rc-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
@@ -251,12 +301,10 @@ textarea.inp{height:auto;padding:8px 10px;font-family:var(--mono);font-size:14px
 <body>
 
 <div class="wrap">
+  <div class="top">
   <header class="mast">
-    <img id="mastStamp" alt="">
-    <div>
-      <h1>Postales <span>ojodecristi</span></h1>
-      <p>Subí las fotos desde la compu o el celu y sale el carrusel armado: una postal por foto con su paleta, una grilla de fichas cada 4 fotos y, si querés, la receta Fujifilm escrita a mano. Elegís estilo, formas, marcos, detalles y qué datos se ven. Los archivos salen sin metadatos, así Instagram no los marca como contenido de IA.</p>
-    </div>
+    <img class="logo" src="icon-192.png" alt="" width="40" height="40">
+    <h1>Postales <span>ojodecristi</span></h1>
   </header>
 
   <section class="bar" aria-label="Datos del carrusel">
@@ -266,11 +314,11 @@ textarea.inp{height:auto;padding:8px 10px;font-family:var(--mono);font-size:14px
       <input id="startNum" class="inp num" type="number" min="1" max="999" value="1" inputmode="numeric">
     </div>
     <div class="field grow">
-      <label for="place">Lugar (para todas)</label>
+      <label for="place">Lugar</label>
       <input id="place" class="inp" type="text" value="Chubut" placeholder="Ej. Mar del Plata" autocomplete="off">
     </div>
     <div class="field">
-      <span class="lbl" id="sizeLbl">Ancho (px)</span>
+      <span class="lbl" id="sizeLbl">Ancho</span>
       <div class="seg" role="radiogroup" aria-labelledby="sizeLbl">
         <button type="button" id="size1080" role="radio" data-size="1080" aria-checked="true">1080</button>
         <button type="button" id="size2160" role="radio" data-size="2160" aria-checked="false">2160</button>
@@ -281,14 +329,15 @@ textarea.inp{height:auto;padding:8px 10px;font-family:var(--mono);font-size:14px
       <button type="button" id="zipBtn" class="btn btn-stamp">Descargar todo (.zip)</button>
     </div>
   </section>
+  </div>
 
-  <p id="sampleNote" class="note"><b>Ejemplo:</b> el post de Florentino Ameghino rearmado acá (las fotos 2 a 4 salen de capturas, por eso tienen poca resolución). Cuando agregues tus fotos, el ejemplo se borra solo.</p>
+  <p id="sampleNote" class="note">Ejemplo de muestra. Se reemplaza cuando agregás tus fotos.</p>
 
   <main class="cols">
     <section aria-labelledby="hPhotos">
       <div class="col-head"><h2 id="hPhotos">Fotos</h2><span id="photoCount" class="count"></span></div>
       <ol id="photoList" class="plist"></ol>
-      <div class="drop picker"><span id="drop">Tocá para elegir fotos de la galería del celu o de la compu, o soltalas acá<br>JPG, PNG o WebP · hasta 16 · el orden de acá es el del carrusel</span><input type="file" class="pick" accept="image/*" multiple aria-label="Elegir fotos"></div>
+      <div class="drop picker"><span id="drop">Elegí fotos o soltalas acá<small>Hasta 16, en el orden del carrusel</small></span><input type="file" class="pick" accept="image/*" multiple aria-label="Elegir fotos"></div>
     </section>
 
     <div class="side">
@@ -299,11 +348,17 @@ textarea.inp{height:auto;padding:8px 10px;font-family:var(--mono);font-size:14px
 
       <section class="design" aria-labelledby="hDesign">
         <div class="col-head" style="margin-bottom:0"><h2 id="hDesign">Diseño</h2><span id="styleName" class="count"></span></div>
-        <div id="styles" class="styles" role="radiogroup" aria-label="Estilo"></div>
-        <div class="drow">
+        <div class="tabs" role="tablist" aria-label="Ajustes">
+          <button type="button" role="tab" data-tab="estilo" aria-selected="true">Estilo</button>
+          <button type="button" role="tab" data-tab="detalles" aria-selected="false">Detalles</button>
+          <button type="button" role="tab" data-tab="datos" aria-selected="false">Datos</button>
+          <button type="button" role="tab" data-tab="receta" aria-selected="false">Receta</button>
+        </div>
+        <div id="styles" class="styles" role="radiogroup" aria-label="Estilo" data-pane="estilo"></div>
+        <div class="drow" data-pane="estilo">
           <label class="colorpick" for="customColor"><input type="color" id="customColor" value="#D8C7A6"> Fondo con tu color</label>
         </div>
-        <div class="drow">
+        <div class="drow" data-pane="estilo">
           <span class="lbl" id="lblFormat">Formato</span>
           <div class="chips" role="radiogroup" aria-labelledby="lblFormat" data-radio="format">
             <button type="button" role="radio" data-v="1:1">Cuadrado 1:1</button>
@@ -311,7 +366,7 @@ textarea.inp{height:auto;padding:8px 10px;font-family:var(--mono);font-size:14px
             <button type="button" role="radio" data-v="3:4">Vertical 3:4</button>
           </div>
         </div>
-        <div class="drow">
+        <div class="drow" data-pane="estilo">
           <span class="lbl" id="lblComp">Postales</span>
           <div class="chips" role="radiogroup" aria-labelledby="lblComp" data-radio="comp">
             <button type="button" role="radio" data-v="postal">Clásica</button>
@@ -319,12 +374,12 @@ textarea.inp{height:auto;padding:8px 10px;font-family:var(--mono);font-size:14px
           </div>
         </div>
 
-        <div class="dgroup">
+        <div class="dgroup" data-pane="estilo">
           <h3 id="lblShape">Forma de los colores</h3>
           <div id="shapes" class="shapes" role="radiogroup" aria-labelledby="lblShape"></div>
         </div>
 
-        <div class="dgroup">
+        <div class="dgroup" data-pane="detalles">
           <h3>Foto y detalles</h3>
           <div class="drow">
             <span class="lbl" id="lblFrame">Marco</span>
@@ -367,7 +422,7 @@ textarea.inp{height:auto;padding:8px 10px;font-family:var(--mono);font-size:14px
           </div>
         </div>
 
-        <div class="dgroup">
+        <div class="dgroup" data-pane="datos">
           <h3>Datos que se ven</h3>
           <div class="drow">
             <span class="lbl" id="lblShowPostal">En postales</span>
@@ -377,10 +432,10 @@ textarea.inp{height:auto;padding:8px 10px;font-family:var(--mono);font-size:14px
             <span class="lbl" id="lblShowGrid">En fichas y grillas</span>
             <div class="chips" data-scope="grid" role="group" aria-labelledby="lblShowGrid"></div>
           </div>
-          <p class="subhint">Cámara, lente, focal, apertura, velocidad, ISO, hora y coordenadas salen de los datos que la cámara guarda en cada foto. Si una foto no los trae, completalos en “Datos de cámara”. El título de cada foto lo escribís vos o te lo sugiere la estrella. Tus elecciones de diseño quedan guardadas en este navegador.</p>
+          <p class="subhint">Los datos de cámara salen de cada foto. Si faltan, completalos en “Datos de cámara” de esa foto.</p>
         </div>
 
-        <div class="dgroup" id="recipeBox">
+        <div class="dgroup" id="recipeBox" data-pane="receta">
           <h3>Receta Fujifilm</h3>
           <div class="drow">
             <label class="check"><input type="checkbox" id="rcOn"> Sumar la receta al carrusel</label>
@@ -421,11 +476,15 @@ textarea.inp{height:auto;padding:8px 10px;font-family:var(--mono);font-size:14px
         </div>
       </section>
 
-      <section aria-labelledby="hOut">
+      <section class="out" aria-labelledby="hOut">
         <div class="col-head"><h2 id="hOut">Carrusel</h2><span id="outCount" class="count"></span></div>
+        <div class="stage" id="stage">
+          <button type="button" class="stage-view" id="stageView" aria-label="Ver en tamaño real"><canvas id="stageC" width="900" height="900"></canvas></button>
+          <div class="stage-bar"><span id="stageCap" class="stage-cap"></span><button type="button" class="btn btn-ghost mini" id="stageSave">Guardar esta</button></div>
+        </div>
         <div id="gridTitles" class="gtitles"></div>
         <ol id="outList" class="olist"></ol>
-        <p class="hint">Tocá una imagen para verla grande. En la compu podés guardarla con clic derecho; en el celu, con “Guardar imagen” o manteniéndola apretada.</p>
+        <p class="hint">Tocá una imagen para verla grande y guardarla.</p>
       </section>
     </div>
   </main>
@@ -2011,7 +2070,7 @@ function renderOutputs(){
     const c = document.getElementById('out-' + k); if (c) renderTo(c, o, PREVIEW, false);
     const nm = document.getElementById('oname-' + k); if (nm) nm.textContent = outName(o, k).label;
   });
-  renderPeek();
+  renderPeek(); renderStage();
   $('#outCount').textContent = outs.length ? `${outs.length} ${outs.length === 1 ? 'imagen' : 'imágenes'}` : 'vacío';
 }
 let outT = 0;
@@ -2026,13 +2085,62 @@ function updateEmpty(){ const none = !state.photos.length; $('#zipBtn').disabled
 
 outList.addEventListener('click', async e => {
   const open = e.target.closest('[data-k]'), sv = e.target.closest('[data-save]');
-  if (open) openLB(+open.dataset.k);
+  if (open){ if (isWide()) selectOut(+open.dataset.k); else openLB(+open.dataset.k); }
   else if (sv){
     const k = +sv.dataset.save, o = outputs()[k]; if (!o) return;
     sv.textContent = '…';
     try { const b = await renderBlob(o, state.size); await saveBlob(outName(o, k).file, b); } finally { sv.textContent = 'Guardar'; }
   }
 });
+
+/* ---------- wide layout: tabs, big stage, sticky header height ---------- */
+const isWide = () => window.matchMedia('(min-width:1100px)').matches;
+let selK = 0, stageT = 0;
+function selectOut(k){ selK = k; renderStage(); }
+function renderStage(){
+  const outs = outputs();
+  document.querySelectorAll('#outList .ocard').forEach((li, k) => li.classList.toggle('sel', k === selK));
+  if (!isWide() || !outs.length) return;
+  if (selK >= outs.length) selK = outs.length - 1;
+  const c = $('#stageC'), view = $('#stageView'), dpr = Math.min(2, window.devicePixelRatio || 1);
+  const box = Math.min(view.clientWidth, view.clientHeight / (FORMATS[state.format] || 1)) || 600;
+  renderTo(c, outs[selK], Math.max(480, Math.min(1600, Math.round(box * dpr))), false);
+  $('#stageCap').textContent = `${String(selK+1).padStart(2,'0')} / ${String(outs.length).padStart(2,'0')} · ${outName(outs[selK], selK).label}`;
+}
+$('#stageView').addEventListener('click', () => openLB(selK));
+$('#stageSave').addEventListener('click', async e => {
+  const o = outputs()[selK]; if (!o) return; const b = e.currentTarget, t = b.textContent; b.textContent = '…';
+  try { await saveBlob(outName(o, selK).file, await renderBlob(o, state.size)); } finally { b.textContent = t; }
+});
+document.addEventListener('keydown', e => {
+  if (!isWide() || !lb.hidden || /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement && document.activeElement.tagName)) return;
+  const n = outputs().length; if (!n) return;
+  if (e.key === 'ArrowRight'){ selectOut((selK + 1) % n); e.preventDefault(); }
+  else if (e.key === 'ArrowLeft'){ selectOut((selK - 1 + n) % n); e.preventDefault(); }
+});
+const TAB_KEY = 'postales-ojodecristi-tab';
+function setTab(t){
+  document.querySelectorAll('.tabs [data-tab]').forEach(b => { const on = b.dataset.tab === t; b.setAttribute('aria-selected', String(on)); b.tabIndex = on ? 0 : -1; });
+  document.querySelectorAll('.design [data-pane]').forEach(el => el.classList.toggle('pane-off', el.dataset.pane !== t));
+  try { localStorage.setItem(TAB_KEY, t); } catch(e){}
+}
+document.querySelector('.tabs').addEventListener('click', e => { const b = e.target.closest('[data-tab]'); if (b){ setTab(b.dataset.tab); $('.design').scrollTop = 0; } });
+document.querySelector('.tabs').addEventListener('keydown', e => {
+  if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+  const bs = [...document.querySelectorAll('.tabs [data-tab]')], i = bs.findIndex(b => b.getAttribute('aria-selected') === 'true');
+  const nb = bs[(i + (e.key === 'ArrowRight' ? 1 : -1) + bs.length) % bs.length]; setTab(nb.dataset.tab); nb.focus(); e.preventDefault();
+});
+{ let t = 'estilo'; try { t = localStorage.getItem(TAB_KEY) || t; } catch(e){} setTab(t); }
+const gtHome = $('#gridTitles').parentNode, gtNext = $('#gridTitles').nextSibling;
+function placeGridTitles(){
+  const gt = $('#gridTitles'), ph = $('#photoList');
+  if (isWide()){ if (gt.nextSibling !== ph) ph.parentNode.insertBefore(gt, ph); }
+  else if (gt.parentNode !== gtHome) gtHome.insertBefore(gt, gtNext);
+}
+placeGridTitles();
+function setTopH(){ document.documentElement.style.setProperty('--topH', $('.top').offsetHeight + 'px'); }
+setTopH();
+window.addEventListener('resize', () => { setTopH(); placeGridTitles(); clearTimeout(stageT); stageT = setTimeout(renderStage, 120); });
 
 /* ---------- lightbox ---------- */
 const lb = $('#lightbox'), lbImg = $('#lbImg');
@@ -2077,7 +2185,7 @@ $('#mSave').textContent = MSAVE_LABEL();
 if (useShare()) $('#lbSave').textContent = 'Compartir / guardar';
 
 /* ---------- adding photos ---------- */
-const DROP_TEXT = 'Tocá para elegir fotos de la galería del celu o de la compu, o soltalas acá<br>JPG, PNG o WebP · hasta 16 · el orden de acá es el del carrusel';
+const DROP_TEXT = 'Elegí fotos o soltalas acá<small>Hasta 16, en el orden del carrusel</small>';
 const isImageFile = f => /^image\//.test(f.type) || /\.(jpe?g|png|webp|heic|heif|avif)$/i.test(f.name) || (!f.type && f.size > 0);
 const typeOf = f => f.type || (/\.png$/i.test(f.name) ? 'image/png' : /\.webp$/i.test(f.name) ? 'image/webp' : /\.hei[cf]$/i.test(f.name) ? 'image/heic' : 'image/jpeg');
 // Read every picked file right away: on Android the gallery/Google Photos files can stop being readable
@@ -2141,7 +2249,6 @@ document.addEventListener('drop', e => {
 /* ---------- boot ---------- */
 async function boot(){
   loadPrefs();
-  $('#mastStamp').src = ASSETS.stamp;
   const [paperI, stampI, tapeI, clipI] = await Promise.all([ASSETS.paper, ASSETS.stamp, ASSETS.tape, ASSETS.clip].map(loadImg));
   Object.assign(IMG, {paper:paperI, stamp:stampI, tape:tapeI, clip:clipI});
   IMG.paperSmall = downscale(paperI, 512);
