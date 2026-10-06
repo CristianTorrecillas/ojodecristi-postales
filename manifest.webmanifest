@@ -1,0 +1,16 @@
+{
+  "name": "Postales ojodecristi",
+  "short_name": "Postales",
+  "description": "Postales, grillas y receta Fujifilm para los carruseles de ojodecristi.",
+  "lang": "es",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#EEE7D1",
+  "theme_color": "#EEE7D1",
+  "icons": [
+    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png"},
+    {"src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ]
+}

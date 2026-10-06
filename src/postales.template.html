@@ -1,6 +1,17 @@
+<!doctype html>
+<html lang="es">
+<head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Postales ojodecristi</title>
+<meta name="description" content="Armá el carrusel de Instagram de ojodecristi: postales con paleta de colores, grillas de fichas y la receta Fujifilm, listas para subir.">
+<meta name="theme-color" content="#EEE7D1" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1A1915" media="(prefers-color-scheme: dark)">
+<meta property="og:title" content="Postales ojodecristi">
+<meta property="og:description" content="Postales, grillas y receta Fujifilm para los carruseles de ojodecristi.">
+<meta property="og:image" content="https://cristiantorrecillas.github.io/ojodecristi-postales/icon-512.png">
+<meta property="og:type" content="website">
+<link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -45,8 +56,8 @@
 
 *{box-sizing:border-box}
 html,body{background:var(--paper)}
-body{color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
-.wrap{max-width:1380px;margin:0 auto;padding-inline:20px;padding-block:22px 56px;display:flex;flex-direction:column;gap:18px}
+body{margin:0;color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
+.wrap{max-width:1380px;margin:0 auto;padding-inline:max(20px,env(safe-area-inset-left,0px)) max(20px,env(safe-area-inset-right,0px));padding-block:22px 56px;display:flex;flex-direction:column;gap:18px}
 button,input,select{font:inherit;color:inherit}
 :focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 
@@ -232,13 +243,15 @@ body.lb-open .mbar{display:none}
 textarea.inp{height:auto;padding:8px 10px;font-family:var(--mono);font-size:14px;line-height:1.55;resize:vertical}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 </style>
+</head>
+<body>
 
 <div class="wrap">
   <header class="mast">
     <img id="mastStamp" alt="">
     <div>
       <h1>Postales <span>ojodecristi</span></h1>
-      <p>Subí las fotos desde la compu o el celu y sale el carrusel armado: una postal por foto con su paleta, y una grilla de fichas cada 4 fotos. Elegís estilo, formas, marcos, detalles y qué datos se ven. Los archivos salen sin metadatos, así Instagram no los marca como contenido de IA.</p>
+      <p>Subí las fotos desde la compu o el celu y sale el carrusel armado: una postal por foto con su paleta, una grilla de fichas cada 4 fotos y, si querés, la receta Fujifilm escrita a mano. Elegís estilo, formas, marcos, detalles y qué datos se ven. Los archivos salen sin metadatos, así Instagram no los marca como contenido de IA.</p>
     </div>
   </header>
 
@@ -265,7 +278,7 @@ textarea.inp{height:auto;padding:8px 10px;font-family:var(--mono);font-size:14px
     </div>
   </section>
 
-  <p id="sampleNote" class="note"><b>Ejemplo:</b> tu post de Florentino Ameghino rearmado con las capturas que mandaste (por eso las fotos 2 a 4 tienen poca resolución). Cuando agregues tus fotos, el ejemplo se borra solo.</p>
+  <p id="sampleNote" class="note"><b>Ejemplo:</b> el post de Florentino Ameghino rearmado acá (las fotos 2 a 4 salen de capturas, por eso tienen poca resolución). Cuando agregues tus fotos, el ejemplo se borra solo.</p>
 
   <main class="cols">
     <section aria-labelledby="hPhotos">
@@ -432,7 +445,7 @@ textarea.inp{height:auto;padding:8px 10px;font-family:var(--mono);font-size:14px
 </div>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="vendor/jszip.min.js" defer></script>
 <script>
 (() => {
 'use strict';
@@ -1544,6 +1557,43 @@ async function saveZip(){
   finally { btn.textContent = label; btn.disabled = !state.photos.length; }
 }
 
+/* ---------- phone: share straight to Instagram / gallery ---------- */
+const canShareFiles = (() => { try { const f = new File([new Blob(['x'], {type:'image/jpeg'})], 'x.jpg', {type:'image/jpeg'}); return !!(navigator.canShare && navigator.canShare({files:[f]})); } catch(e){ return false; } })();
+const useShare = () => canShareFiles && isPhone();
+const MSAVE_LABEL = () => useShare() ? 'Compartir imágenes' : 'Guardar imágenes';
+let shareReady = null;
+function resetShare(){ if (!shareReady) return; shareReady = null; const b = $('#mSave'); if (b && !busySaving) b.textContent = MSAVE_LABEL(); }
+async function doShare(files, btn){
+  try { await navigator.share({files, title:'ojodecristi'}); shareReady = null; btn.textContent = MSAVE_LABEL(); rememberNumbering(); }
+  catch(e){
+    const n = e && e.name;
+    if (n === 'AbortError'){ shareReady = null; btn.textContent = MSAVE_LABEL(); return; }
+    if (n === 'NotAllowedError' && !shareReady){ shareReady = files; btn.textContent = `Listo · compartir ${files.length}`; toast('Las imágenes están listas: tocá de nuevo para compartirlas'); return; }
+    shareReady = null; btn.textContent = MSAVE_LABEL(); toast('No se pudo compartir: se descargan una por una'); saveOneByOne(btn);
+  }
+}
+async function shareAll(btn){
+  if (busySaving) return;
+  if (shareReady) return doShare(shareReady, btn);
+  const outs = outputs(); if (!outs.length) return;
+  busySaving = true; const files = [];
+  try {
+    for (let k = 0; k < outs.length; k++){
+      btn.textContent = `Armando ${k+1} de ${outs.length}…`;
+      files.push(new File([await renderBlob(outs[k], state.size)], outName(outs[k], k).file, {type:'image/jpeg'}));
+    }
+  } catch(e){ toast('Algo falló armando las imágenes. Probá de nuevo.'); return; }
+  finally { busySaving = false; btn.textContent = MSAVE_LABEL(); }
+  await doShare(files, btn);
+}
+async function shareOrSave(name, blob){
+  if (useShare()){
+    try { await navigator.share({files:[new File([blob], name, {type:'image/jpeg'})]}); return; }
+    catch(e){ if (e && e.name === 'AbortError') return; }
+  }
+  saveBlob(name, blob);
+}
+
 /* ---------- Claude suggestions (viewer's own account, on click only) ---------- */
 const sampleP = (window.claude && typeof window.claude.use === 'function') ? window.claude.use('sample').catch(() => null) : Promise.resolve(null);
 sampleP.then(async s => { if (!s) return; const lim = await s.limits().catch(() => null); if (lim && lim.images) document.body.classList.add('can-name'); });
@@ -1883,13 +1933,13 @@ function renderOutputs(){
   $('#outCount').textContent = outs.length ? `${outs.length} ${outs.length === 1 ? 'imagen' : 'imágenes'}` : 'vacío';
 }
 let outT = 0;
-function scheduleOut(){ clearTimeout(outT); outT = setTimeout(() => requestAnimationFrame(() => { renderOutputs(); renderShapeThumbsSoon(); savePrefs(); }), 90); }
+function scheduleOut(){ resetShare(); clearTimeout(outT); outT = setTimeout(() => requestAnimationFrame(() => { renderOutputs(); renderShapeThumbsSoon(); savePrefs(); }), 90); }
 let shapeT = 0, lastShapeSig = '';
 function renderShapeThumbsSoon(){
   const sig = state.photos[0] ? state.photos[0].colors.map(c => c.hex).join() : 'demo';
   if (sig === lastShapeSig) return; lastShapeSig = sig; clearTimeout(shapeT); shapeT = setTimeout(renderShapeThumbs, 60);
 }
-function afterStructure(){ state.picking = null; renderPhotos(); renderGridTitles(); renderRecipePhotos(); renderOutputs(); renderStyleThumbs(); renderShapeThumbsSoon(); updateEmpty(); }
+function afterStructure(){ resetShare(); state.picking = null; renderPhotos(); renderGridTitles(); renderRecipePhotos(); renderOutputs(); renderStyleThumbs(); renderShapeThumbsSoon(); updateEmpty(); }
 function updateEmpty(){ const none = !state.photos.length; $('#zipBtn').disabled = none; $('#oneBtn').disabled = none; $('#mSave').disabled = none; }
 
 outList.addEventListener('click', async e => {
@@ -1920,7 +1970,7 @@ function closeLB(){ lb.hidden = true; document.body.classList.remove('lb-open');
 $('#lbClose').addEventListener('click', closeLB);
 $('#lbPrev').addEventListener('click', () => openLB(lbK - 1));
 $('#lbNext').addEventListener('click', () => openLB(lbK + 1));
-$('#lbSave').addEventListener('click', () => { const o = outputs()[lbK]; if (lbBlob && o) saveBlob(outName(o, lbK).file, lbBlob); });
+$('#lbSave').addEventListener('click', () => { const o = outputs()[lbK]; if (lbBlob && o) shareOrSave(outName(o, lbK).file, lbBlob); });
 lb.addEventListener('click', e => { if (e.target === lb || e.target.classList.contains('lb-stage')) closeLB(); });
 document.addEventListener('keydown', e => {
   if (lb.hidden) return;
@@ -1940,7 +1990,9 @@ $('#place').addEventListener('input', e => {
 document.querySelectorAll('.seg button').forEach(b => b.addEventListener('click', () => { state.size = +b.dataset.size; syncDesign(); savePrefs(); }));
 $('#zipBtn').addEventListener('click', saveZip);
 $('#oneBtn').addEventListener('click', e => saveOneByOne(e.currentTarget));
-$('#mSave').addEventListener('click', e => (isPhone() ? saveOneByOne(e.currentTarget) : saveZip()));
+$('#mSave').addEventListener('click', e => (useShare() ? shareAll(e.currentTarget) : isPhone() ? saveOneByOne(e.currentTarget) : saveZip()));
+$('#mSave').textContent = MSAVE_LABEL();
+if (useShare()) $('#lbSave').textContent = 'Compartir / guardar';
 
 /* ---------- adding photos ---------- */
 const DROP_TEXT = 'Tocá para elegir fotos de la galería del celu o de la compu, o soltalas acá<br>JPG, PNG o WebP · hasta 16 · el orden de acá es el del carrusel';
@@ -2001,6 +2053,9 @@ async function boot(){
   afterStructure();
 }
 window.__postales = {state, outputs, renderTo, renderBlob, extractPalette, colorName, readExif, STYLES, saveOneByOne};
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
 boot();
 })();
 </script>
+</body>
+</html>
