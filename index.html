@@ -1957,7 +1957,6 @@ function drawPortada(ctx, hi, H){
     const left = 'N.° ' + pad3(n0) + (n1 > n0 ? '–' + pad3(n1) : ''), right = (p.date || '').trim().slice(-4) || String(new Date().getFullYear());
     ctx.textAlign = 'left'; ctx.fillText(left, M, fy); ctx.textAlign = 'right'; ctx.fillText(right, D - M, fy);
     ctx.globalAlpha = 0.35; ctx.fillRect(M, fy - 18, D - 2*M, 0.9); ctx.globalAlpha = 1;
-    const keep = S; S = Object.assign({}, S, {stamp: dark && !state.stampColor ? '#F3EFE6' : S.stamp}); stamp(ctx, D/2, fy - 6, 46, -12); S = keep;
   }
 }
 function outputs(){
