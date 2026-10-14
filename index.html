@@ -247,6 +247,8 @@ body.lb-open .mbar{display:none}
 .tabs{display:none;gap:2px;border-bottom:1px solid var(--rule);position:sticky;top:0;background:var(--paper);z-index:3}
 .tabs button{border:0;background:transparent;padding:10px 12px 9px;font-family:var(--sans);font-size:14.5px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
 .tabs button:hover{color:var(--ink)}
+.presets .chips button .x{margin-left:8px;opacity:.55;font-size:12px}
+.presets .chips button .x:hover{opacity:1}
 .tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--stamp)}
 .stage{display:none}
 .stage-view{padding:0;border:0;background:transparent;cursor:zoom-in;display:flex;align-items:center;justify-content:center;width:100%;height:calc(100vh - var(--topH,64px) - 330px);min-height:320px}
@@ -386,6 +388,16 @@ textarea.inp{height:auto;padding:8px 10px;font-family:var(--mono);font-size:14px
           <button type="button" role="tab" data-tab="detalles" aria-selected="false">Detalles</button>
           <button type="button" role="tab" data-tab="datos" aria-selected="false">Datos</button>
           <button type="button" role="tab" data-tab="receta" aria-selected="false">Receta</button>
+          <button type="button" role="tab" data-tab="portada" aria-selected="false">Portada</button>
+        </div>
+        <div class="dgroup presets" data-pane="estilo">
+          <h3>Mis diseños guardados</h3>
+          <div id="presetList" class="chips"></div>
+          <div class="drow">
+            <input id="presetName" class="inp" type="text" placeholder="Nombre, ej. Costa vertical" autocomplete="off" style="flex:1;min-width:160px">
+            <button type="button" id="presetSave" class="btn btn-ghost mini">Guardar el diseño actual</button>
+          </div>
+          <p class="subhint">Guarda estilo, colores, formato, detalles y portada. Tocá uno para aplicarlo; ✕ lo borra.</p>
         </div>
         <div id="styles" class="styles" role="radiogroup" aria-label="Estilo" data-pane="estilo"></div>
         <div class="drow" data-pane="estilo">
@@ -514,6 +526,40 @@ textarea.inp{height:auto;padding:8px 10px;font-family:var(--mono);font-size:14px
             <div class="chips" data-scope="grid" role="group" aria-labelledby="lblShowGrid"></div>
           </div>
           <p class="subhint">Los datos de cámara salen de cada foto. Si faltan, completalos en “Datos de cámara” de esa foto.</p>
+        </div>
+
+        <div class="dgroup" id="coverBox" data-pane="portada">
+          <h3>Portada</h3>
+          <div class="drow">
+            <label class="check"><input type="checkbox" id="cvOn"> Sumar una portada como primera imagen</label>
+          </div>
+          <div class="drow">
+            <label class="lbl" for="cvPhoto">Foto</label>
+            <select id="cvPhoto" class="inp" style="width:auto;height:36px"></select>
+          </div>
+          <div class="drow">
+            <span class="lbl" id="lblCvStyle">Diseño</span>
+            <div class="chips" role="radiogroup" aria-labelledby="lblCvStyle" data-cradio="look">
+              <button type="button" role="radio" data-v="sola">Solo la foto</button>
+              <button type="button" role="radio" data-v="titulo">Título arriba</button>
+              <button type="button" role="radio" data-v="libro">Tapa de libro</button>
+            </div>
+          </div>
+          <div class="drow">
+            <span class="lbl" id="lblCvBg">Fondo</span>
+            <div class="chips" role="radiogroup" aria-labelledby="lblCvBg" data-cradio="bg">
+              <button type="button" role="radio" data-v="blanco">Blanco</button>
+              <button type="button" role="radio" data-v="papel">Papel del estilo</button>
+              <button type="button" role="radio" data-v="foto">Color de la foto</button>
+              <button type="button" role="radio" data-v="otro">Otro</button>
+            </div>
+            <label class="colorpick" for="cvColor"><input type="color" id="cvColor" value="#F3EFE6"> Elegir</label>
+          </div>
+          <div class="rc-grid">
+            <label>Título<input id="cvTitle" class="inp" type="text" placeholder="Vacío = el lugar" autocomplete="off"></label>
+            <label>Subtítulo<input id="cvSub" class="inp" type="text" placeholder="Ej. Postales de primavera" autocomplete="off"></label>
+          </div>
+          <p class="subhint">«Solo la foto» no lleva texto: la foto entera, sin recortar, sobre el fondo. Va en el mismo formato que el resto del carrusel.</p>
         </div>
 
         <div class="dgroup" id="recipeBox" data-pane="receta">
@@ -699,15 +745,18 @@ const RECIPE_DEFAULT = {
   note:''
 };
 state.recipe = {...RECIPE_DEFAULT};
+const COVER_DEFAULT = {on:false, photo:0, look:'sola', bg:'blanco', color:'#F3EFE6', title:'', sub:''};
+state.cover = {...COVER_DEFAULT};
 const PENS = {azul:'#1F3A7A', negra:'#1E1D1B', sepia:'#5B3A22'};
 const PREF_KEY = 'postales-ojodecristi-v1';
-const PREF_FIELDS = ['style','custom','deco','decoPostal','tilt','extras','shape','frame','format','comp','titleFont','size','show','lastEnd','recipe','photoSize','stampColor','paperTex','swSize','swPos','counterInk'];
+const PREF_FIELDS = ['style','custom','deco','decoPostal','tilt','extras','shape','frame','format','comp','titleFont','size','show','lastEnd','recipe','photoSize','stampColor','paperTex','swSize','swPos','counterInk','cover'];
 function loadPrefs(){
   try{
     const o = JSON.parse(localStorage.getItem(PREF_KEY) || 'null'); if (!o || typeof o !== 'object') return;
     for (const k of PREF_FIELDS){
       if (!(k in o)) continue;
       if (k === 'extras') Object.assign(state.extras, o.extras);
+      else if (k === 'cover'){ if (o.cover && typeof o.cover === 'object') for (const f in COVER_DEFAULT) if (typeof o.cover[f] === typeof COVER_DEFAULT[f]) state.cover[f] = o.cover[f]; }
       else if (k === 'recipe'){ if (o.recipe && typeof o.recipe === 'object') for (const f in RECIPE_DEFAULT) if (typeof o.recipe[f] === typeof RECIPE_DEFAULT[f]) state.recipe[f] = o.recipe[f]; }
       else if (k === 'show'){ for (const sc of ['postal','grid']) if (o.show && o.show[sc]) for (const f in state.show[sc]) if (typeof o.show[sc][f] === 'boolean') state.show[sc][f] = o.show[sc][f]; }
       else state[k] = o[k];
@@ -1852,15 +1901,76 @@ function drawRecipe(ctx, hi, H){
   ctx.restore();
 }
 
+/* ---------- portada: la primera imagen del carrusel, la foto entera sobre un fondo liso ---------- */
+function coverPhoto(){ const C = state.cover; return state.photos[C.photo] || state.photos[0] || null; }
+function coverBg(p){
+  const C = state.cover;
+  if (C.bg === 'blanco') return '#FBFAF7';
+  if (C.bg === 'otro') return C.color;
+  if (C.bg === 'foto'){ const cols = (p.colors || []).slice().sort((a, b) => hex2ok(b.hex)[0] - hex2ok(a.hex)[0]); if (!cols.length) return '#F3EFE6'; const o = hex2ok(cols[0].hex); return ok2hex([0.93, o[1]*0.32, o[2]*0.32]); }
+  return null;
+}
+function spaced(ctx, text, cx, base, track){
+  const chars = [...text], ws = chars.map(c => ctx.measureText(c).width), total = ws.reduce((a, b) => a + b, 0) + track*(chars.length - 1);
+  let x = cx - total/2; ctx.textAlign = 'left';
+  chars.forEach((c, i) => { ctx.fillText(c, x, base); x += ws[i] + track; });
+  return total;
+}
+function fitSpaced(ctx, text, maxW, size, family, weight, trackK){
+  let s = size; ctx.font = `${weight} ${s}px ${family}`;
+  const w = () => ctx.measureText(text).width + s*trackK*(text.length - 1);
+  if (w() > maxW){ s = s*maxW/w(); ctx.font = `${weight} ${s}px ${family}`; }
+  return s;
+}
+function drawPortada(ctx, hi, H){
+  H = H || D; const C = state.cover, p = coverPhoto(); if (!p) return;
+  const bg = coverBg(p);
+  if (bg){ ctx.fillStyle = bg; ctx.fillRect(0, 0, D, H); } else paper(ctx, hi, H);
+  const bgHex = bg || (S.paper ? rgbHex(...S.paper) : paperAvg), dark = hex2ok(bgHex)[0] < 0.55;
+  const ink = dark ? '#F3EFE6' : (bg ? '#1B1A18' : S.ink);
+  const title = (C.title || '').trim() || placeOf(p), sub = (C.sub || '').trim();
+  const ar = p.fw && p.fh ? p.fw/p.fh : 1.5, M = 36;
+  let top = M, bot = M;
+  if (C.look === 'titulo') top = sub ? 104 : 86;
+  if (C.look === 'libro'){ top = sub ? 176 : 150; bot = 70; }
+  const aw = D - 2*M, ah = H - top - bot;
+  let w = aw, h = w/ar; if (h > ah){ h = ah; w = h*ar; }
+  const r = {x:(D - w)/2, y:top + (ah - h)/2, w, h};
+  if (C.look === 'sola') r.y = (H - h)/2;
+  if (C.look === 'titulo') r.y = Math.max(top, (H - h + (top - M))/2);
+  drawCover(ctx, srcOf(p, hi), r, 0);
+  ctx.fillStyle = ink;
+  if (C.look === 'titulo'){
+    const ft = titleFont(24), t = state.titleFont === 'hand' ? title : title.toUpperCase();
+    const base = r.y - (sub ? 52 : 30);
+    centerText(ctx, t, D/2, base, ft.size, 600, ft.family, ft.weight);
+    const tw = Math.min(600, ctx.measureText(t).width); const keep = S; S = Object.assign({}, S, {ink}); underline(ctx, D/2 - tw/2 - 7, D/2 + tw/2 + 7, base + 10, base + 5); S = keep;
+    if (sub){ ctx.globalAlpha = 0.8; centerText(ctx, sub, D/2, r.y - 16, 15, 560, SANS, 400); ctx.globalAlpha = 1; }
+  } else if (C.look === 'libro'){
+    ctx.globalAlpha = 0.75; ctx.font = `500 11px ${MONO}`; spaced(ctx, 'OJODECRISTI', D/2, 46, 4.2); ctx.globalAlpha = 1;
+    ctx.fillRect(D/2 - 16, 60, 32, 1.4);
+    const T = title.toUpperCase(), fs = fitSpaced(ctx, T, D - 2*M - 20, 40, SANS, 500, 0.16);
+    spaced(ctx, T, D/2, 112, fs*0.16);
+    if (sub){ ctx.globalAlpha = 0.8; ctx.font = `400 16px ${SANS}`; const ss = fitSpaced(ctx, sub, D - 2*M - 40, 16, SANS, 400, 0.04); spaced(ctx, sub, D/2, 142, ss*0.04); ctx.globalAlpha = 1; }
+    const fy = H - 38, n0 = state.startNum, n1 = state.startNum + state.photos.length - 1;
+    ctx.globalAlpha = 0.85; ctx.font = `400 11.5px ${MONO}`;
+    const left = 'N.° ' + pad3(n0) + (n1 > n0 ? '–' + pad3(n1) : ''), right = (p.date || '').trim().slice(-4) || String(new Date().getFullYear());
+    ctx.textAlign = 'left'; ctx.fillText(left, M, fy); ctx.textAlign = 'right'; ctx.fillText(right, D - M, fy);
+    ctx.globalAlpha = 0.35; ctx.fillRect(M, fy - 18, D - 2*M, 0.9); ctx.globalAlpha = 1;
+    const keep = S; S = Object.assign({}, S, {stamp: dark && !state.stampColor ? '#F3EFE6' : S.stamp}); stamp(ctx, D/2, fy - 6, 46, -12); S = keep;
+  }
+}
 function outputs(){
   const o = state.photos.map((p, i) => ({kind:'postal', i}));
   for (let g = 0; g*4 < state.photos.length; g++) o.push({kind:'grid', g});
   if (state.recipe.on && state.photos.length){ if (state.recipe.pos === 'start') o.unshift({kind:'recipe'}); else o.push({kind:'recipe'}); }
+  if (state.cover.on && state.photos.length) o.unshift({kind:'cover'});
   return o;
 }
 function outName(o, k){
   const idx = String(k+1).padStart(2,'0');
   if (o.kind === 'postal') return {label:`Postal ${pad3(state.startNum + o.i)}`, file:`${idx}-postal-${pad3(state.startNum + o.i)}.jpg`};
+  if (o.kind === 'cover') return {label:'Portada', file:`${idx}-portada.jpg`};
   if (o.kind === 'recipe') return {label:'Receta' + ((state.recipe.title || '').trim() ? ' · ' + state.recipe.title.trim() : ''), file:`${idx}-receta.jpg`};
   const a = o.g*4, b = Math.min(state.photos.length, a+4);
   return {label:`Grilla ${o.g+1} · fotos ${a+1}–${b}`, file:`${idx}-grilla-${o.g+1}.jpg`};
@@ -1873,12 +1983,13 @@ function renderTo(canvas, o, size, hi){
   ctx.setTransform(w/D, 0, 0, w/D, 0, 0); ctx.textBaseline = 'alphabetic';
   if (o.kind === 'postal') drawPostal(ctx, state.photos[o.i], state.startNum + o.i, hi, false, H);
   else if (o.kind === 'recipe') drawRecipe(ctx, hi, H);
+  else if (o.kind === 'cover') drawPortada(ctx, hi, H);
   else drawGrid(ctx, o.g, hi, H);
   ctx.setTransform(1,0,0,1,0,0);
   return canvas;
 }
 async function renderBlob(o, size){
-  const need = (o.kind === 'postal' ? [state.photos[o.i]] : o.kind === 'recipe' ? [recipePhoto()] : state.photos.slice(o.g*4, o.g*4 + 4)).filter(Boolean);
+  const need = (o.kind === 'postal' ? [state.photos[o.i]] : o.kind === 'recipe' ? [recipePhoto()] : o.kind === 'cover' ? [coverPhoto()] : state.photos.slice(o.g*4, o.g*4 + 4)).filter(Boolean);
   need.forEach(p => PINNED.add(p.id));
   const c = document.createElement('canvas');
   try {
@@ -2255,7 +2366,59 @@ document.querySelectorAll('.chips[data-scope]').forEach(box => box.addEventListe
 }));
 
 /* ---------- UI: recipe note ---------- */
+function renderCoverPhotos(){
+  const sel = $('#cvPhoto'), C = state.cover; if (!sel) return;
+  if (C.photo >= state.photos.length) C.photo = 0;
+  sel.innerHTML = state.photos.map((p, i) => `<option value="${i}">Foto ${i+1}${(p.title || '').trim() ? ' · ' + esc(p.title.trim()) : ''}</option>`).join('');
+  sel.value = String(C.photo);
+}
+function syncCover(){
+  const C = state.cover;
+  $('#cvOn').checked = C.on; $('#cvTitle').value = C.title; $('#cvSub').value = C.sub; $('#cvColor').value = C.color;
+  document.querySelectorAll('.chips[data-cradio]').forEach(box => box.querySelectorAll('button').forEach(b => b.setAttribute('aria-checked', String(C[box.dataset.cradio] === b.dataset.v))));
+  renderCoverPhotos();
+}
+$('#cvOn').addEventListener('change', e => { state.cover.on = e.target.checked; scheduleOut(); });
+$('#cvPhoto').addEventListener('change', e => { state.cover.photo = +e.target.value; scheduleOut(); });
+$('#cvTitle').addEventListener('input', e => { state.cover.title = e.target.value; scheduleOut(); });
+$('#cvSub').addEventListener('input', e => { state.cover.sub = e.target.value; scheduleOut(); });
+$('#cvColor').addEventListener('input', e => { state.cover.color = e.target.value; state.cover.bg = 'otro'; syncCover(); scheduleOut(); });
+document.querySelectorAll('.chips[data-cradio]').forEach(box => box.addEventListener('click', e => {
+  const b = e.target.closest('button[data-v]'); if (!b) return;
+  state.cover[box.dataset.cradio] = b.dataset.v; syncCover(); scheduleOut();
+}));
+
+/* ---------- mis diseños guardados ---------- */
+const PRESET_KEY = 'postales-ojodecristi-disenos';
+const PRESET_FIELDS = ['style','custom','deco','decoPostal','tilt','extras','shape','frame','format','comp','titleFont','photoSize','stampColor','paperTex','swSize','swPos','counterInk'];
+const PRESET_EXAMPLES = [
+  {name:'Clásica', d:{style:'archivo', deco:'cintas-clip', decoPostal:false, frame:'fina', format:'1:1', comp:'postal', shape:'cuadrados', photoSize:'normal', paperTex:'textura', swSize:'medianos', swPos:'centro', stampColor:'', extras:{postmark:false, border:false, filmdate:false, counter:false}}},
+  {name:'Costa vertical', d:{style:'archivo', deco:'paspartu', decoPostal:true, frame:'fina', format:'4:5', comp:'postal', shape:'cuadrados', photoSize:'grande', paperTex:'liso', swSize:'medianos', swPos:'costado', counterInk:'tinta', extras:{postmark:false, border:false, filmdate:false, counter:true}}, cover:{on:true, look:'sola', bg:'blanco'}}
+];
+function loadPresets(){ try { const v = JSON.parse(localStorage.getItem(PRESET_KEY) || 'null'); return Array.isArray(v) ? v : PRESET_EXAMPLES.map(x => JSON.parse(JSON.stringify(x))); } catch(e){ return PRESET_EXAMPLES.slice(); } }
+function savePresets(list){ try { localStorage.setItem(PRESET_KEY, JSON.stringify(list)); } catch(e){} }
+let PRESETS = [];
+function renderPresets(){
+  $('#presetList').innerHTML = PRESETS.length ? PRESETS.map((pr, i) => `<button type="button" data-preset="${i}">${esc(pr.name)}<span class="x" data-del="${i}" role="button" aria-label="Borrar ${esc(pr.name)}">✕</span></button>`).join('') : '<span class="subhint">Todavía no guardaste ninguno.</span>';
+}
+$('#presetSave').addEventListener('click', () => {
+  const name = $('#presetName').value.trim(); if (!name){ toast('Ponele un nombre al diseño'); $('#presetName').focus(); return; }
+  const d = {}; PRESET_FIELDS.forEach(k => d[k] = JSON.parse(JSON.stringify(state[k])));
+  const cover = {on:state.cover.on, look:state.cover.look, bg:state.cover.bg, color:state.cover.color};
+  const i = PRESETS.findIndex(x => x.name.toLowerCase() === name.toLowerCase());
+  if (i >= 0) PRESETS[i] = {name, d, cover}; else PRESETS.push({name, d, cover});
+  savePresets(PRESETS); renderPresets(); $('#presetName').value = ''; toast('Guardado: ' + name);
+});
+$('#presetList').addEventListener('click', e => {
+  const del = e.target.closest('[data-del]');
+  if (del){ const i = +del.dataset.del, pr = PRESETS[i]; PRESETS.splice(i, 1); savePresets(PRESETS); renderPresets(); toast('Borrado: ' + pr.name); return; }
+  const b = e.target.closest('[data-preset]'); if (!b) return; const pr = PRESETS[+b.dataset.preset]; if (!pr) return;
+  for (const k of PRESET_FIELDS) if (k in pr.d){ if (k === 'extras') Object.assign(state.extras, pr.d.extras); else state[k] = JSON.parse(JSON.stringify(pr.d[k])); }
+  if (pr.cover) Object.assign(state.cover, pr.cover);
+  syncDesign(); syncCover(); renderStyleThumbs(); renderShapeThumbsSoon(); scheduleOut(); toast('Aplicado: ' + pr.name);
+});
 function renderRecipePhotos(){
+  renderCoverPhotos();
   const sel = $('#rcPhoto'), R = state.recipe;
   if (R.photo >= state.photos.length) R.photo = state.photos.length ? 0 : -1;
   sel.innerHTML = '<option value="-1">Sin foto</option>' + state.photos.map((p, i) => `<option value="${i}">Foto ${i+1}${(p.title || '').trim() ? ' · ' + esc(p.title.trim()) : ''}</option>`).join('');
@@ -2597,7 +2760,7 @@ async function boot(){
     const imgs = await Promise.all(SAMPLE.map(s => loadImg(s.src)));
     state.photos = await Promise.all(imgs.map((im, i) => makePhoto(im, {date:'04-09-2025', colors: SAMPLE[i].colors.map(([hex, name]) => ({hex, name, auto:false}))})));
   }
-  buildDesign(); syncDesign(); syncRecipe();
+  buildDesign(); syncDesign(); syncRecipe(); syncCover(); PRESETS = loadPresets(); renderPresets();
   afterStructure();
 }
 window.__postales = {state, outputs, renderTo, renderBlob, extractPalette, colorName, readExif, STYLES, saveOneByOne};
