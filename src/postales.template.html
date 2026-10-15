@@ -1835,9 +1835,12 @@ const PM_POS = [['libre','Lugar libre'],['abajo-izq','Abajo a la izquierda'],['a
 function pmPosOf(p){ return (p && p.lay && p.lay.pm) || state.pmPos; }
 function pmSpot(p, n, L, H, dy, style){
   const pos = pmPosOf(p), P0 = L.photo, Rr = PM_R[style]*PM_K;
+  /* arriba: el margen de arriba es más chico que el matasellos, así que va a caballo del borde de la foto (lo más arriba que entra) */
+  const yTop = Math.max(-dy + Rr + 6, P0.y - Rr*0.35);
   const corner = {'foto-si':[P0.x + Rr*0.85, P0.y + Rr*0.85], 'foto-sd':[P0.x + P0.w - Rr*0.85, P0.y + Rr*0.85], 'foto':[P0.x + P0.w - Rr*0.85, P0.y + Rr*0.85],
-                  'foto-ii':[P0.x + Rr*0.85, P0.y + P0.h - Rr*0.85], 'foto-id':[P0.x + P0.w - Rr*0.85, P0.y + P0.h - Rr*0.85]}[pos];
-  if (corner) return {cx:corner[0], cy:corner[1], dir:pos === 'foto-si' || pos === 'foto-ii' ? 1 : -1};
+                  'foto-ii':[P0.x + Rr*0.85, P0.y + P0.h - Rr*0.85], 'foto-id':[P0.x + P0.w - Rr*0.85, P0.y + P0.h - Rr*0.85],
+                  'arriba-izq':[P0.x + Rr*0.95, yTop], 'arriba-der':[P0.x + P0.w - Rr*0.95, yTop]}[pos];
+  if (corner) return {cx:corner[0], cy:corner[1], dir:pos === 'foto-si' || pos === 'foto-ii' || pos === 'arriba-izq' ? 1 : -1};
   if (pos !== 'sello') return pmFree(p, n, L, H, dy, style, pos);
   const st = L.stamp, R = PM_R[style]*PM_K, rr = [], add = (x, y, w, h) => rr.push({x, y, w, h});
   const ph = L.photo; add(ph.x - 6, ph.y - 6, ph.w + 12, ph.h + 12);
@@ -2424,7 +2427,9 @@ function postalLayout(p, n, H, mini){
     const LW = lineWidthFor();
     const spots = {
       izquierda:{x0:side, x1:side + LW, y0:pb + 20},
-      sello: fits && colBot + 70 + 72 + 30 + dy < H - (strip ? 44 : 14) - (counter ? 60 : 0) ? {x0:D - side - LW, x1:D - side, y0:colBot + 70 + 72} : null,
+      /* debajo del sello: si el sello está al pie de la foto (no debajo de la columna), las líneas van debajo de él, no se pierden */
+      sello: fits ? (colBot + 70 + 72 + 30 + dy < H - (strip ? 44 : 14) - (counter ? 60 : 0) ? {x0:D - side - LW, x1:D - side, y0:colBot + 70 + 72} : null)
+                  : (stampAt.cy + 72 + 30 + dy < H - (strip ? 44 : 14) - (counter ? 60 : 0) ? {x0:x + w + m - LW, x1:x + w + m, y0:stampAt.cy + 72} : null),
       arriba: top + dy >= 40 ? {x0:D - side - LW, x1:D - side, y0:top - 34} : null
     };
     return Object.assign(out, {
@@ -3320,7 +3325,7 @@ function syncDesign(){
   document.querySelectorAll('[data-ifpostal]').forEach(el => el.hidden = state.comp === 'ficha');
   $('#decoPostalRow').hidden = state.deco === 'ninguno';
   document.body.classList.toggle('pm-on', state.pm !== 'ninguno');
-  $('#pmIconRow').hidden = state.pm !== 'ilustrado'; $('#pmPosRow').hidden = state.pm === 'ninguno'; $('#linePosRow').hidden = state.lineStyle === 'ninguna';
+  $('#pmIconRow').hidden = state.pm !== 'ilustrado'; $('#pmPosRow').hidden = state.pm === 'ninguno'; $('#linePosRow').hidden = state.lineStyle === 'ninguna' || state.comp === 'ficha';
   $('#counterInkRow').hidden = !state.extras.counter;
   document.querySelectorAll('select[data-sel]').forEach(x => x.value = state[x.dataset.sel]);
   $('#datosSum').textContent = datosSummary();
