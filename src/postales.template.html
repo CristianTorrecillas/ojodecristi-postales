@@ -2470,33 +2470,52 @@ function postalLayout(p, n, H, mini){
     pm:{cx:side + 45, cy:pb + 122.3}
   });
 }
-/* «1/4» escrito con pluma de punta ancha: cursiva, trazos gruesos y finos según la dirección, y la barra cónica hecha a mano */
+/* «1/4» escrito a mano con microfibra: números cursivos de trazo fino (con apenas variación de grosor), el 4 cerrado y la barra suelta.
+   Cada número es un dibujo propio (no una letra), así se controla la forma. Puntos en una caja de 0.6 × 1, de arriba hacia abajo. */
+const HAND_DIGITS = {
+  '0':[[[.30,0],[.09,.14],[.02,.50],[.09,.86],[.30,1],[.51,.86],[.58,.50],[.51,.14],[.30,0]]],
+  '1':[[[.06,.26],[.30,0],[.30,1]]],
+  '2':[[[.04,.22],[.16,.04],[.36,0],[.52,.12],[.50,.32],[.32,.56],[.04,1],[.58,1]]],
+  '3':[[[.05,.10],[.28,0],[.50,.10],[.46,.32],[.24,.47],[.50,.62],[.56,.82],[.36,1],[.04,.92]]],
+  '4':[[[.42,0],[.03,.68],[.62,.68]],[[.42,0],[.42,1]]],
+  '5':[[[.50,0],[.14,0],[.08,.46],[.30,.40],[.52,.55],[.52,.82],[.30,1],[.04,.92]]],
+  '6':[[[.46,.03],[.20,.25],[.06,.62],[.12,.92],[.32,1],[.52,.85],[.48,.58],[.28,.50],[.10,.62]]],
+  '7':[[[.04,.03],[.56,.03],[.22,1]],[[.17,.56],[.45,.56]]],
+  '8':[[[.30,0],[.10,.12],[.14,.32],[.30,.48],[.52,.66],[.48,.90],[.30,1],[.10,.90],[.08,.66],[.30,.48],[.48,.32],[.50,.12],[.30,0]]],
+  '9':[[[.50,.40],[.30,.50],[.10,.38],[.12,.10],[.30,0],[.50,.12],[.52,.45],[.42,.80],[.22,1]]]
+};
+function handStroke(ctx, pts, ox, oy, h, r){
+  /* spline suave por los puntos (Catmull-Rom) y un temblor mínimo, como una mano firme */
+  const P = pts.map(q => [ox + (q[0] + (r() - 0.5)*0.025)*h, oy + (q[1] + (r() - 0.5)*0.02)*h]), out = [];
+  for (let i = 0; i < P.length - 1; i++){
+    const p0 = P[Math.max(0, i - 1)], p1 = P[i], p2 = P[i + 1], p3 = P[Math.min(P.length - 1, i + 2)];
+    for (let k = 0; k < 10; k++){ const t = k/10, t2 = t*t, t3 = t2*t;
+      out.push([0, 1].map(j => 0.5*((2*p1[j]) + (-p0[j] + p2[j])*t + (2*p0[j] - 5*p1[j] + 4*p2[j] - p3[j])*t2 + (-p0[j] + 3*p1[j] - 3*p2[j] + p3[j])*t3))); }
+  }
+  out.push(P[P.length - 1]);
+  ctx.beginPath(); out.forEach((q, i) => i ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])); ctx.stroke();
+}
 function markerFraction(ctx, a, b, xr, base){
-  const size = 33, col = state.counterInk === 'sello' && S.stamp ? S.stamp : state.counterInk === 'sello' ? '#9E1610' : S.ink;
-  const ds = devScale(ctx), r = rng(a*31 + b*7);
-  ctx.save(); ctx.translate(xr, base); ctx.rotate(-5*Math.PI/180); ctx.transform(1, 0, -0.2, 1, 0, 0);
-  ctx.font = `400 ${size}px ${HAND}`; ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'left';
-  const A = String(a), B = String(b), wa = ctx.measureText(A).width, wb = ctx.measureText(B).width, sl = size*0.62;
-  const x = -(wa + sl + wb);
-  /* punta ancha inclinada 40°: el mismo trazo se repite corrido a lo largo de la punta, así los trazos que la siguen quedan finos y los que la cruzan, gruesos */
-  const NIB = 40*Math.PI/180, NW = size*0.045, nib = (fn) => {
-    for (let k = 0; k < 7; k++){ const t = k/6 - 0.5; ctx.save(); ctx.translate(t*NW*2*Math.cos(NIB), -t*NW*2*Math.sin(NIB)); fn(); ctx.restore(); }
+  const h = 25, col = state.counterInk === 'sello' && S.stamp ? S.stamp : state.counterInk === 'sello' ? '#9E1610' : S.ink;
+  const ds = devScale(ctx), r = rng(a*31 + b*7), adv = h*0.74;
+  const A = String(a), B = String(b), gap = h*0.62, total = (A.length + B.length)*adv + gap - h*0.12;
+  ctx.save(); ctx.translate(xr, base); ctx.rotate(-4*Math.PI/180); ctx.transform(1, 0, -0.17, 1, 0, 0);
+  ctx.strokeStyle = col; ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+  /* microfibra: línea fina; la punta apenas cuadrada da un poco de contraste entre trazos que bajan y trazos que suben */
+  const NIB = 35*Math.PI/180, NW = 0.32, pen = (fn) => {
+    for (let k = 0; k < 3; k++){ const t = k/2 - 0.5; ctx.save(); ctx.translate(t*NW*2*Math.cos(NIB), -t*NW*2*Math.sin(NIB)); fn(); ctx.restore(); }
   };
   const ink = (fn) => {
-    ctx.save(); ctx.globalAlpha = 0.24; ctx.shadowColor = col; ctx.shadowBlur = 1.8*ds; fn(); ctx.restore();
-    ctx.save(); ctx.globalAlpha = 0.94; fn(); ctx.restore();
+    ctx.save(); ctx.globalAlpha = 0.16; ctx.shadowColor = col; ctx.shadowBlur = 1.2*ds; fn(); ctx.restore();
+    ctx.save(); ctx.globalAlpha = 0.95; fn(); ctx.restore();
   };
-  ctx.fillStyle = col; ctx.strokeStyle = col; ctx.lineJoin = 'round'; ctx.lineCap = 'round';
-  const word = (t, px, py) => ink(() => nib(() => { ctx.lineWidth = 0.7; ctx.fillText(t, px, py); ctx.strokeText(t, px, py); }));
-  word(A, x, -size*0.08);
-  /* barra: cónica (más gruesa al medio, fina en las puntas), un poco curva */
-  const sx0 = x + wa + sl*0.1, sx1 = x + wa + sl*0.9, y0 = size*0.08, y1 = -size*0.7, bow = (r() - 0.5)*3 - 1.6, N = 28, top = [], bot = [];
-  for (let i = 0; i <= N; i++){
-    const t = i/N, px = sx0 + (sx1 - sx0)*t + Math.sin(Math.PI*t)*bow, py = y0 + (y1 - y0)*t, w = 0.45 + 2.5*Math.pow(Math.sin(Math.PI*Math.min(1, t*1.05)), 0.7);
-    top.push([px - w*0.55, py]); bot.push([px + w*0.55, py]);
-  }
-  ink(() => { ctx.beginPath(); top.forEach((q, i) => i ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])); for (let i = bot.length - 1; i >= 0; i--) ctx.lineTo(bot[i][0], bot[i][1]); ctx.closePath(); ctx.fill(); });
-  word(B, x + wa + sl, size*0.06);
+  let x = -total;
+  const digits = (str) => { for (const ch of str){ (HAND_DIGITS[ch] || []).forEach(st => ink(() => pen(() => { ctx.lineWidth = 1.05; handStroke(ctx, st, x, -h, h, r); }))); x += adv; } };
+  digits(A);
+  /* barra: un trazo largo y fino, apenas curvo */
+  const sx0 = x - h*0.02, sx1 = x + gap - h*0.2, y0 = h*0.06, y1 = -h*1.08, bow = (r() - 0.5)*2 - 1.2;
+  ink(() => pen(() => { ctx.lineWidth = 1.05; ctx.beginPath(); ctx.moveTo(sx0, y0); ctx.quadraticCurveTo((sx0 + sx1)/2 + bow, (y0 + y1)/2, sx1, y1); ctx.stroke(); }));
+  x += gap - h*0.12; digits(B);
   ctx.restore();
 }
 function drawPostal(ctx, p, n, hi, mini, H){
