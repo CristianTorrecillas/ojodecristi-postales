@@ -387,7 +387,10 @@ body::before{content:"";position:fixed;top:0;left:0;right:0;height:5px;z-index:5
 .bar{border-radius:var(--r-md)}
 .ico{border-radius:var(--r-sm)}
 .ico.undo{display:inline-flex;align-items:center;justify-content:center;flex:none;height:36px;width:36px}
-.ico.undo svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ico{display:inline-flex;align-items:center;justify-content:center}
+.ico svg,.btn svg{width:16px;height:16px;fill:currentColor;flex:none}
+.ico.undo svg{width:17px;height:17px}
+.sw-alt svg,.sw-ai svg{fill:currentColor}
 .drop{flex-direction:column;gap:10px;border-radius:var(--r-md);font-family:var(--sans);font-size:14.5px;color:var(--muted);min-height:132px}
 .drop small{font-size:12.5px}
 .drop-ico{width:34px;height:40px;color:var(--frame)}
@@ -425,7 +428,7 @@ body.bg-cada .lay-bg{display:grid !important}
   </header>
 
   <section class="bar" aria-label="Datos del carrusel">
-    <span class="picker btn btn-ghost">+ Agregar fotos<input type="file" id="file" class="pick" accept="image/*" multiple aria-label="Agregar fotos"></span>
+    <span class="picker btn btn-ghost"><svg viewBox="0 0 256 256" aria-hidden="true"><path d="M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z"/></svg>Agregar fotos<input type="file" id="file" class="pick" accept="image/*" multiple aria-label="Agregar fotos"></span>
     <div class="field">
       <label for="startNum">N.° inicial</label>
       <input id="startNum" class="inp num" type="number" min="1" max="999" value="1" inputmode="numeric">
@@ -443,7 +446,7 @@ body.bg-cada .lay-bg{display:grid !important}
     </div>
     <div class="saves push">
       <button type="button" id="oneBtn" class="btn btn-ghost">Guardar una por una</button>
-      <button type="button" id="zipBtn" class="btn btn-stamp">Descargar todo (.zip)</button>
+      <button type="button" id="zipBtn" class="btn btn-stamp"><svg viewBox="0 0 256 256" aria-hidden="true"><path d="M224,144v64a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V144a8,8,0,0,1,16,0v56H208V144a8,8,0,0,1,16,0Zm-101.66,5.66a8,8,0,0,0,11.32,0l40-40a8,8,0,0,0-11.32-11.32L136,124.69V32a8,8,0,0,0-16,0v92.69L93.66,98.34a8,8,0,0,0-11.32,11.32Z"/></svg>Descargar todo (.zip)</button>
     </div>
   </section>
   </div>
@@ -474,7 +477,7 @@ body.bg-cada .lay-bg{display:grid !important}
 
         <div class="presetbar">
           <select id="presetSel" class="inp" aria-label="Diseño guardado"></select>
-          <button type="button" id="undoBtn" class="ico undo" title="Deshacer el último cambio (Ctrl+Z)" aria-label="Deshacer" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14L4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg></button>
+          <button type="button" id="undoBtn" class="ico undo" title="Deshacer el último cambio (Ctrl+Z)" aria-label="Deshacer" disabled><svg viewBox="0 0 256 256" aria-hidden="true"><path d="M224,128a96,96,0,0,1-94.71,96H128A95.38,95.38,0,0,1,62.1,197.8a8,8,0,0,1,11-11.63A80,80,0,1,0,71.43,71.39a3.07,3.07,0,0,1-.26.25L44.59,96H72a8,8,0,0,1,0,16H24a8,8,0,0,1-8-8V56a8,8,0,0,1,16,0V85.8L60.25,60A96,96,0,0,1,224,128Z"/></svg></button>
           <button type="button" id="presetNew" class="btn btn-ghost mini">Guardar</button>
           <button type="button" id="presetDel" class="linkbtn" hidden>Borrar</button>
         </div>
@@ -646,6 +649,9 @@ body.bg-cada .lay-bg{display:grid !important}
             </div>
             <label class="check"><input type="checkbox" id="exPostmark"> Matasellos con lugar y fecha</label>
             <label class="check"><input type="checkbox" id="exFilmdate"> Fecha de rollo sobre la foto</label>
+            <label class="check"><input type="checkbox" id="exIcons"> Íconos en los datos (lugar, fecha, cámara…)</label>
+            <label class="check"><input type="checkbox" id="exParAvion"> Etiqueta «Por avión»</label>
+            <label class="check"><input type="checkbox" id="exWaves"> Ondas de matasellos sobre el sello</label>
             <label class="check"><input type="checkbox" id="exBorder"> Borde de correo aéreo</label>
             <label class="check"><input type="checkbox" id="tilt"> Fotos inclinadas en la grilla</label>
           </div>
@@ -798,7 +804,7 @@ body.bg-cada .lay-bg{display:grid !important}
         <div class="col-head"><h2 id="hOut">Carrusel</h2><span id="outCount" class="count"></span></div>
         <div class="stage" id="stage">
           <button type="button" class="stage-view" id="stageView" aria-label="Ver en tamaño real"><canvas id="stageC" width="900" height="900"></canvas></button>
-          <div class="stage-bar"><span id="stageCap" class="stage-cap"></span><button type="button" class="btn btn-ghost mini" id="stageSave">Guardar esta</button></div>
+          <div class="stage-bar"><span id="stageCap" class="stage-cap"></span><button type="button" class="btn btn-ghost mini" id="stageSave"><svg viewBox="0 0 256 256" aria-hidden="true"><path d="M224,144v64a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V144a8,8,0,0,1,16,0v56H208V144a8,8,0,0,1,16,0Zm-101.66,5.66a8,8,0,0,0,11.32,0l40-40a8,8,0,0,0-11.32-11.32L136,124.69V32a8,8,0,0,0-16,0v92.69L93.66,98.34a8,8,0,0,0-11.32,11.32Z"/></svg>Guardar esta</button></div>
         </div>
         <div id="gridTitles" class="gtitles"></div>
         <ol id="outList" class="olist"></ol>
@@ -809,7 +815,7 @@ body.bg-cada .lay-bg{display:grid !important}
 </div>
 
 <div class="mbar" aria-label="Acciones rápidas">
-  <span class="picker btn btn-ghost">+ Fotos<input type="file" class="pick" accept="image/*" multiple aria-label="Agregar fotos"></span>
+  <span class="picker btn btn-ghost"><svg viewBox="0 0 256 256" aria-hidden="true"><path d="M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z"/></svg>Fotos<input type="file" class="pick" accept="image/*" multiple aria-label="Agregar fotos"></span>
   <button type="button" id="mSave" class="btn btn-stamp">Guardar imágenes</button>
 </div>
 
@@ -960,7 +966,7 @@ const TECH_LABELS = {cam:'Cámara', lens:'Lente', focal:'Focal', ap:'Apertura', 
 const state = {
   photos:[], startNum:1, place:'Chubut', titles:['FLORENTINO AMEGHINO'], size:1080, sample:true, picking:null,
   style:'archivo', custom:'#D8C7A6', deco:'cintas-clip', decoPostal:false, tilt:false,
-  extras:{postmark:false, border:false, filmdate:false, counter:false},
+  extras:{postmark:false, border:false, filmdate:false, counter:false, icons:false, parAvion:false, waves:false},
   shape:'cuadrados', frame:'fina', format:'1:1', comp:'postal', titleFont:'mono', lastEnd:0,
   photoSize:'grande', stampColor:'', stampMode:'papel', paperTex:'textura', swSize:'medianos', swPos:'auto', counterInk:'tinta',
   bgEach:'cada', bgTone:'suave', bgPick:-1,
@@ -1019,6 +1025,16 @@ function mix(hex, to, t){ const a = hexRgb(hex), b = hexRgb(to); return 'rgb(' +
 function devScale(ctx){ const t = ctx.getTransform(); return Math.hypot(t.a, t.b); }
 function releaseCanvas(c){ if (c && c.getContext){ c.width = 0; c.height = 0; } }
 function toBlobP(c, type, q){ return new Promise((res, rej) => c.toBlob(b => b ? res(b) : rej(new Error('toBlob')), type, q)); }
+/* íconos Phosphor (licencia MIT, phosphoricons.com), dibujados en el lienzo */
+const PH = {"pin": "M128,66a38,38,0,1,0,38,38A38,38,0,0,0,128,66Zm0,64a26,26,0,1,1,26-26A26,26,0,0,1,128,130Zm0-112a86.1,86.1,0,0,0-86,86c0,30.91,14.34,63.74,41.47,94.94a252.32,252.32,0,0,0,41.09,38,6,6,0,0,0,6.88,0,252.32,252.32,0,0,0,41.09-38c27.13-31.2,41.47-64,41.47-94.94A86.1,86.1,0,0,0,128,18Zm0,206.51C113,212.93,54,163.62,54,104a74,74,0,0,1,148,0C202,163.62,143,212.93,128,224.51Z", "cal": "M208,34H182V24a6,6,0,0,0-12,0V34H86V24a6,6,0,0,0-12,0V34H48A14,14,0,0,0,34,48V208a14,14,0,0,0,14,14H208a14,14,0,0,0,14-14V48A14,14,0,0,0,208,34ZM48,46H74V56a6,6,0,0,0,12,0V46h84V56a6,6,0,0,0,12,0V46h26a2,2,0,0,1,2,2V82H46V48A2,2,0,0,1,48,46ZM208,210H48a2,2,0,0,1-2-2V94H210V208A2,2,0,0,1,208,210Z", "clock": "M128,26A102,102,0,1,0,230,128,102.12,102.12,0,0,0,128,26Zm0,192a90,90,0,1,1,90-90A90.1,90.1,0,0,1,128,218Zm62-90a6,6,0,0,1-6,6H128a6,6,0,0,1-6-6V72a6,6,0,0,1,12,0v50h50A6,6,0,0,1,190,128Z", "globe": "M128,26A102,102,0,1,0,230,128,102.12,102.12,0,0,0,128,26Zm90,102a89.55,89.55,0,0,1-7.46,35.86l-46.69-28.71a13.94,13.94,0,0,0-5.46-2l-22.82-3.07A14.06,14.06,0,0,0,121.06,138h-9.92a2,2,0,0,1-1.8-1.13l-3.8-7.86a13.94,13.94,0,0,0-9.66-7.59l-10.71-2.3L94.4,103a2,2,0,0,1,1.74-1h16.71a13.9,13.9,0,0,0,6.76-1.75l12.25-6.75a14.73,14.73,0,0,0,2.62-1.88l26.91-24.33a13.93,13.93,0,0,0,2.83-17.21L161,44.25A90.16,90.16,0,0,1,218,128ZM144.6,39.54l9.15,16.39a2,2,0,0,1-.41,2.46L126.43,82.72a1.84,1.84,0,0,1-.37.27l-12.25,6.76a2,2,0,0,1-1,.25H96.14A14,14,0,0,0,84,97L73.18,115.91a2,2,0,0,1-.19-.35L61.5,84.89a2,2,0,0,1,0-1.48L72.68,57.06A89.9,89.9,0,0,1,144.6,39.54ZM38,128A89.52,89.52,0,0,1,49.38,84.23a13.85,13.85,0,0,0,.89,4.87l11.49,30.67a13.94,13.94,0,0,0,10.16,8.78l21.44,4.6a2,2,0,0,1,1.38,1.09l3.8,7.86a14.07,14.07,0,0,0,12.6,7.9h4.56l-8.49,19a14,14,0,0,0,2.51,15.2l.1.11,19.68,20.26a2,2,0,0,1,.46,1.7L127.7,218A90.1,90.1,0,0,1,38,128Zm102.08,89.19,1.67-8.6a14.07,14.07,0,0,0-3.47-12.16l-.1-.11L118.5,176.06a2,2,0,0,1-.33-2.14l13.7-30.73A2,2,0,0,1,134,142l22.82,3.08a2,2,0,0,1,.78.27L205,174.55A90.18,90.18,0,0,1,140.08,217.19Z", "cam": "M208,58H179.21L165,36.67A6,6,0,0,0,160,34H96a6,6,0,0,0-5,2.67L76.78,58H48A22,22,0,0,0,26,80V192a22,22,0,0,0,22,22H208a22,22,0,0,0,22-22V80A22,22,0,0,0,208,58Zm10,134a10,10,0,0,1-10,10H48a10,10,0,0,1-10-10V80A10,10,0,0,1,48,70H80a6,6,0,0,0,5-2.67L99.21,46h57.57L171,67.33A6,6,0,0,0,176,70h32a10,10,0,0,1,10,10ZM128,90a42,42,0,1,0,42,42A42,42,0,0,0,128,90Zm0,72a30,30,0,1,1,30-30A30,30,0,0,1,128,162Z", "ap": "M200.12,55.88A102,102,0,0,0,55.87,200.12,102,102,0,1,0,200.12,55.88Zm-102,66.67,19.65-23.14,29.86,5.46,10.21,28.58-19.65,23.14-29.86-5.46ZM209.93,90.69a90.24,90.24,0,0,1-2,78.63l-56.14-10.24Zm-6.16-11.28-36.94,43.48L136.66,38.42a89.31,89.31,0,0,1,55,25.94A91.33,91.33,0,0,1,203.77,79.41Zm-139.41-15A89.37,89.37,0,0,1,123.81,38.1L143,91.82,54.75,75.71A91.2,91.2,0,0,1,64.36,64.36ZM48,86.68l56.14,10.24L46.07,165.31a90.24,90.24,0,0,1,2-78.63Zm4.21,89.91,36.94-43.48,30.17,84.47a89.31,89.31,0,0,1-55-25.94A91.33,91.33,0,0,1,52.23,176.59Zm139.41,15a89.32,89.32,0,0,1-59.45,26.26L113,164.18l88.24,16.11A91.2,91.2,0,0,1,191.64,191.64Z", "cross": "M232,122H221.8A94.13,94.13,0,0,0,134,34.2V24a6,6,0,0,0-12,0V34.2A94.13,94.13,0,0,0,34.2,122H24a6,6,0,0,0,0,12H34.2A94.13,94.13,0,0,0,122,221.8V232a6,6,0,0,0,12,0V221.8A94.13,94.13,0,0,0,221.8,134H232a6,6,0,0,0,0-12Zm-98,87.76V200a6,6,0,0,0-12,0v9.76A82.09,82.09,0,0,1,46.24,134H56a6,6,0,0,0,0-12H46.24A82.09,82.09,0,0,1,122,46.24V56a6,6,0,0,0,12,0V46.24A82.09,82.09,0,0,1,209.76,122H200a6,6,0,0,0,0,12h9.76A82.09,82.09,0,0,1,134,209.76ZM128,90a38,38,0,1,0,38,38A38,38,0,0,0,128,90Zm0,64a26,26,0,1,1,26-26A26,26,0,0,1,128,154Z", "timer": "M128,42a94,94,0,1,0,94,94A94.11,94.11,0,0,0,128,42Zm0,176a82,82,0,1,1,82-82A82.1,82.1,0,0,1,128,218ZM172.24,91.76a6,6,0,0,1,0,8.48l-40,40a6,6,0,1,1-8.48-8.48l40-40A6,6,0,0,1,172.24,91.76ZM98,16a6,6,0,0,1,6-6h48a6,6,0,0,1,0,12H104A6,6,0,0,1,98,16Z", "plane": "M215.52,197.26a8,8,0,0,1-1.86,8.39l-24,24A8,8,0,0,1,184,232a7.09,7.09,0,0,1-.79,0,8,8,0,0,1-5.87-3.52l-44.07-66.12L112,183.59V208a8,8,0,0,1-2.34,5.65s-14,14.06-15.88,15.88A7.91,7.91,0,0,1,91,231.41a8,8,0,0,1-10.41-4.35l-.06-.15-14.7-36.76L29,175.42a8,8,0,0,1-2.69-13.08l16-16A8,8,0,0,1,48,144H72.4l21.27-21.27L27.56,78.65a8,8,0,0,1-1.22-12.32l24-24a8,8,0,0,1,8.39-1.86l85.94,31.25L176.2,40.19a28,28,0,0,1,39.6,39.6l-31.53,31.53Z"};
+const PH2D = {};
+function drawIcon(ctx, k, x, base, size){ const p = PH2D[k] || (PH2D[k] = new Path2D(PH[k])); ctx.save(); ctx.translate(x, base - size*0.86); ctx.scale(size/256, size/256); ctx.fill(p); ctx.restore(); }
+/* un dato con su ícono adelante (si están activados los íconos) */
+function itemText(ctx, it, x, base, size, family, maxW){
+  if (!(state.extras.icons && it.ic)){ leftText(ctx, it.t, x, base, size, family, maxW); return; }
+  const isz = size*1.02, dx = isz*1.3; ctx.save(); ctx.globalAlpha *= 0.82; drawIcon(ctx, it.ic, x, base + size*0.08, isz); ctx.restore();
+  leftText(ctx, it.t, x + dx, base, size, family, maxW ? maxW - dx : maxW);
+}
 function rrect(ctx, x, y, w, h, r){ ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
 const isPhone = () => window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
 
@@ -1826,15 +1842,17 @@ function drawSwatches(ctx, colors, L, label, seedBase, labels, wrap){
 
 /* ---------- text blocks ---------- */
 const placeOf = p => (p.place || '').trim() || state.place.trim();
-function techLines(p, sh){
+function techItems(p, sh){
   const t = p.tech || {}, out = [];
-  if (sh.gps && t.gps) out.push(t.gps);
-  if (sh.cam && t.cam) out.push(t.cam);
-  if (sh.lens && t.lens) out.push(t.lens);
-  const a = [sh.focal && t.focal, sh.ap && t.ap].filter(Boolean); if (a.length) out.push(a.join(' · '));
-  const b = [sh.sh && t.sh, sh.iso && t.iso].filter(Boolean); if (b.length) out.push(b.join(' · '));
+  if (sh.gps && t.gps) out.push({ic:'globe', t:t.gps});
+  if (sh.cam && t.cam) out.push({ic:'cam', t:t.cam});
+  if (sh.lens && t.lens) out.push({ic:'cross', t:t.lens});
+  const a = [sh.focal && t.focal, sh.ap && t.ap].filter(Boolean); if (a.length) out.push({ic:'ap', t:a.join(' · ')});
+  const b = [sh.sh && t.sh, sh.iso && t.iso].filter(Boolean); if (b.length) out.push({ic:'timer', t:b.join(' · ')});
   return out;
 }
+function techLines(p, sh){ return techItems(p, sh).map(x => x.t); }
+function smallItems(p, sh){ const out = []; if (sh.place && placeOf(p)) out.push({ic:'pin', t:placeOf(p)}); const dl = dateLine(p, sh); if (dl) out.push({ic:'cal', t:dl}); return out; }
 function dateLine(p, sh){ return [sh.date && (p.date || '').trim(), sh.time && (p.tech.time || '').trim()].filter(Boolean).join(' · '); }
 function stripText(p, n){
   const sh = state.show.postal;
@@ -1850,6 +1868,7 @@ function postalStrip(ctx, p, n, base, L){
   const t = p.tech, right = [sh.cam && t.cam, sh.lens && t.lens, sh.focal && t.focal, sh.ap && t.ap, sh.sh && t.sh, sh.iso && t.iso].filter(Boolean);
   const lt = left.join(' · '), rt = right.join(' · ');
   if (!lt && !rt) return;
+  if (state.extras.icons){ iconStrip(ctx, p, n, base, L); return; }
   ctx.save(); ctx.fillStyle = S.ink; ctx.globalAlpha = 0.92;
   let size = L.size; ctx.font = `400 ${size}px ${MONO}`;
   const avail = (L.x1 - L.x0) - (lt && rt ? 26 : 0), wl = lt ? ctx.measureText(lt).width : 0, wr = rt ? ctx.measureText(rt).width : 0;
@@ -1858,18 +1877,54 @@ function postalStrip(ctx, p, n, base, L){
   if (rt) rightText(ctx, rt, L.x1, base, size, MONO, lt && rt ? avail * wr/(wl+wr) : avail);
   ctx.restore();
 }
+/* la tira de datos de la postal, cada dato con su ícono */
+function iconStrip(ctx, p, n, base, L){
+  const sh = state.show.postal, t = p.tech;
+  const left = []; if (sh.num) left.push({t:'N.° ' + pad3(n)}); left.push(...smallItems(p, sh)); if (sh.gps && t.gps) left.push({ic:'globe', t:t.gps});
+  const right = techItems(p, Object.assign({}, sh, {gps:false}));
+  let size = L.size; const gap = 16;
+  const wOf = (arr, sz) => { ctx.font = `400 ${sz}px ${MONO}`; return arr.reduce((a, it, i) => a + (i ? gap : 0) + (it.ic ? sz*1.33 : 0) + ctx.measureText(it.t).width, 0); };
+  const avail = (L.x1 - L.x0) - (left.length && right.length ? 26 : 0);
+  while (size > 7.5 && wOf(left, size) + wOf(right, size) > avail) size -= 0.25;
+  ctx.save(); ctx.fillStyle = S.ink; ctx.globalAlpha = 0.92; ctx.font = `400 ${size}px ${MONO}`; ctx.textAlign = 'left';
+  const run = (arr, x) => arr.forEach((it, i) => { if (i) x += gap; if (it.ic){ ctx.save(); ctx.globalAlpha *= 0.85; drawIcon(ctx, it.ic, x, base + size*0.08, size*1.02); ctx.restore(); x += size*1.33; } ctx.fillText(it.t, x, base); x += ctx.measureText(it.t).width; });
+  run(left, L.x0); run(right, L.x1 - wOf(right, size)); ctx.font = `400 ${size}px ${MONO}`;
+  ctx.restore();
+}
+/* etiqueta azul de correo aéreo */
+function parAvion(ctx, x, y, rot){
+  const w = 138, h = 36, ds = devScale(ctx);
+  ctx.save(); ctx.translate(x, y); ctx.rotate(rot*Math.PI/180);
+  ctx.shadowColor = 'rgba(0,0,0,.18)'; ctx.shadowBlur = 2*ds; ctx.shadowOffsetY = 0.8*ds;
+  ctx.fillStyle = '#244A96'; ctx.beginPath(); rrect(ctx, 0, 0, w, h, 2.5); ctx.fill(); ctx.shadowColor = 'transparent';
+  ctx.strokeStyle = 'rgba(255,255,255,.8)'; ctx.lineWidth = 0.9; ctx.strokeRect(3.5, 3.5, w - 7, h - 7);
+  ctx.fillStyle = '#FFFFFF'; drawIcon(ctx, 'plane', 10, 27, 20);
+  ctx.textAlign = 'left'; ctx.font = `600 13px ${SANS}`; ctx.fillText('POR AVIÓN', 38, 17.5);
+  ctx.globalAlpha = 0.88; ctx.font = `400 8.6px ${SANS}`; ctx.fillText('PAR AVION · BY AIR MAIL', 38, 28.5);
+  ctx.restore();
+}
+/* ondas de matasellos que cruzan el sello, como en una postal que ya pasó por el correo */
+function cancelWaves(ctx, cx, cy, d, seed){
+  const r = rng(seed), x0 = cx - d*0.95, x1 = cx + d*0.32;
+  ctx.save(); ctx.strokeStyle = S.ink; ctx.globalAlpha = 0.62; ctx.lineWidth = 1.6; ctx.lineCap = 'round';
+  for (let i = 0; i < 5; i++){
+    const y = cy - d*0.2 + i*d*0.1, ph = r()*0.6;
+    ctx.beginPath(); for (let x = x0; x <= x1; x += 2){ const yy = y + Math.sin((x - x0)/8.5 + ph)*2.8; x === x0 ? ctx.moveTo(x, yy) : ctx.lineTo(x, yy); } ctx.stroke();
+  }
+  ctx.restore();
+}
 function fichaText(ctx, p, n){
   const sh = state.show.grid;
   const big = sh.num ? 'N.° ' + pad3(n) : '';
-  const small = []; if (sh.place && placeOf(p)) small.push(placeOf(p)); const dl = dateLine(p, sh); if (dl) small.push(dl);
-  const tech = techLines(p, sh), hasLeft = !!(big || small.length);
+  const small = smallItems(p, sh);
+  const tech = techItems(p, sh), hasLeft = !!(big || small.length);
   ctx.fillStyle = S.ink;
   let y = 573;
-  for (let i = small.length-1; i >= 0; i--){ leftText(ctx, small[i], 21, y, 17, SANS, tech.length ? 176 : 400); y -= 25; }
+  for (let i = small.length-1; i >= 0; i--){ itemText(ctx, small[i], 21, y, 17, SANS, tech.length ? 176 : 400); y -= 25; }
   if (big) leftText(ctx, big, 21, small.length ? y + 25 - 29 : 573, 20.5, MONO, tech.length ? 176 : 400);
   const tx = hasLeft ? 205 : 21;
   let ty = 573;
-  for (let i = tech.length-1; i >= 0; i--){ leftText(ctx, tech[i], tx, ty, 12.8, MONO, hasLeft ? 232 : 400); ty -= 18; }
+  for (let i = tech.length-1; i >= 0; i--){ itemText(ctx, tech[i], tx, ty, 12.8, MONO, hasLeft ? 232 : 400); ty -= 18; }
 }
 function titleFont(size){ return state.titleFont === 'hand' ? {family:HAND, weight:600, size:size*1.6} : {family:MONO, weight:400, size}; }
 
@@ -1985,11 +2040,13 @@ function drawPostal(ctx, p, n, hi, mini, H){
   if (state.extras.filmdate && !mini) filmDate(ctx, r, p.date, Math.min(555, L.stamp.cx - 70));
   if (kind !== 'none') decorate(ctx, r, kind, true, p);
   if (state.extras.postmark && !mini) postmark(ctx, p, n, L.pm);
+  const label = !mini && state.extras.parAvion, labelTop = r.y - frameTop() - underPad(kind) + dy - (state.extras.border ? BORDER : 0) >= 46;
   if (!mini && state.show.postal.title && (p.title || '').trim()){
     const ft = titleFont(15), top = (state.extras.border ? BORDER : 0) - dy, fTop = r.y - frameTop() - underPad(kind) - (kind === 'broches' ? 22 : kind === 'cinta-color' ? 12 : 0);
     const base = (top + fTop)/2 + ft.size*0.3;
-    ctx.fillStyle = S.ink; centerText(ctx, p.title.trim(), r.x + r.w/2, base, ft.size, 560, ft.family, ft.weight);
+    ctx.fillStyle = S.ink; centerText(ctx, p.title.trim(), r.x + r.w/2, base, ft.size, label && labelTop ? 360 : 560, ft.family, ft.weight);
   }
+  if (label){ if (labelTop) parAvion(ctx, r.x - 2, r.y - frameTop() - underPad(kind) - 42, -2); else parAvion(ctx, r.x + 14, r.y + r.h - 50, -3); }
   if (L.lines) inkLines(ctx, L.lines, 11);
   if (L.column){
     const C = L.column;
@@ -2001,6 +2058,7 @@ function drawPostal(ctx, p, n, hi, mini, H){
   if (!mini) postalStrip(ctx, p, n, H - Math.max(22, dy*0.5) - dy, L.strip);
   const keepS = S; if (!mini) S = withPhotoStamp(S, p);
   stamp(ctx, L.stamp.cx, L.stamp.cy, L.stamp.d, L.stamp.rot);
+  if (!mini && state.extras.waves) cancelWaves(ctx, L.stamp.cx, L.stamp.cy, L.stamp.d, n);
   ctx.restore();
   if (L.counter) markerFraction(ctx, n - state.startNum + 1, state.photos.length, L.counter.xr, L.counter.base);
   S = keepS;
@@ -2022,10 +2080,10 @@ function drawFichaTall(ctx, p, n, cell, hi, single){
   const sh = state.show.grid; ctx.fillStyle = S.ink;
   let y = r.y + 4;
   if (sh.num){ leftText(ctx, 'N.° ' + pad3(n), x0, y + 19, 20.5, MONO, colW); y += 33; }
-  const small = []; if (sh.place && placeOf(p)) small.push(placeOf(p)); const dl = dateLine(p, sh); if (dl) small.push(dl);
-  for (const t of small){ leftText(ctx, t, x0, y + 17, 17, SANS, colW); y += 25; }
-  const tech = techLines(p, sh); if (tech.length) y += 4;
-  for (const t of tech){ leftText(ctx, t, x0, y + 13, 12.8, MONO, colW); y += 18; }
+  const small = smallItems(p, sh);
+  for (const t of small){ itemText(ctx, t, x0, y + 17, 17, SANS, colW); y += 25; }
+  const tech = techItems(p, sh); if (tech.length) y += 4;
+  for (const t of tech){ itemText(ctx, t, x0, y + 13, 12.8, MONO, colW); y += 18; }
   const lab = single ? 34 : 0, gap = 14, top = y + 20;
   const k = Math.max(0.55, Math.min(1, (690 - 112 - top) / (3*(90 + lab) + 2*gap)));
   const sw = Math.min(104*k, colW), shh = 90*k, step = shh + (lab + gap)*k;
@@ -2035,6 +2093,7 @@ function drawFichaTall(ctx, p, n, cell, hi, single){
   inkLines(ctx, {x0, x1:x0 + 58, ys:[st.cy - 8, st.cy + 1.5, st.cy + 11], w:2.1}, 23 + n);
   const keepS = S; S = withPhotoStamp(S, p);
   stamp(ctx, st.cx, st.cy, st.d, GRID.rots[cell]);
+  if (state.extras.waves) cancelWaves(ctx, st.cx, st.cy, st.d, n);
   S = keepS;
 }
 function drawFicha(ctx, p, n, cell, hi, single){
@@ -2054,6 +2113,7 @@ function drawFicha(ctx, p, n, cell, hi, single){
   drawSwatches(ctx, p.colors, F.sw, F.label, n, single, false);
   const st = high ? F.stampHigh : F.stamp, keepS = S; S = withPhotoStamp(S, p);
   stamp(ctx, st.cx, st.cy, st.d, GRID.rots[cell]);
+  if (state.extras.waves) cancelWaves(ctx, st.cx, st.cy, st.d, n);
   S = keepS;
 }
 function gridTitle(g){ return (state.titles[g] || '').trim(); }
@@ -2372,7 +2432,7 @@ function rememberNumbering(){ if (state.sample || !state.photos.length) return; 
 let busySaving = false;
 async function saveOneByOne(btn){
   const outs = outputs(); if (!outs.length || busySaving) return;
-  busySaving = true; const label = btn ? btn.textContent : '';
+  busySaving = true; const label = btn ? btn.innerHTML : '';
   try{
     for (let k = 0; k < outs.length; k++){
       if (btn) btn.textContent = `Imagen ${k+1} de ${outs.length}…`;
@@ -2381,11 +2441,11 @@ async function saveOneByOne(btn){
       if (!ok) return;
     }
     toast(`Listo: ${outs.length} imágenes guardadas`); rememberNumbering();
-  } finally { busySaving = false; if (btn) btn.textContent = label; }
+  } finally { busySaving = false; if (btn) btn.innerHTML = label; }
 }
 async function saveZip(){
   const outs = outputs(); if (!outs.length) return;
-  const btn = $('#zipBtn'), label = btn.textContent; btn.disabled = true;
+  const btn = $('#zipBtn'), label = btn.innerHTML; btn.disabled = true;
   try{
     if (typeof JSZip === 'undefined'){ toast('No cargó el armador de .zip. Usá “Guardar una por una”.'); return; }
     const zip = new JSZip();
@@ -2399,7 +2459,7 @@ async function saveZip(){
     const base = slug(gridTitle(0) || state.place || '') || 'carrusel';
     if (await saveBlob(`ojodecristi-${base}-${state.size}.zip`, blob)) rememberNumbering();
   } catch(err){ toast('Algo falló armando el .zip. Probá de nuevo o guardá una por una.'); }
-  finally { btn.textContent = label; btn.disabled = !state.photos.length; }
+  finally { btn.innerHTML = label; btn.disabled = !state.photos.length; }
 }
 
 /* ---------- phone: share straight to Instagram / gallery ---------- */
@@ -2521,8 +2581,8 @@ function setTitle(p, t){
 
 /* ---------- UI: photo list ---------- */
 const photoList = $('#photoList'), outList = $('#outList');
-const CYCLE = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13.2 6.2A5.4 5.4 0 0 0 3.1 5M2.8 9.8A5.4 5.4 0 0 0 12.9 11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M3.4 1.9v3.4h3.4M12.6 14.1v-3.4H9.2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-const STAR = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 .8l1.7 5.1 5.3 1.9-5.3 1.9L8 15.2l-1.7-5.5L1 7.8l5.3-1.9z" fill="currentColor"/></svg>';
+const CYCLE = '<svg viewBox="0 0 256 256" aria-hidden="true"><path d="M224,48V96a8,8,0,0,1-8,8H168a8,8,0,0,1,0-16h28.69L182.06,73.37a79.56,79.56,0,0,0-56.13-23.43h-.45A79.52,79.52,0,0,0,69.59,72.71,8,8,0,0,1,58.41,61.27a96,96,0,0,1,135,.79L208,76.69V48a8,8,0,0,1,16,0ZM186.41,183.29a80,80,0,0,1-112.47-.66L59.31,168H88a8,8,0,0,0,0-16H40a8,8,0,0,0-8,8v48a8,8,0,0,0,16,0V179.31l14.63,14.63A95.43,95.43,0,0,0,130,222.06h.53a95.36,95.36,0,0,0,67.07-27.33,8,8,0,0,0-11.18-11.44Z"/></svg>';
+const STAR = '<svg viewBox="0 0 256 256" aria-hidden="true"><path d="M197.58,129.06,146,110l-19-51.62a15.92,15.92,0,0,0-29.88,0L78,110l-51.62,19a15.92,15.92,0,0,0,0,29.88L78,178l19,51.62a15.92,15.92,0,0,0,29.88,0L146,178l51.62-19a15.92,15.92,0,0,0,0-29.88ZM137,164.22a8,8,0,0,0-4.74,4.74L112,223.85,91.78,169A8,8,0,0,0,87,164.22L32.15,144,87,123.78A8,8,0,0,0,91.78,119L112,64.15,132.22,119a8,8,0,0,0,4.74,4.74L191.85,144ZM144,40a8,8,0,0,1,8-8h16V16a8,8,0,0,1,16,0V32h16a8,8,0,0,1,0,16H184V64a8,8,0,0,1-16,0V48H152A8,8,0,0,1,144,40ZM248,88a8,8,0,0,1-8,8h-8v8a8,8,0,0,1-16,0V96h-8a8,8,0,0,1,0-16h8V72a8,8,0,0,1,16,0v8h8A8,8,0,0,1,248,88Z"/></svg>';
 function drawThumb(p){
   const c = document.getElementById('thumb-' + p.id); if (!c) return;
   c.width = 480; c.height = 320; const x = c.getContext('2d'); x.imageSmoothingQuality = 'high';
@@ -2563,9 +2623,9 @@ function renderPhotos(){
           <label class="pc-focus"${ov ? '' : ' hidden'}>Encuadre <input type="range" id="focus-${id}" data-f="focus" min="-100" max="100" value="${p.focus}"></label>
           <div class="tools">
             <button type="button" class="btn btn-ghost mini" data-act="auto" title="Volver a sacar la paleta automática de la foto">Paleta auto</button>
-            <button type="button" class="ico" data-act="up" aria-label="Subir foto ${i+1}"${i === 0 ? ' disabled' : ''}>↑</button>
-            <button type="button" class="ico" data-act="down" aria-label="Bajar foto ${i+1}"${i === n-1 ? ' disabled' : ''}>↓</button>
-            <button type="button" class="ico" data-act="del" aria-label="Quitar foto ${i+1}">✕</button>
+            <button type="button" class="ico" data-act="up" aria-label="Subir foto ${i+1}"${i === 0 ? ' disabled' : ''}><svg viewBox="0 0 256 256" aria-hidden="true"><path d="M205.66,117.66a8,8,0,0,1-11.32,0L136,59.31V216a8,8,0,0,1-16,0V59.31L61.66,117.66a8,8,0,0,1-11.32-11.32l72-72a8,8,0,0,1,11.32,0l72,72A8,8,0,0,1,205.66,117.66Z"/></svg></button>
+            <button type="button" class="ico" data-act="down" aria-label="Bajar foto ${i+1}"${i === n-1 ? ' disabled' : ''}><svg viewBox="0 0 256 256" aria-hidden="true"><path d="M205.66,149.66l-72,72a8,8,0,0,1-11.32,0l-72-72a8,8,0,0,1,11.32-11.32L120,196.69V40a8,8,0,0,1,16,0V196.69l58.34-58.35a8,8,0,0,1,11.32,11.32Z"/></svg></button>
+            <button type="button" class="ico" data-act="del" aria-label="Quitar foto ${i+1}"><svg viewBox="0 0 256 256" aria-hidden="true"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg></button>
           </div>
         </div>
         <details class="pc-tech" data-layd="${id}"${p.layOpen ? ' open' : ''}>
@@ -2674,7 +2734,7 @@ function syncDesign(){
   document.querySelectorAll('.chips[data-radio]').forEach(box => box.querySelectorAll('button').forEach(b => b.setAttribute('aria-checked', String(state[box.dataset.radio] === b.dataset.v))));
   $('#styleName').textContent = currentStyle().name;
   $('#decoSel').value = state.deco; $('#decoPostal').checked = state.decoPostal; $('#tilt').checked = state.tilt;
-  $('#exPostmark').checked = state.extras.postmark; $('#exBorder').checked = state.extras.border; $('#exFilmdate').checked = state.extras.filmdate; $('#exCounter').checked = !!state.extras.counter;
+  $('#exPostmark').checked = state.extras.postmark; $('#exBorder').checked = state.extras.border; $('#exFilmdate').checked = state.extras.filmdate; $('#exCounter').checked = !!state.extras.counter; $('#exIcons').checked = !!state.extras.icons; $('#exParAvion').checked = !!state.extras.parAvion; $('#exWaves').checked = !!state.extras.waves;
   $('#customColor').value = state.custom;
   $('#paperName').textContent = currentStyle().name;
   $('#customRow').hidden = state.style !== 'custom';
@@ -2761,6 +2821,7 @@ $('#tilt').addEventListener('change', e => { state.tilt = e.target.checked; sche
 $('#exPostmark').addEventListener('change', e => { state.extras.postmark = e.target.checked; scheduleOut(); });
 $('#exBorder').addEventListener('change', e => { state.extras.border = e.target.checked; scheduleOut(); });
 $('#exFilmdate').addEventListener('change', e => { state.extras.filmdate = e.target.checked; scheduleOut(); });
+['icons','parAvion','waves'].forEach(k => $('#ex' + k[0].toUpperCase() + k.slice(1)).addEventListener('change', e => { state.extras[k] = e.target.checked; scheduleOut(); }));
 $('#exCounter').addEventListener('change', e => { state.extras.counter = e.target.checked; syncDesign(); scheduleOut(); });
 document.querySelectorAll('.chips[data-scope]').forEach(box => box.addEventListener('click', e => {
   const b = e.target.closest('button[data-k]'); if (!b) return;
