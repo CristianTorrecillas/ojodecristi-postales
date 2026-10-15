@@ -686,6 +686,21 @@ body.bg-cada .lay-bg{display:grid !important}
                 <label>Subtítulo<input id="cvSub" class="inp" type="text" placeholder="Ej. Postales de primavera" autocomplete="off"></label>
               </div>
             </div>
+            <div class="opt" id="cvFootRow">
+              <label class="lbl" for="cvFootSel">Pie</label>
+              <select id="cvFootSel" class="inp" data-csel="foot">
+                <option value="fotos">Cantidad de fotos y fecha</option>
+                <option value="lugar">Lugar y fecha</option>
+                <option value="camara">Cámara y fecha</option>
+                <option value="fecha">Solo la fecha</option>
+                <option value="texto">Texto propio y fecha</option>
+                <option value="nada">Sin pie</option>
+              </select>
+            </div>
+            <div class="opt" id="cvFootTextRow">
+              <span class="lbl"></span>
+              <input id="cvFootText" class="inp" type="text" placeholder="Ej. Serie Noticing Clouds" autocomplete="off" aria-label="Texto del pie">
+            </div>
             <div class="opt">
               <span class="lbl">Tamaño</span>
               <div class="chips segc" role="radiogroup" aria-label="Tamaño de la foto en la portada" data-cradio="size">
@@ -963,7 +978,7 @@ const RECIPE_DEFAULT = {
   note:''
 };
 state.recipe = {...RECIPE_DEFAULT};
-const COVER_DEFAULT = {on:false, photo:0, look:'sola', bg:'blanco', color:'#F3EFE6', title:'', sub:'', size:'grande', frame:'ninguno', pick:-1, tone:'suave', sign:false};
+const COVER_DEFAULT = {on:false, photo:0, look:'sola', bg:'blanco', color:'#F3EFE6', title:'', sub:'', size:'grande', frame:'ninguno', pick:-1, tone:'suave', sign:false, foot:'fotos', footText:''};
 state.cover = {...COVER_DEFAULT};
 const PENS = {azul:'#1F3A7A', negra:'#1E1D1B', sepia:'#5B3A22'};
 const PREF_KEY = 'postales-ojodecristi-v1';
@@ -1990,7 +2005,40 @@ function drawPostal(ctx, p, n, hi, mini, H){
   if (L.counter) markerFraction(ctx, n - state.startNum + 1, state.photos.length, L.counter.xr, L.counter.base);
   S = keepS;
 }
+/* Ficha para fotos verticales o cuadradas: la foto entera a la izquierda (sin recortar)
+   y la ficha en una columna al costado. Ocupa la misma celda que una horizontal. */
+function fichaIsTall(p){ return !!(p && p.fw && p.fh && p.fw/p.fh < 1.2); }
+function drawFichaTall(ctx, p, n, cell, hi, single){
+  const ar = p.fw/p.fh, w = Math.min(440, 640*ar), h = w/ar, r = {x:26, y:36.5, w, h};
+  const tilt = state.tilt && !single ? GRID.tilts[cell] : 0, kind = cellDeco(cell);
+  ctx.save();
+  if (tilt){ const cx = r.x + r.w/2, cy = r.y + r.h/2; ctx.translate(cx, cy); ctx.rotate(tilt*Math.PI/180); ctx.translate(-cx, -cy); }
+  decorUnder(ctx, r, kind);
+  framedPhoto(ctx, srcOf(p, hi), r, FICHA.pad, p.focus);
+  if (state.extras.filmdate) filmDate(ctx, r, p.date);
+  decorate(ctx, r, kind, false, p);
+  ctx.restore();
+  const x0 = r.x + r.w + 26 + frameTop()*0.5 + underPad(kind), colW = D - 21 - x0;
+  const sh = state.show.grid; ctx.fillStyle = S.ink;
+  let y = r.y + 4;
+  if (sh.num){ leftText(ctx, 'N.° ' + pad3(n), x0, y + 19, 20.5, MONO, colW); y += 33; }
+  const small = []; if (sh.place && placeOf(p)) small.push(placeOf(p)); const dl = dateLine(p, sh); if (dl) small.push(dl);
+  for (const t of small){ leftText(ctx, t, x0, y + 17, 17, SANS, colW); y += 25; }
+  const tech = techLines(p, sh); if (tech.length) y += 4;
+  for (const t of tech){ leftText(ctx, t, x0, y + 13, 12.8, MONO, colW); y += 18; }
+  const lab = single ? 34 : 0, gap = 14, top = y + 20;
+  const k = Math.max(0.55, Math.min(1, (690 - 112 - top) / (3*(90 + lab) + 2*gap)));
+  const sw = Math.min(104*k, colW), shh = 90*k, step = shh + (lab + gap)*k;
+  p.colors.forEach((c, i) => drawSwatches(ctx, [c], {xs:[x0], y:top + i*step, w:sw, h:shh, inset:4*k}, {size:FICHA.label.size*Math.max(k, 0.8), base:top + i*step + shh + 21*k, maxW:sw + 14}, n*5 + i, single, false));
+  const swEnd = top + 3*step - gap*k;
+  const st = {cx:x0 + Math.min(colW, 200) - 58, cy:Math.min(631, Math.max(swEnd + 64, r.y + r.h - 50)), d:110};
+  inkLines(ctx, {x0, x1:x0 + 58, ys:[st.cy - 8, st.cy + 1.5, st.cy + 11], w:2.1}, 23 + n);
+  const keepS = S; S = withPhotoStamp(S, p);
+  stamp(ctx, st.cx, st.cy, st.d, GRID.rots[cell]);
+  S = keepS;
+}
 function drawFicha(ctx, p, n, cell, hi, single){
+  if (fichaIsTall(p)) return drawFichaTall(ctx, p, n, cell, hi, single);
   const F = FICHA, high = (cell === 1 || cell === 2), r = F.photo;
   const tilt = state.tilt && !single ? GRID.tilts[cell] : 0;
   ctx.save();
@@ -2180,6 +2228,32 @@ function fitSpaced(ctx, text, maxW, size, family, weight, trackK){
   if (w() > maxW){ s = s*maxW/w(); ctx.font = `${weight} ${s}px ${family}`; }
   return s;
 }
+/* pie de la tapa: qué hay adentro (cantidad de fotos, lugar o cámara) y cuándo se tomaron */
+const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+function coverWhen(){
+  const ds = state.photos.map(p => String(p.date || '').trim().match(/^(\d{1,2})[-/.](\d{1,2})[-/.](\d{2,4})$/)).filter(Boolean)
+    .map(m => ({m:+m[2], y:+(m[3].length === 2 ? '20' + m[3] : m[3])})).filter(d => d.y > 1900);
+  if (!ds.length) return String(new Date().getFullYear());
+  const ys = [...new Set(ds.map(d => d.y))].sort((a, b) => a - b);
+  if (ys.length > 1) return ys[0] + '–' + ys[ys.length - 1];
+  const ms = [...new Set(ds.map(d => d.m))];
+  return ms.length === 1 && ms[0] >= 1 && ms[0] <= 12 ? MESES[ms[0] - 1] + ' ' + ys[0] : String(ys[0]);
+}
+function coverCamera(){
+  const n = {}; state.photos.forEach(p => { const c = ((p.tech && p.tech.cam) || '').trim(); if (c) n[c] = (n[c] || 0) + 1; });
+  return Object.keys(n).sort((a, b) => n[b] - n[a])[0] || (state.recipe.cam || '').trim();
+}
+function coverFoot(p){
+  const C = state.cover, k = state.photos.length, count = k + (k === 1 ? ' fotografía' : ' fotografías'), when = coverWhen();
+  switch (C.foot){
+    case 'nada': return null;
+    case 'fecha': return {center:when};
+    case 'lugar': return {left:placeOf(p), right:when};
+    case 'camara': return {left:coverCamera() || count, right:when};
+    case 'texto': return {left:(C.footText || '').trim(), right:when};
+    default: return {left:count, right:when};
+  }
+}
 function drawPortada(ctx, hi, H){
   H = H || D; const C = state.cover, p = coverPhoto(); if (!p) return;
   const bg = coverBg(p);
@@ -2190,7 +2264,7 @@ function drawPortada(ctx, hi, H){
   const ar = p.fw && p.fh ? p.fw/p.fh : 1.5, M = C.size === 'mediano' ? 36 : 14, fp = COVER_FRAME[C.frame] || 0;
   let top = M, bot = M;
   if (C.look === 'titulo') top = sub ? 104 : 86;
-  if (C.look === 'libro'){ top = sub ? 176 : 150; bot = 70; }
+  if (C.look === 'libro'){ top = sub ? 176 : 150; bot = C.foot === 'nada' ? M + 6 : 70; }
   const aw = D - 2*(M + fp), ah = H - top - bot - 2*fp;
   let w = aw, h = w/ar; if (h > ah){ h = ah; w = h*ar; }
   const r = {x:(D - w)/2, y:top + fp + (ah - h)/2, w, h};
@@ -2211,11 +2285,18 @@ function drawPortada(ctx, hi, H){
     const T = title.toUpperCase(), fs = fitSpaced(ctx, T, D - 2*M - 20, 40, SANS, 500, 0.16);
     spaced(ctx, T, D/2, 112, fs*0.16);
     if (sub){ ctx.globalAlpha = 0.8; ctx.font = `400 16px ${SANS}`; const ss = fitSpaced(ctx, sub, D - 2*M - 40, 16, SANS, 400, 0.04); spaced(ctx, sub, D/2, 142, ss*0.04); ctx.globalAlpha = 1; }
-    const fy = H - 38, n0 = state.startNum, n1 = state.startNum + state.photos.length - 1;
-    ctx.globalAlpha = 0.85; ctx.font = `400 11.5px ${MONO}`;
-    const left = 'N.° ' + pad3(n0) + (n1 > n0 ? '–' + pad3(n1) : ''), right = (p.date || '').trim().slice(-4) || String(new Date().getFullYear());
-    ctx.textAlign = 'left'; ctx.fillText(left, M, fy); ctx.textAlign = 'right'; ctx.fillText(right, D - M, fy);
-    ctx.globalAlpha = 0.35; ctx.fillRect(M, fy - 18, D - 2*M, 0.9); ctx.globalAlpha = 1;
+    const F = coverFoot(p);
+    if (F){
+      const fy = H - 36, tr = s => s*0.22, maxW = D - 2*M;
+      ctx.globalAlpha = 0.32; ctx.fillRect(M, fy - 20, maxW, 0.9); ctx.globalAlpha = 0.82;
+      const L = (F.left || '').toUpperCase(), R = (F.right || '').toUpperCase(), Cn = (F.center || '').toUpperCase();
+      let size = 10.5; const width = (t, sz) => { ctx.font = `500 ${sz}px ${MONO}`; return t ? ctx.measureText(t).width + tr(sz)*([...t].length - 1) : 0; };
+      while (size > 7 && (Cn ? width(Cn, size) : width(L, size) + width(R, size) + 40) > maxW) size -= 0.5;
+      ctx.font = `500 ${size}px ${MONO}`;
+      if (Cn) spaced(ctx, Cn, D/2, fy, tr(size));
+      else { if (L) spaced(ctx, L, M + width(L, size)/2, fy, tr(size)); if (R) spaced(ctx, R, D - M - width(R, size)/2, fy, tr(size)); }
+      ctx.globalAlpha = 1;
+    }
   }
   /* firma: debajo de la foto si hay lugar; si no, sobre la foto como marca de agua */
   if (C.sign && C.look !== 'libro'){
@@ -2705,6 +2786,7 @@ function syncCover(){
   const C = state.cover; renderCoverSwatches();
   $('#cvOpts').hidden = !C.on; $('#cvOffHint').hidden = C.on; $('#cvTextRow').hidden = C.look === 'sola'; $('#cvColorRow').hidden = C.bg !== 'otro';
   document.querySelectorAll('select[data-csel]').forEach(x => x.value = C[x.dataset.csel]);
+  $('#cvFootRow').hidden = C.look !== 'libro'; $('#cvFootTextRow').hidden = C.look !== 'libro' || C.foot !== 'texto'; $('#cvFootText').value = C.footText || '';
   $('#cvOn').checked = C.on; $('#cvSign').checked = !!C.sign; $('#cvSignRow').hidden = C.look === 'libro'; $('#cvTitle').value = C.title; $('#cvSub').value = C.sub; $('#cvColor').value = C.color;
   document.querySelectorAll('.chips[data-cradio]').forEach(box => box.querySelectorAll('button').forEach(b => b.setAttribute('aria-checked', String(C[box.dataset.cradio] === b.dataset.v))));
   renderCoverPhotos(); syncPresetSel();
@@ -2712,6 +2794,7 @@ function syncCover(){
 $('#cvOn').addEventListener('change', e => { state.cover.on = e.target.checked; syncCover(); scheduleOut(); });
 document.querySelectorAll('select[data-csel]').forEach(x => x.addEventListener('change', () => { state.cover[x.dataset.csel] = x.value; syncCover(); scheduleOut(); }));
 $('#cvPhoto').addEventListener('change', e => { state.cover.photo = +e.target.value; state.cover.pick = -1; renderCoverSwatches(); scheduleOut(); });
+$('#cvFootText').addEventListener('input', e => { state.cover.footText = e.target.value; scheduleOut(); });
 $('#cvSign').addEventListener('change', e => { state.cover.sign = e.target.checked; scheduleOut(); });
 $('#cvTitle').addEventListener('input', e => { state.cover.title = e.target.value; scheduleOut(); });
 $('#cvSub').addEventListener('input', e => { state.cover.sub = e.target.value; scheduleOut(); });
@@ -2763,7 +2846,7 @@ $('#presetCancel').addEventListener('click', closePresetSave);
 function savePresetNow(){
   const name = $('#presetName').value.trim(); if (!name){ toast('Ponele un nombre al diseño'); $('#presetName').focus(); return; }
   const d = {}; PRESET_FIELDS.forEach(k => d[k] = JSON.parse(JSON.stringify(state[k])));
-  const C = state.cover, cover = {on:C.on, look:C.look, bg:C.bg, color:C.color, size:C.size, frame:C.frame, tone:C.tone, sign:!!C.sign};
+  const C = state.cover, cover = {on:C.on, look:C.look, bg:C.bg, color:C.color, size:C.size, frame:C.frame, tone:C.tone, sign:!!C.sign, foot:C.foot};
   const i = PRESETS.findIndex(x => x.name.toLowerCase() === name.toLowerCase());
   if (i >= 0) PRESETS[i] = {name, d, cover}; else PRESETS.push({name, d, cover});
   lastPreset = name; savePresets(PRESETS); closePresetSave(); syncPresetSel(); toast((i >= 0 ? 'Actualizado: ' : 'Guardado: ') + name);
