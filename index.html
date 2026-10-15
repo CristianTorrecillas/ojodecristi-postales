@@ -403,6 +403,8 @@ body::before{content:"";position:fixed;top:0;left:0;right:0;height:5px;z-index:5
 .lay-bg{display:none !important}
 body.bg-cada .lay-bg{display:grid !important}
 .lay-row .chips button.swb{width:28px;height:24px}
+.swpick{display:inline-flex;align-items:center}
+.swpick input{width:30px;height:26px;padding:0;border:1px solid var(--rule);border-radius:6px;background:var(--paper);cursor:pointer}
 /* la postal elegida, apoyada sobre la mesa */
 .stage-view{background:var(--well);border-radius:var(--r-lg);padding:22px}
 .stage-view canvas{box-shadow:0 1px 1px rgba(40,28,12,.10),0 12px 26px -10px rgba(40,28,12,.40),0 34px 64px -34px rgba(40,28,12,.38)}
@@ -530,10 +532,15 @@ body.bg-cada .lay-bg{display:grid !important}
           <div class="opt">
             <span class="lbl">Sello</span>
             <div class="optrow">
-              <label class="colorpick" for="stampColor"><input type="color" id="stampColor" value="#9E1610"> Color</label>
-              <button type="button" id="stampReset" class="linkbtn" hidden>Usar el del papel</button>
+              <div class="chips segc" role="radiogroup" aria-label="Color del sello" data-radio="stampMode">
+                <button type="button" role="radio" data-v="papel">Del papel</button>
+                <button type="button" role="radio" data-v="elegido">Elegido</button>
+                <button type="button" role="radio" data-v="sugerido">Sugerido</button>
+              </div>
+              <label class="colorpick" id="stampPick" for="stampColor"><input type="color" id="stampColor" value="#9E1610" aria-label="Color del sello"></label>
             </div>
           </div>
+          <p class="subhint" id="stampHint">En cada postal elige una tinta al estilo Wes Anderson que contraste con el fondo y repita un tono de la foto. Foto por foto lo podés cambiar en «Diseño de esta postal».</p>
           <div class="opt">
             <span class="lbl">Títulos</span>
             <div class="chips segc" role="radiogroup" aria-label="Letra de los títulos" data-radio="titleFont">
@@ -884,7 +891,36 @@ function customStyle(hex){
     corner: light ? '#221F1B' : '#EAE4D6', pin:'#A62520', deco:null, border:false};
 }
 function baseStyle(){ return state.style === 'foto' ? fotoStyle(sharedBgHex()) : state.style === 'custom' ? customStyle(state.custom) : (STYLES.find(s => s.id === state.style) || STYLES[0]); }
-function withStamp(st){ return state.stampColor ? Object.assign({}, st, {stamp:state.stampColor}) : st; }
+function withStamp(st){ return state.stampMode === 'elegido' ? Object.assign({}, st, {stamp:state.stampColor || '#9E1610'}) : st; }
+/* Sello sugerido: tintas de sello con la paleta de Wes Anderson (apagadas, profundas) y unas claras para fondos oscuros.
+   Se elige la que mejor contrasta con el fondo, prefiere el tono opuesto al del fondo (complementario)
+   y suma puntos si repite un color de la foto, como en sus películas, donde los colores se repiten de un plano a otro. */
+const STAMP_INKS = ['#A62520','#7A1F2B','#C4566E','#5B2A4E','#1F3A5F','#2D4B8E','#2E6F77','#3B5B3A','#B8862B','#B5532F','#F3E6C8','#F2C6C2','#BFD9E3','#F2D58A'];
+const SUGG = new Map();
+function hueDist(a, b){ let d = Math.abs(a - b) % (2*Math.PI); if (d > Math.PI) d = 2*Math.PI - d; return d*180/Math.PI; }
+function suggestStamp(bgHex, p){
+  const pal = ((p && p.colors) || []).map(c => c.hex), key = bgHex + pal.join(''); if (SUGG.has(key)) return SUGG.get(key);
+  const bg = hex2ok(bgHex), bgC = Math.hypot(bg[1], bg[2]), bgH = Math.atan2(bg[2], bg[1]);
+  const pals = pal.map(hex2ok).filter(o => Math.hypot(o[1], o[2]) > 0.03).map(o => Math.atan2(o[2], o[1]));
+  let best = STAMP_INKS[0], bs = -Infinity;
+  for (const ink of STAMP_INKS){
+    const k = hex2ok(ink), dL = Math.abs(k[0] - bg[0]), kH = Math.atan2(k[2], k[1]);
+    let sc = dL < 0.2 ? -10 : Math.min(dL, 0.5)*4;
+    if (bgC > 0.025){ const d = hueDist(kH, bgH); sc += d >= 120 ? 1.4 : d <= 30 ? -0.4 : (d - 30)/90*1.4; }
+    if (pals.length){ const md = Math.min(...pals.map(h => hueDist(kH, h))); sc += md < 25 ? 1 : md < 50 ? 0.5 : 0; }
+    if (ink === '#A62520') sc += 0.15;
+    if (sc > bs){ bs = sc; best = ink; }
+  }
+  if (SUGG.size > 200) SUGG.clear(); SUGG.set(key, best); return best;
+}
+/* el sello de una foto: el elegido en su tarjeta, el sugerido, o el general */
+function stampInkFor(p, bgHex){
+  const m = (p && p.lay && p.lay.stamp) || '';
+  if (m && m !== 'auto') return m;
+  if (m === 'auto' || state.stampMode === 'sugerido') return suggestStamp(bgHex, p);
+  return null;
+}
+function withPhotoStamp(st, p){ const ink = stampInkFor(p, st.paper ? rgbHex(...st.paper) : paperAvg); return ink ? Object.assign({}, st, {stamp:ink}) : st; }
 function currentStyle(){ return withStamp(baseStyle()); }
 /* papel «De la foto»: el color sale de la paleta de cada foto (o de la foto 1 para todas) */
 function vividOf(cols){ let best = cols[0].hex, bc = -1; cols.forEach(c => { const o = hex2ok(c.hex), ch = Math.hypot(o[1], o[2]) * (o[0] > 0.35 ? 1 : 0.5); if (ch > bc){ bc = ch; best = c.hex; } }); return best; }
@@ -911,7 +947,7 @@ const state = {
   style:'archivo', custom:'#D8C7A6', deco:'cintas-clip', decoPostal:false, tilt:false,
   extras:{postmark:false, border:false, filmdate:false, counter:false},
   shape:'cuadrados', frame:'fina', format:'1:1', comp:'postal', titleFont:'mono', lastEnd:0,
-  photoSize:'grande', stampColor:'', paperTex:'textura', swSize:'medianos', swPos:'auto', counterInk:'tinta',
+  photoSize:'grande', stampColor:'', stampMode:'papel', paperTex:'textura', swSize:'medianos', swPos:'auto', counterInk:'tinta',
   bgEach:'cada', bgTone:'suave', bgPick:-1,
   show:{
     postal:{title:true, num:false, place:false, date:false, time:false, gps:false, cam:false, lens:false, focal:false, ap:false, sh:false, iso:false, hex:false},
@@ -931,7 +967,7 @@ const COVER_DEFAULT = {on:false, photo:0, look:'sola', bg:'blanco', color:'#F3EF
 state.cover = {...COVER_DEFAULT};
 const PENS = {azul:'#1F3A7A', negra:'#1E1D1B', sepia:'#5B3A22'};
 const PREF_KEY = 'postales-ojodecristi-v1';
-const PREF_FIELDS = ['style','custom','deco','decoPostal','tilt','extras','shape','frame','format','comp','titleFont','size','show','lastEnd','recipe','photoSize','stampColor','paperTex','swSize','swPos','counterInk','cover','bgEach','bgTone','bgPick'];
+const PREF_FIELDS = ['style','custom','deco','decoPostal','tilt','extras','shape','frame','format','comp','titleFont','size','show','lastEnd','recipe','photoSize','stampColor','stampMode','paperTex','swSize','swPos','counterInk','cover','bgEach','bgTone','bgPick'];
 function loadPrefs(){
   try{
     const o = JSON.parse(localStorage.getItem(PREF_KEY) || 'null'); if (!o || typeof o !== 'object') return;
@@ -944,6 +980,7 @@ function loadPrefs(){
       else state[k] = o[k];
     }
     if (!FORMATS[state.format]) state.format = '1:1';
+    if (!('stampMode' in o)) state.stampMode = o.stampColor ? 'elegido' : 'papel';
     /* antes había un bloque aparte para verticales; «Auto» hace lo mismo */
     if (o.swPos === 'centro' && o.vertSep !== false && (o.swPosV || 'costado') === 'costado') state.swPos = 'auto';
     if (!['auto','centro','izquierda','costado'].includes(state.swPos)) state.swPos = 'auto';
@@ -1834,7 +1871,7 @@ function layOf(p){
 const POS_TXT = {centro:'abajo', izquierda:'abajo a la izquierda', costado:'al costado'}, SIZE_TXT = {chicos:'chicos', medianos:'medianos', grandes:'grandes'};
 function laySummary(p){
   const L = (p && p.lay) || {}, Lo = layOf(p), bg = L.bg != null && state.style === 'foto' && state.bgEach === 'cada';
-  return (L.pos || L.size || bg ? 'Colores ' : 'Como todas · colores ') + POS_TXT[Lo.swPos] + (L.size ? ', ' + SIZE_TXT[L.size] : '') + (bg ? ' · fondo elegido' : '');
+  return (L.pos || L.size || bg || L.stamp ? 'Colores ' : 'Como todas · colores ') + POS_TXT[Lo.swPos] + (L.size ? ', ' + SIZE_TXT[L.size] : '') + (bg ? ' · fondo elegido' : '') + (L.stamp ? (L.stamp === 'auto' ? ' · sello sugerido' : ' · sello propio') : '');
 }
 const PTOP = 50, SW_K = {chicos:0.75, medianos:1, grandes:1.15}, DECO_M = {troquelado:13, paspartu:17, cortes:18};
 function postalLayout(p, n, H, mini){
@@ -1947,9 +1984,11 @@ function drawPostal(ctx, p, n, hi, mini, H){
     });
   } else drawSwatches(ctx, p.colors, L.sw, L.label, n, !mini, true);
   if (!mini) postalStrip(ctx, p, n, H - Math.max(22, dy*0.5) - dy, L.strip);
+  const keepS = S; if (!mini) S = withPhotoStamp(S, p);
   stamp(ctx, L.stamp.cx, L.stamp.cy, L.stamp.d, L.stamp.rot);
   ctx.restore();
   if (L.counter) markerFraction(ctx, n - state.startNum + 1, state.photos.length, L.counter.xr, L.counter.base);
+  S = keepS;
 }
 function drawFicha(ctx, p, n, cell, hi, single){
   const F = FICHA, high = (cell === 1 || cell === 2), r = F.photo;
@@ -1965,8 +2004,9 @@ function drawFicha(ctx, p, n, cell, hi, single){
   fichaText(ctx, p, n);
   inkLines(ctx, high ? F.linesHigh : F.lines, 23 + n);
   drawSwatches(ctx, p.colors, F.sw, F.label, n, single, false);
-  const st = high ? F.stampHigh : F.stamp;
+  const st = high ? F.stampHigh : F.stamp, keepS = S; S = withPhotoStamp(S, p);
   stamp(ctx, st.cx, st.cy, st.d, GRID.rots[cell]);
+  S = keepS;
 }
 function gridTitle(g){ return (state.titles[g] || '').trim(); }
 function drawGrid(ctx, g, hi, H){
@@ -2105,7 +2145,7 @@ function drawRecipe(ctx, hi, H){
     ctx.restore();
   }
   if (state.deco === 'cintas-clip' || state.deco === 'cintas') tape(ctx, sw*0.36, 2, -5, 128);
-  stamp(ctx, st.x, st.y, st.d, st.rot);
+  { const keepS = S, ink = stampInkFor(p, '#F7F2E4'); if (ink) S = Object.assign({}, S, {stamp:ink}); stamp(ctx, st.x, st.y, st.d, st.rot); S = keepS; }
   ctx.restore();
 }
 
@@ -2452,6 +2492,7 @@ function renderPhotos(){
           <div class="lay-grid">
             <div class="lay-row"><span class="lbl">Colores</span><div class="chips" data-lay="pos">${[['','Como todas'],['centro','Abajo'],['izquierda','Izquierda'],['costado','Costado']].map(([v, l]) => `<button type="button" data-v="${v}" aria-pressed="${((p.lay && p.lay.pos) || '') === v}">${l}</button>`).join('')}</div></div>
             <div class="lay-row lay-bg"><span class="lbl">Fondo</span><div class="chips" data-lay="bg"><button type="button" data-v="" aria-pressed="${!(p.lay && p.lay.bg != null)}">Auto</button>${p.colors.map((c, k) => `<button type="button" class="swb" id="laybg-${id}-${k}" data-v="${k}" aria-pressed="${!!(p.lay && p.lay.bg === String(k))}" title="${esc(c.name || c.hex)}" style="background:${c.hex}"></button>`).join('')}</div></div>
+            <div class="lay-row"><span class="lbl">Sello</span><div class="chips" data-lay="stamp"><button type="button" data-v="" aria-pressed="${!(p.lay && p.lay.stamp)}">Como todas</button><button type="button" data-v="auto" aria-pressed="${!!(p.lay && p.lay.stamp === 'auto')}">Sugerido</button>${p.colors.map(c => `<button type="button" class="swb" data-v="${c.hex}" aria-pressed="${!!(p.lay && p.lay.stamp === c.hex)}" title="${esc(c.name || c.hex)}" style="background:${c.hex}"></button>`).join('')}<label class="swpick" title="Otro color"><input type="color" data-laystamp="1" value="${p.lay && p.lay.stamp && p.lay.stamp[0] === '#' ? p.lay.stamp : '#9E1610'}" aria-label="Otro color de sello para esta foto"></label></div></div>
             <div class="lay-row"><span class="lbl">Tamaño</span><div class="chips" data-lay="size">${[['','Como todas'],['chicos','Chicos'],['medianos','Medianos'],['grandes','Grandes']].map(([v, l]) => `<button type="button" data-v="${v}" aria-pressed="${((p.lay && p.lay.size) || '') === v}">${l}</button>`).join('')}</div></div>
           </div>
         </details>
@@ -2475,6 +2516,11 @@ photoList.addEventListener('input', e => {
   else if (f === 'title') p.title = e.target.value;
   else if (f === 'focus'){ p.focus = +e.target.value; drawThumb(p); }
   else if (nm !== undefined){ const c = p.colors[+nm]; c.name = e.target.value; c.auto = false; }
+  else if (e.target.dataset.laystamp){
+    p.lay = Object.assign({}, p.lay, {stamp:e.target.value});
+    e.target.closest('[data-lay]').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', 'false'));
+    const sum = document.getElementById('laysum-' + p.id); if (sum) sum.textContent = laySummary(p);
+  }
   else if (tk){ p.tech[tk] = e.target.value; const s = document.getElementById('techsum-' + p.id); if (s) s.textContent = techSummary(p); }
   scheduleOut();
 });
@@ -2560,7 +2606,7 @@ function syncDesign(){
   document.querySelectorAll('select[data-sel]').forEach(x => x.value = state[x.dataset.sel]);
   $('#datosSum').textContent = datosSummary();
   state.photos.forEach(p => { const el = document.getElementById('laysum-' + p.id); if (el) el.textContent = laySummary(p); });
-  { const st = baseStyle(); $('#stampColor').value = state.stampColor || st.stamp || '#9E1610'; $('#stampReset').hidden = !state.stampColor; }
+  { const st = baseStyle(); $('#stampColor').value = state.stampColor || st.stamp || '#9E1610'; $('#stampPick').hidden = state.stampMode !== 'elegido'; $('#stampHint').hidden = state.stampMode !== 'sugerido'; }
   document.querySelectorAll('.seg button').forEach(x => x.setAttribute('aria-checked', String(+x.dataset.size === state.size)));
   document.querySelectorAll('.chips[data-scope]').forEach(box => box.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(!!state.show[box.dataset.scope][b.dataset.k]))));
   syncPresetSel();
@@ -2618,7 +2664,7 @@ $('#styles').addEventListener('click', e => {
 $('#shapes').addEventListener('click', e => { const b = e.target.closest('.shape-card'); if (!b) return; state.shape = b.dataset.shape; syncDesign(); scheduleOut(); });
 document.querySelectorAll('.chips[data-radio]').forEach(box => box.addEventListener('click', e => {
   const b = e.target.closest('button[data-v]'); if (!b) return;
-  state[box.dataset.radio] = b.dataset.v; syncDesign(); scheduleOut();
+  state[box.dataset.radio] = b.dataset.v; syncDesign(); if (box.dataset.radio === 'stampMode') renderStyleThumbs(); scheduleOut();
 }));
 $('#customColor').addEventListener('input', e => {
   state.custom = e.target.value; state.style = 'custom'; syncDesign();
@@ -2628,8 +2674,7 @@ $('#customColor').addEventListener('input', e => {
 });
 $('#decoSel').addEventListener('change', e => { state.deco = e.target.value; syncDesign(); scheduleOut(); });
 document.querySelectorAll('select[data-sel]').forEach(x => x.addEventListener('change', () => { state[x.dataset.sel] = x.value; syncDesign(); scheduleOut(); }));
-$('#stampColor').addEventListener('input', e => { state.stampColor = e.target.value; syncDesign(); renderStyleThumbs(); scheduleOut(); });
-$('#stampReset').addEventListener('click', () => { state.stampColor = ''; syncDesign(); renderStyleThumbs(); scheduleOut(); });
+$('#stampColor').addEventListener('input', e => { state.stampColor = e.target.value; state.stampMode = 'elegido'; syncDesign(); renderStyleThumbs(); scheduleOut(); });
 $('#decoPostal').addEventListener('change', e => { state.decoPostal = e.target.checked; scheduleOut(); });
 $('#tilt').addEventListener('change', e => { state.tilt = e.target.checked; scheduleOut(); });
 $('#exPostmark').addEventListener('change', e => { state.extras.postmark = e.target.checked; scheduleOut(); });
@@ -2678,12 +2723,12 @@ document.querySelectorAll('.chips[data-cradio]').forEach(box => box.addEventList
 
 /* ---------- mis diseños guardados ---------- */
 const PRESET_KEY = 'postales-ojodecristi-disenos';
-const PRESET_FIELDS = ['style','custom','deco','decoPostal','tilt','extras','shape','frame','format','comp','titleFont','photoSize','stampColor','paperTex','swSize','swPos','counterInk','bgEach','bgTone'];
+const PRESET_FIELDS = ['style','custom','deco','decoPostal','tilt','extras','shape','frame','format','comp','titleFont','photoSize','stampColor','stampMode','paperTex','swSize','swPos','counterInk','bgEach','bgTone'];
 const PRESET_EXAMPLES = [
   {name:'Clásica', d:{style:'archivo', deco:'cintas-clip', decoPostal:false, frame:'fina', format:'1:1', comp:'postal', shape:'cuadrados', photoSize:'normal', paperTex:'textura', swSize:'medianos', swPos:'centro', stampColor:'', extras:{postmark:false, border:false, filmdate:false, counter:false}}},
   {name:'Costa vertical', d:{style:'archivo', deco:'paspartu', decoPostal:true, frame:'fina', format:'4:5', comp:'postal', shape:'cuadrados', photoSize:'grande', paperTex:'liso', swSize:'medianos', swPos:'costado', counterInk:'tinta', extras:{postmark:false, border:false, filmdate:false, counter:true}}, cover:{on:true, look:'sola', bg:'blanco'}}
 ];
-function migratePreset(pr){ if (pr && pr.d && pr.d.vertSep === true && pr.d.swPos === 'centro' && (pr.d.swPosV || 'costado') === 'costado') pr.d.swPos = 'auto'; return pr; }
+function migratePreset(pr){ if (pr && pr.d && !('stampMode' in pr.d)) pr.d.stampMode = pr.d.stampColor ? 'elegido' : 'papel'; if (pr && pr.d && pr.d.vertSep === true && pr.d.swPos === 'centro' && (pr.d.swPosV || 'costado') === 'costado') pr.d.swPos = 'auto'; return pr; }
 function loadPresets(){ try { const v = JSON.parse(localStorage.getItem(PRESET_KEY) || 'null'); return Array.isArray(v) ? v.map(migratePreset) : PRESET_EXAMPLES.map(x => JSON.parse(JSON.stringify(x))); } catch(e){ return PRESET_EXAMPLES.slice(); } }
 function savePresets(list){ try { localStorage.setItem(PRESET_KEY, JSON.stringify(list)); } catch(e){} }
 let PRESETS = [], lastPreset = '';
