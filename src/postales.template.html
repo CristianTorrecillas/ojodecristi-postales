@@ -371,6 +371,57 @@ textarea.inp.pc-title{font-style:italic}
 .drive-dlg .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
 .drive-dlg .inp{flex:1;min-width:200px}
 .drive-dlg .msg{min-height:20px;font-size:13.5px;margin:10px 0 0;color:var(--muted)}
+/* paletas de la herramienta, las mismas de la web (15/10/2026) */
+:root[data-paleta]{color-scheme:light}
+:root[data-paleta="pastel"]{--paper:#F7D8CB;--panel:#FCEBE3;--well:#A9CFE2;--ink:#3A2426;--muted:#5E4142;--rule:rgba(58,36,38,.18);--frame:rgba(58,36,38,.42);--stamp:#B8404F;--on-stamp:#FFF6F2;--focus:#2E6F77;--soft:#F3D98F;--soft2:#BCD5B4;--air-red:#B8404F;--air-blue:#5E93B8;--air-gap:#FCEBE3;--shadow:0 1px 0 rgba(58,36,38,.06),0 8px 22px -12px rgba(58,36,38,.35)}
+:root[data-paleta="girasoles"]{--paper:#F5E2A5;--panel:#FBF1D2;--well:#AED6C8;--ink:#1E3433;--muted:#3F524B;--rule:rgba(30,52,51,.18);--frame:rgba(30,52,51,.42);--stamp:#2E6F77;--on-stamp:#F4FBF9;--focus:#B8404F;--soft:#F4BCA6;--soft2:#C9DFEA;--air-red:#D4704F;--air-blue:#2E6F77;--air-gap:#FBF1D2;--shadow:0 1px 0 rgba(30,52,51,.06),0 8px 22px -12px rgba(30,52,51,.35)}
+:root[data-paleta="mar"]{--paper:#CFE3EC;--panel:#EAF3F7;--well:#F4D98A;--ink:#1B2F3D;--muted:#45596A;--rule:rgba(27,47,61,.18);--frame:rgba(27,47,61,.42);--stamp:#C4452F;--on-stamp:#FFF7F3;--focus:#2D4B8E;--soft:#F3BBA9;--soft2:#C3DAB4;--air-red:#C4452F;--air-blue:#2D4B8E;--air-gap:#EAF3F7;--shadow:0 1px 0 rgba(27,47,61,.06),0 8px 22px -12px rgba(27,47,61,.35)}
+:root[data-paleta="crema"]{--paper:#EEE7D1;--panel:#F7F2E3;--well:#E4DAC0;--ink:#1E1C18;--muted:#686152;--rule:#CFC2A2;--frame:#868698;--stamp:#A62520;--on-stamp:#FFF8EE;--focus:#355C8A;--soft:#E9D9A8;--soft2:#D5DDC2;--air-red:#C0392B;--air-blue:#24448E;--air-gap:#FBF8F0}
+:root[data-paleta="noche"]{color-scheme:dark;--paper:#1A1915;--panel:#23211C;--well:#2D2A23;--ink:#ECE5D0;--muted:#A69E8A;--rule:#3C382F;--frame:#9494AA;--stamp:#D65147;--on-stamp:#1B0B09;--focus:#8DB3DE;--soft:#3A3426;--soft2:#2E3A2E;--air-red:#B5473C;--air-blue:#4064B0;--air-gap:#23211C;--shadow:0 1px 0 rgba(0,0,0,.3),0 8px 22px -12px rgba(0,0,0,.7)}
+.mast{flex-wrap:wrap}
+.paletas{order:3;display:flex;gap:6px;flex-basis:100%;padding-left:48px}
+@media (max-width:1099px){.paletas{padding-left:0}}
+.paletas button{display:inline-flex;gap:0;padding:4px 5px;border:1px solid var(--rule);border-radius:999px;background:var(--panel);cursor:pointer}
+.paletas button i{width:11px;height:11px;border-radius:50%;background:var(--c);margin-left:-3px;box-shadow:0 0 0 1px rgba(0,0,0,.08)}
+.paletas button i:first-child{margin-left:0}
+.paletas button[aria-checked="true"]{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink)}
+.note{background:var(--soft);border-left-color:var(--stamp)}
+.drop:hover,body.dragging .drop{background:var(--soft)}
+.design{background:var(--panel);border:1px solid var(--rule);border-radius:var(--r-md);padding:12px 14px 18px}
+.out .col-head h2,.design .col-head h2,section[aria-labelledby="hPhotos"] .col-head h2{display:inline-flex;align-items:center;gap:8px}
+.col-head h2::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--stamp)}
+section[aria-labelledby="hPhotos"] .col-head h2::before{background:var(--well)}
+.design .col-head h2::before{background:var(--soft)}
+.tabs{background:var(--panel)}
+.pcard{background:var(--panel)}
+.sect{border-bottom-color:var(--soft)}
+.chips button[aria-pressed="true"],.chips button[aria-checked="true"]{background:var(--stamp);border-color:var(--stamp);color:var(--on-stamp)}
+.chips.segc button[aria-checked="true"]{background:var(--stamp);color:var(--on-stamp)}
+.style-card[aria-checked="true"] canvas,.shape-card[aria-checked="true"]{outline-color:var(--stamp)}
+.tabs button[aria-selected="true"],.views button[aria-selected="true"]{border-bottom-color:var(--stamp)}
+.mini-prev{display:none}
+@media (max-width:1099px){
+  .mini-prev:not([hidden]){display:flex;flex-direction:column;align-items:center;gap:3px;position:fixed;right:10px;bottom:calc(78px + env(safe-area-inset-bottom,0px));z-index:14;width:104px;padding:6px 6px 5px;border:1px solid var(--rule);border-radius:10px;background:var(--panel);box-shadow:0 10px 26px -10px rgba(0,0,0,.45);cursor:zoom-in}
+  .mini-prev canvas{width:100%;height:auto;display:block;border-radius:3px}
+  .mini-prev span{font-size:11px;color:var(--muted)}
+  .peek{background:var(--paper)}
+  .design{border:0;border-radius:0;background:transparent;padding:0}
+}
+.stage-acts{display:inline-flex;gap:8px}
+.lay-pm{display:none !important}
+body.pm-on .lay-pm{display:grid !important}
+.lay-row select.inp{height:32px;font-size:13.5px;width:auto;max-width:100%}
+.pick-dlg{border:0;border-radius:14px;background:var(--panel);color:var(--ink);padding:14px;max-width:calc(100vw - 16px);max-height:calc(100vh - 16px);box-shadow:0 30px 80px -20px rgba(0,0,0,.6)}
+.pick-dlg::backdrop{background:rgba(15,12,8,.6)}
+.pick-head{display:flex;align-items:center;gap:12px;margin-bottom:10px;flex-wrap:wrap}
+.pick-title{font-weight:600;flex:1;min-width:140px}
+.pick-now{display:inline-flex;align-items:center;gap:8px}
+.pick-now i{width:34px;height:26px;border-radius:6px;border:1px solid rgba(0,0,0,.15);display:block}
+.pick-now code{font-family:var(--mono);font-size:13px}
+.pick-stage{position:relative;display:flex;justify-content:center;touch-action:none}
+.pick-stage canvas#pickC{display:block;cursor:crosshair;border-radius:4px;touch-action:none}
+#pickLoupe{position:absolute;width:140px;height:140px;border-radius:50%;border:3px solid #fff;box-shadow:0 6px 20px rgba(0,0,0,.45);pointer-events:none;background:#000}
+.pick-hint{margin:10px 2px 0}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 /* ---------- pasada visual (15/10/2026): la mesa de correo ---------- */
 :root{--air-red:#C0392B;--air-blue:#24448E;--air-gap:#FBF8F0;--r-sm:6px;--r-md:10px;--r-lg:14px}
@@ -437,6 +488,13 @@ body.bg-cada .lay-bg{display:grid !important}
 <div class="wrap">
   <div class="top">
   <header class="mast">
+    <div class="paletas" role="radiogroup" aria-label="Colores de la herramienta">
+      <button type="button" role="radio" data-paleta="pastel" title="Pastel de Cristi"><i style="--c:#F7D8CB"></i><i style="--c:#A9CFE2"></i><i style="--c:#B8404F"></i></button>
+      <button type="button" role="radio" data-paleta="girasoles" title="Girasoles de Cristi"><i style="--c:#F5E2A5"></i><i style="--c:#AED6C8"></i><i style="--c:#2E6F77"></i></button>
+      <button type="button" role="radio" data-paleta="mar" title="El mar de mi hogar"><i style="--c:#CFE3EC"></i><i style="--c:#F4D98A"></i><i style="--c:#C4452F"></i></button>
+      <button type="button" role="radio" data-paleta="crema" title="Crema"><i style="--c:#EEE7D1"></i><i style="--c:#E4DAC0"></i><i style="--c:#A62520"></i></button>
+      <button type="button" role="radio" data-paleta="noche" title="Noche"><i style="--c:#1A1915"></i><i style="--c:#2D2A23"></i><i style="--c:#D65147"></i></button>
+    </div>
     <svg class="logo" viewBox="0 0 200 200" aria-hidden="true"><g fill="none" stroke="currentColor"><circle cx="100" cy="100" r="86" stroke-width="9"/><path transform="translate(100 101) scale(1.5) translate(-100 -101)" d="M94.1 86.3A18 18 0 1 0 94.1 113.7M107.6 82H135.6M121.6 82V120" stroke-width="7.5"/></g></svg>
     <h1>Postales <span>ojodecristi</span></h1>
   </header>
@@ -459,9 +517,9 @@ body.bg-cada .lay-bg{display:grid !important}
       </div>
     </div>
     <div class="saves push">
-      <button type="button" id="driveBtn" class="btn btn-ghost" title="Subir todas las imágenes a tu carpeta de Google Drive"><svg viewBox="0 0 256 256" aria-hidden="true"><path d="M178.34,165.66,160,147.31V208a8,8,0,0,1-16,0V147.31l-18.34,18.35a8,8,0,0,1-11.32-11.32l32-32a8,8,0,0,1,11.32,0l32,32a8,8,0,0,1-11.32,11.32ZM160,40A88.08,88.08,0,0,0,81.29,88.68,64,64,0,1,0,72,216h40a8,8,0,0,0,0-16H72a48,48,0,0,1,0-96c1.1,0,2.2,0,3.29.12A88,88,0,0,0,72,128a8,8,0,0,0,16,0,72,72,0,1,1,100.8,66,8,8,0,0,0,3.2,15.34,7.9,7.9,0,0,0,3.2-.68A88,88,0,0,0,160,40Z"/></svg>Subir a Drive</button>
+      <button type="button" id="driveBtn" class="btn btn-ghost" title="Subir todas las imágenes a tu carpeta de Google Drive"><svg viewBox="0 0 256 256" aria-hidden="true"><path d="M178.34,165.66,160,147.31V208a8,8,0,0,1-16,0V147.31l-18.34,18.35a8,8,0,0,1-11.32-11.32l32-32a8,8,0,0,1,11.32,0l32,32a8,8,0,0,1-11.32,11.32ZM160,40A88.08,88.08,0,0,0,81.29,88.68,64,64,0,1,0,72,216h40a8,8,0,0,0,0-16H72a48,48,0,0,1,0-96c1.1,0,2.2,0,3.29.12A88,88,0,0,0,72,128a8,8,0,0,0,16,0,72,72,0,1,1,100.8,66,8,8,0,0,0,3.2,15.34,7.9,7.9,0,0,0,3.2-.68A88,88,0,0,0,160,40Z"/></svg>Drive</button>
       <button type="button" id="driveCfgBtn" class="ico" title="Conexión con Google Drive" aria-label="Conexión con Google Drive"><svg viewBox="0 0 256 256" aria-hidden="true"><path d="M216,72H130.67L102.93,51.2a16.12,16.12,0,0,0-9.6-3.2H40A16,16,0,0,0,24,64V200a16,16,0,0,0,16,16H216.89A15.13,15.13,0,0,0,232,200.89V88A16,16,0,0,0,216,72Zm0,128H40V64H93.33L123.2,86.4A8,8,0,0,0,128,88h88Z"/></svg></button>
-      <button type="button" id="oneBtn" class="btn btn-ghost">Guardar una por una</button>
+      <button type="button" id="oneBtn" class="btn btn-ghost" title="Guardar las imágenes una por una">Una por una</button>
       <button type="button" id="zipBtn" class="btn btn-stamp"><svg viewBox="0 0 256 256" aria-hidden="true"><path d="M224,144v64a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V144a8,8,0,0,1,16,0v56H208V144a8,8,0,0,1,16,0Zm-101.66,5.66a8,8,0,0,0,11.32,0l40-40a8,8,0,0,0-11.32-11.32L136,124.69V32a8,8,0,0,0-16,0v92.69L93.66,98.34a8,8,0,0,0-11.32,11.32Z"/></svg>Descargar todo (.zip)</button>
     </div>
   </section>
@@ -686,9 +744,17 @@ body.bg-cada .lay-bg{display:grid !important}
           <div class="opt" id="pmPosRow">
             <label class="lbl" for="pmPosSel">Dónde</label>
             <select id="pmPosSel" class="inp" data-sel="pmPos">
-              <option value="libre">En un lugar libre, sin tocar el sello</option>
+              <option value="libre">Automático: lugar libre cerca del sello</option>
+              <option value="abajo-izq">Abajo a la izquierda</option>
+              <option value="abajo-centro">Abajo al centro</option>
+              <option value="abajo-der">Abajo a la derecha</option>
+              <option value="arriba-izq">Arriba a la izquierda</option>
+              <option value="arriba-der">Arriba a la derecha</option>
               <option value="sello">Mordiendo el borde del sello</option>
-              <option value="foto">Sobre la esquina de la foto</option>
+              <option value="foto-si">Sobre la foto: esquina de arriba a la izquierda</option>
+              <option value="foto-sd">Sobre la foto: esquina de arriba a la derecha</option>
+              <option value="foto-ii">Sobre la foto: esquina de abajo a la izquierda</option>
+              <option value="foto-id">Sobre la foto: esquina de abajo a la derecha</option>
             </select>
           </div>
           <div class="opt" id="pmIconRow">
@@ -867,7 +933,7 @@ body.bg-cada .lay-bg{display:grid !important}
         <div class="col-head"><h2 id="hOut">Carrusel</h2><span id="outCount" class="count"></span></div>
         <div class="stage" id="stage">
           <button type="button" class="stage-view" id="stageView" aria-label="Ver en tamaño real"><canvas id="stageC" width="900" height="900"></canvas></button>
-          <div class="stage-bar"><span id="stageCap" class="stage-cap"></span><button type="button" class="btn btn-ghost mini" id="stageSave"><svg viewBox="0 0 256 256" aria-hidden="true"><path d="M224,144v64a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V144a8,8,0,0,1,16,0v56H208V144a8,8,0,0,1,16,0Zm-101.66,5.66a8,8,0,0,0,11.32,0l40-40a8,8,0,0,0-11.32-11.32L136,124.69V32a8,8,0,0,0-16,0v92.69L93.66,98.34a8,8,0,0,0-11.32,11.32Z"/></svg>Guardar esta</button></div>
+          <div class="stage-bar"><span id="stageCap" class="stage-cap"></span><span class="stage-acts"><button type="button" class="btn btn-ghost mini" id="stageEdit">Editar</button><button type="button" class="btn btn-ghost mini" id="stageSave"><svg viewBox="0 0 256 256" aria-hidden="true"><path d="M224,144v64a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V144a8,8,0,0,1,16,0v56H208V144a8,8,0,0,1,16,0Zm-101.66,5.66a8,8,0,0,0,11.32,0l40-40a8,8,0,0,0-11.32-11.32L136,124.69V32a8,8,0,0,0-16,0v92.69L93.66,98.34a8,8,0,0,0-11.32,11.32Z"/></svg>Guardar esta</button></span></div>
         </div>
         <div id="gridTitles" class="gtitles"></div>
         <ol id="outList" class="olist"></ol>
@@ -877,6 +943,7 @@ body.bg-cada .lay-bg{display:grid !important}
   </main>
 </div>
 
+<button type="button" id="mini" class="mini-prev" hidden aria-label="Ver en grande"><canvas id="miniC" width="300" height="300"></canvas><span id="miniLbl"></span></button>
 <div class="mbar" aria-label="Acciones rápidas">
   <span class="picker btn btn-ghost"><svg viewBox="0 0 256 256" aria-hidden="true"><path d="M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z"/></svg>Fotos<input type="file" class="pick" accept="image/*" multiple aria-label="Agregar fotos"></span>
   <button type="button" id="mDrive" class="btn btn-ghost" aria-label="Subir a Drive" title="Subir a Drive"><svg viewBox="0 0 256 256" aria-hidden="true"><path d="M178.34,165.66,160,147.31V208a8,8,0,0,1-16,0V147.31l-18.34,18.35a8,8,0,0,1-11.32-11.32l32-32a8,8,0,0,1,11.32,0l32,32a8,8,0,0,1-11.32,11.32ZM160,40A88.08,88.08,0,0,0,81.29,88.68,64,64,0,1,0,72,216h40a8,8,0,0,0,0-16H72a48,48,0,0,1,0-96c1.1,0,2.2,0,3.29.12A88,88,0,0,0,72,128a8,8,0,0,0,16,0,72,72,0,1,1,100.8,66,8,8,0,0,0,3.2,15.34,7.9,7.9,0,0,0,3.2-.68A88,88,0,0,0,160,40Z"/></svg></button>
@@ -906,6 +973,11 @@ body.bg-cada .lay-bg{display:grid !important}
   <div class="row"><input id="driveUrl" class="inp" type="url" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off"><button type="button" class="btn btn-stamp" id="driveTest">Conectar</button></div>
   <p class="msg" id="driveMsg" role="status"></p>
   <div class="row" style="justify-content:space-between"><button type="button" class="linkbtn" id="driveForget" hidden>Desconectar</button><button type="button" class="btn btn-ghost mini" id="driveClose">Cerrar</button></div>
+</dialog>
+<dialog id="pickDlg" class="pick-dlg" aria-labelledby="pickTitle">
+  <div class="pick-head"><span id="pickTitle" class="pick-title"></span><span class="pick-now"><i id="pickSw"></i><code id="pickHex"></code></span><button type="button" class="btn btn-ghost mini" id="pickCancel">Cancelar</button></div>
+  <div class="pick-stage"><canvas id="pickC"></canvas><canvas id="pickLoupe" width="140" height="140" hidden></canvas></div>
+  <p class="subhint pick-hint">Tocá o arrastrá sobre la foto: la lupa muestra el punto exacto y al soltar queda elegido.</p>
 </dialog>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
@@ -1080,6 +1152,7 @@ function loadPrefs(){
     if (!FORMATS[state.format]) state.format = '1:1';
     if (!('stampMode' in o)) state.stampMode = o.stampColor ? 'elegido' : 'papel';
     if (!('pm' in o) && o.extras && o.extras.postmark) state.pm = 'circular';
+    if (state.pmPos === 'foto') state.pmPos = 'foto-sd';
     /* antes había un bloque aparte para verticales; «Auto» hace lo mismo */
     if (o.swPos === 'centro' && o.vertSep !== false && (o.swPosV || 'costado') === 'costado') state.swPos = 'auto';
     if (!['auto','centro','izquierda','costado'].includes(state.swPos)) state.swPos = 'auto';
@@ -1758,9 +1831,14 @@ function pmPoly(x, R, k, rot){ x.beginPath(); for (let i = 0; i <= k; i++){ cons
 function pmCenterDate(x, dt, y0){ x.textAlign = 'center'; x.textBaseline = 'alphabetic'; x.font = `500 12.5px ${MONO}`; x.fillText(dt.dm, 0, y0); x.font = `500 9.5px ${MONO}`; x.fillText(dt.y, 0, y0 + 12.5); }
 const PM_R = {circular:41, rodillo:35, octogono:41, ilustrado:45}, PM_K = 1.22;
 /* dónde va: alrededor del sello, mordiendo su borde, en el lugar que menos tapa la foto, los colores, los nombres y la tira de datos */
+const PM_POS = [['libre','Lugar libre'],['abajo-izq','Abajo a la izquierda'],['abajo-centro','Abajo al centro'],['abajo-der','Abajo a la derecha'],['arriba-izq','Arriba a la izquierda'],['arriba-der','Arriba a la derecha'],['sello','Mordiendo el sello'],['foto-si','Foto: arriba izq.'],['foto-sd','Foto: arriba der.'],['foto-ii','Foto: abajo izq.'],['foto-id','Foto: abajo der.']];
+function pmPosOf(p){ return (p && p.lay && p.lay.pm) || state.pmPos; }
 function pmSpot(p, n, L, H, dy, style){
-  if (state.pmPos === 'foto'){ const ph = L.photo, R = PM_R[style]*PM_K; return {cx:ph.x + ph.w - R*0.75, cy:ph.y + R*0.8, dir:-1}; }
-  if (state.pmPos === 'libre') return pmFree(p, n, L, H, dy, style);
+  const pos = pmPosOf(p), P0 = L.photo, Rr = PM_R[style]*PM_K;
+  const corner = {'foto-si':[P0.x + Rr*0.85, P0.y + Rr*0.85], 'foto-sd':[P0.x + P0.w - Rr*0.85, P0.y + Rr*0.85], 'foto':[P0.x + P0.w - Rr*0.85, P0.y + Rr*0.85],
+                  'foto-ii':[P0.x + Rr*0.85, P0.y + P0.h - Rr*0.85], 'foto-id':[P0.x + P0.w - Rr*0.85, P0.y + P0.h - Rr*0.85]}[pos];
+  if (corner) return {cx:corner[0], cy:corner[1], dir:pos === 'foto-si' || pos === 'foto-ii' ? 1 : -1};
+  if (pos !== 'sello') return pmFree(p, n, L, H, dy, style, pos);
   const st = L.stamp, R = PM_R[style]*PM_K, rr = [], add = (x, y, w, h) => rr.push({x, y, w, h});
   const ph = L.photo; add(ph.x - 6, ph.y - 6, ph.w + 12, ph.h + 12);
   if (L.sw) add(L.sw.xs[0] - 4, L.sw.y - 4, L.sw.xs[2] + L.sw.w - L.sw.xs[0] + 8, L.label.base + (state.show.postal.hex ? 38 : 24) - L.sw.y);
@@ -1788,7 +1866,7 @@ function pmSpot(p, n, L, H, dy, style){
   return best;
 }
 /* lugar libre: busca en toda la postal un hueco que no toque la foto, los colores, el sello ni los textos, cerca del sello */
-function pmFree(p, n, L, H, dy, style){
+function pmFree(p, n, L, H, dy, style, pos){
   const st = L.stamp, R = PM_R[style]*PM_K, rr = [], add = (x, y, w, h) => rr.push({x, y, w, h});
   const ph = L.photo; add(ph.x - 8, ph.y - 8, ph.w + 16, ph.h + 16);
   add(st.cx - st.d*0.56, st.cy - st.d*0.56, st.d*1.12, st.d*1.12);
@@ -1801,21 +1879,42 @@ function pmFree(p, n, L, H, dy, style){
   const inter = (a, b) => Math.max(0, Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x)) * Math.max(0, Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y));
   const outside = b => { const x0 = Math.max(b.x, 6), x1 = Math.min(b.x + b.w, D - 6), y0 = Math.max(b.y, -dy + 6), y1 = Math.min(b.y + b.h, H - dy - 6); return b.w*b.h - Math.max(0, x1 - x0)*Math.max(0, y1 - y0); };
   const cost = b => rr.reduce((a, r) => a + inter(b, r), 0);
+  /* zonas: libre (cerca del sello), abajo a la izquierda / centro / derecha, arriba (margen superior) */
+  const pb = ph.y + ph.h, zone = {
+    'abajo-izq':(cx, cy) => cx < D*0.45 && cy > pb - R*0.3, 'abajo-centro':(cx, cy) => Math.abs(cx - D/2) < D*0.22 && cy > pb - R*0.3,
+    'abajo-der':(cx, cy) => cx > D*0.55 && cy > pb - R*0.3, 'arriba-izq':(cx, cy) => cx < D*0.5 && cy < ph.y + R*0.6, 'arriba-der':(cx, cy) => cx > D*0.5 && cy < ph.y + R*0.6
+  }[pos];
+  const pull = {'abajo-izq':[0, H - dy], 'abajo-centro':[D/2, H - dy], 'abajo-der':[D, H - dy], 'arriba-izq':[0, -dy], 'arriba-der':[D, -dy]}[pos];
   let best = null;
+  for (let pass = 0; pass < 2 && !best; pass++)
   for (let cy = -dy + R + 6; cy <= H - dy - R - 6; cy += 9) for (let cx = R + 6; cx <= D - R - 6; cx += 9){
+    if (zone && pass === 0 && !zone(cx, cy)) continue;
     const box = {x:cx - R, y:cy - R, w:2*R, h:2*R};
-    let c = cost(box)*3 + outside(box)*8 + Math.hypot(cx - st.cx, cy - st.cy)*0.9, dir = -1;
+    let c = cost(box)*3 + outside(box)*8 + (pull ? Math.hypot(cx - pull[0], cy - pull[1])*0.35 : Math.hypot(cx - st.cx, cy - st.cy)*0.9), dir = -1;
     if (style === 'rodillo'){ const L2 = 112*PM_K, bars = d => ({x:d < 0 ? cx - R - L2 : cx + R, y:cy - 21*PM_K, w:L2, h:42*PM_K}); const cl = cost(bars(-1)), cr = cost(bars(1)); dir = cl <= cr ? -1 : 1; c += Math.min(cl, cr)*2; }
-    if (!best || c < best.c) best = {cx, cy, dir, c};
+    if (!best || c < best.c) best = {cx, cy, dir, c, ov:cost(box) + outside(box)};
   }
+  /* si la zona elegida no tiene lugar (pisaría algo o se saldría), va al lugar libre más cercano al sello */
+  if (zone && best && best.ov > 0.03*4*R*R) return pmFree(p, n, L, H, dy, style, 'libre');
   return best;
+}
+/* sobre una parte oscura de la foto, el matasellos va con tinta clara para que se lea */
+function pmInk(p, L, at, R){
+  const ph = L.photo; if (at.cx < ph.x || at.cx > ph.x + ph.w || at.cy < ph.y || at.cy > ph.y + ph.h) return S.ink;
+  try {
+    const src = p.prev, u = (at.cx - ph.x)/ph.w, v = (at.cy - ph.y)/ph.h, rw = R/ph.w*src.width, rh = R/ph.h*src.height;
+    const x0 = Math.max(0, Math.round(u*src.width - rw/2)), y0 = Math.max(0, Math.round(v*src.height - rh/2)), w = Math.max(1, Math.min(src.width - x0, Math.round(rw))), h = Math.max(1, Math.min(src.height - y0, Math.round(rh)));
+    const d = src.getContext('2d', {willReadFrequently:true}).getImageData(x0, y0, w, h).data; let l = 0, n = 0;
+    for (let i = 0; i < d.length; i += 16){ l += 0.299*d[i] + 0.587*d[i+1] + 0.114*d[i+2]; n++; }
+    return l/n/255 < 0.5 ? '#F4EFE4' : '#1E1C18';
+  } catch(e){ return S.ink; }
 }
 function drawPostmark(ctx, p, n, L, H, dy){
   const style = state.pm, at = pmSpot(p, n, L, H, dy, style), R = PM_R[style], ds = devScale(ctx), rnd = rng(311 + n);
   const half = (R + 130)*PM_K, rot = (-9 + (rnd() - 0.5)*8)*Math.PI/180;
   const c = document.createElement('canvas'); c.width = c.height = Math.max(1, Math.ceil(2*half*ds));
   const x = c.getContext('2d'); x.setTransform(ds, 0, 0, ds, half*ds, half*ds); x.rotate(rot); x.scale(PM_K, PM_K);
-  x.strokeStyle = x.fillStyle = S.ink; x.lineCap = 'round';
+  x.strokeStyle = x.fillStyle = pmInk(p, L, at, R*PM_K); x.lineCap = 'round';
   const dt = pmParts(p.date), place = placeOf(p).toUpperCase();
   if (style === 'circular'){
     x.lineWidth = 2.2; x.beginPath(); x.arc(0, 0, R, 0, Math.PI*2); x.stroke();
@@ -2419,7 +2518,7 @@ function drawPostal(ctx, p, n, hi, mini, H){
   if (!mini) postalStrip(ctx, p, n, H - Math.max(22, dy*0.5) - dy, L.strip);
   const keepS = S; if (!mini) S = withPhotoStamp(S, p);
   stamp(ctx, L.stamp.cx, L.stamp.cy, L.stamp.d, L.stamp.rot);
-  if (!mini && state.pm !== 'ninguno') drawPostmark(ctx, p, n, L, H, dy);
+  if (!mini && state.pm !== 'ninguno' && pmPosOf(p) !== 'no') drawPostmark(ctx, p, n, L, H, dy);
   ctx.restore();
   if (L.counter) markerFraction(ctx, n - state.startNum + 1, state.photos.length, L.counter.xr, L.counter.base);
   S = keepS;
@@ -2821,6 +2920,11 @@ async function drivePost(url, body){ const r = await fetch(url, {method:'POST', 
 function blobB64(b){ return new Promise((res, rej) => { const fr = new FileReader(); fr.onload = () => res(String(fr.result).split(',')[1]); fr.onerror = rej; fr.readAsDataURL(b); }); }
 function openDriveDlg(){ const c = driveCfg(), d = $('#driveDlg'); $('#driveUrl').value = c.url || ''; $('#driveMsg').textContent = c.url ? 'Conectado. Podés cambiar la URL o desconectar.' : ''; $('#driveForget').hidden = !c.url; if (d.showModal) d.showModal(); else d.setAttribute('open', ''); }
 $('#driveClose').addEventListener('click', () => $('#driveDlg').close());
+$('#pickCancel').addEventListener('click', () => $('#pickDlg').close());
+$('#pickC').addEventListener('pointerdown', e => { e.preventDefault(); PICK.down = true; $('#pickC').setPointerCapture(e.pointerId); pickAt(e); });
+$('#pickC').addEventListener('pointermove', e => { if (PICK && (PICK.down || e.pointerType === 'mouse')) pickAt(e); });
+$('#pickC').addEventListener('pointerup', e => { if (PICK && PICK.down){ PICK.down = false; pickChoose(e); } });
+$('#pickC').addEventListener('pointerleave', e => { if (PICK && !PICK.down) $('#pickLoupe').hidden = true; });
 $('#driveCopy').addEventListener('click', async () => {
   const code = driveScript(driveCfg());
   try { await navigator.clipboard.writeText(code); toast('Código copiado'); }
@@ -2933,6 +3037,44 @@ async function shareOrSave(name, blob){
 /* ---------- Claude suggestions (viewer's own account, on click only) ---------- */
 const sampleP = (window.claude && typeof window.claude.use === 'function') ? window.claude.use('sample').catch(() => null) : Promise.resolve(null);
 sampleP.then(async s => { if (!s) return; const lim = await s.limits().catch(() => null); if (lim && lim.images) document.body.classList.add('can-name'); });
+/* Elegir el color en grande: la foto ocupa la pantalla, una lupa muestra el punto exacto y al soltar se elige */
+let PICK = null;
+function pickSample(fx, fy){
+  const src = PICK.p.prev, x = Math.round(fx*(src.width - 1)), y = Math.round(fy*(src.height - 1));
+  const d = src.getContext('2d', {willReadFrequently:true}).getImageData(Math.max(0, Math.min(src.width - 5, x - 2)), Math.max(0, Math.min(src.height - 5, y - 2)), 5, 5).data;
+  let R = 0, G = 0, B = 0, n = 0; for (let i = 0; i < d.length; i += 4){ R += d[i]; G += d[i+1]; B += d[i+2]; n++; }
+  return rgbHex(R/n, G/n, B/n);
+}
+function pickShow(hex){ $('#pickSw').style.background = hex; $('#pickHex').textContent = hex; }
+function openPicker(p, k){
+  const d = $('#pickDlg'), c = $('#pickC'), src = p.prev; PICK = {p, k, down:false};
+  $('#pickTitle').textContent = `Color ${k + 1} · ${p.colors[k].name || ''}`.trim();
+  const maxW = Math.min(window.innerWidth - 40, 1200), maxH = window.innerHeight - 190, s = Math.min(maxW/src.width, maxH/src.height), dpr = Math.min(2, window.devicePixelRatio || 1);
+  c.style.width = Math.round(src.width*s) + 'px'; c.style.height = Math.round(src.height*s) + 'px';
+  c.width = Math.round(src.width*s*dpr); c.height = Math.round(src.height*s*dpr);
+  const x = c.getContext('2d'); x.imageSmoothingQuality = 'high'; x.drawImage(src, 0, 0, c.width, c.height);
+  pickShow(p.colors[k].hex); $('#pickLoupe').hidden = true;
+  if (d.showModal) d.showModal(); else d.setAttribute('open', '');
+}
+function pickAt(e){
+  const c = $('#pickC'), r = c.getBoundingClientRect(), fx = Math.min(1, Math.max(0, (e.clientX - r.left)/r.width)), fy = Math.min(1, Math.max(0, (e.clientY - r.top)/r.height));
+  const hex = pickSample(fx, fy); pickShow(hex);
+  const L = $('#pickLoupe'), lx = L.getContext('2d'), src = PICK.p.prev, sx = fx*src.width, sy = fy*src.height, z = 9;
+  L.hidden = false; lx.imageSmoothingEnabled = false; lx.clearRect(0, 0, L.width, L.height);
+  lx.drawImage(src, sx - L.width/(2*z), sy - L.height/(2*z), L.width/z, L.height/z, 0, 0, L.width, L.height);
+  lx.strokeStyle = '#fff'; lx.lineWidth = 3; lx.strokeRect(L.width/2 - 9, L.height/2 - 9, 18, 18); lx.strokeStyle = '#000'; lx.lineWidth = 1; lx.strokeRect(L.width/2 - 10.5, L.height/2 - 10.5, 21, 21);
+  const touch = e.pointerType !== 'mouse', host = c.parentElement.getBoundingClientRect();
+  L.style.left = (e.clientX - host.left - L.offsetWidth/2) + 'px'; L.style.top = (e.clientY - host.top - L.offsetHeight/2 - (touch ? 100 : 0)) + 'px';
+  return {fx, fy, hex};
+}
+function pickChoose(e){
+  const {fx, fy, hex} = pickAt(e), {p, k} = PICK, col = p.colors[k];
+  col.hex = hex; col.pt = {x:fx, y:fy}; col.sugg = null; col.name = freshName(p, k); col.auto = true;
+  const nameEl = document.getElementById(`name-${p.id}-${k}`); if (nameEl) nameEl.value = col.name;
+  const chipEl = document.getElementById(`chip-${p.id}-${k}`); if (chipEl){ chipEl.style.setProperty('--c', col.hex); chipEl.title = col.hex; }
+  const lbg = document.getElementById(`laybg-${p.id}-${k}`); if (lbg) lbg.style.background = col.hex;
+  $('#pickDlg').close(); scheduleOut(); toast('Color elegido: ' + col.name);
+}
 function thumbToPhoto(p, fx, fy){
   const iw = p.prev.width, ih = p.prev.height, ar = 1.5, f = (p.focus||0)/100; let sx=0, sy=0, sw=iw, sh=ih;
   if (iw/ih > ar){ sw = ih*ar; sx = (iw-sw)*(0.5+f/2); } else { sh = iw/ar; sy = (ih-sh)*(0.5+f/2); }
@@ -3065,6 +3207,7 @@ function renderPhotos(){
             <div class="lay-row"><span class="lbl">Colores</span><div class="chips" data-lay="pos">${[['','Como todas'],['centro','Abajo'],['izquierda','Izquierda'],['costado','Costado']].map(([v, l]) => `<button type="button" data-v="${v}" aria-pressed="${((p.lay && p.lay.pos) || '') === v}">${l}</button>`).join('')}</div></div>
             <div class="lay-row lay-bg"><span class="lbl">Fondo</span><div class="chips" data-lay="bg"><button type="button" data-v="" aria-pressed="${!(p.lay && p.lay.bg != null)}">Auto</button>${p.colors.map((c, k) => `<button type="button" class="swb" id="laybg-${id}-${k}" data-v="${k}" aria-pressed="${!!(p.lay && p.lay.bg === String(k))}" title="${esc(c.name || c.hex)}" style="background:${c.hex}"></button>`).join('')}</div></div>
             <div class="lay-row"><span class="lbl">Sello</span><div class="chips" data-lay="stamp"><button type="button" data-v="" aria-pressed="${!(p.lay && p.lay.stamp)}">Como todas</button><button type="button" data-v="auto" aria-pressed="${!!(p.lay && p.lay.stamp === 'auto')}">Sugerido</button>${p.colors.map(c => `<button type="button" class="swb" data-v="${c.hex}" aria-pressed="${!!(p.lay && p.lay.stamp === c.hex)}" title="${esc(c.name || c.hex)}" style="background:${c.hex}"></button>`).join('')}<label class="swpick" title="Otro color"><input type="color" data-laystamp="1" value="${p.lay && p.lay.stamp && p.lay.stamp[0] === '#' ? p.lay.stamp : '#9E1610'}" aria-label="Otro color de sello para esta foto"></label></div></div>
+            <div class="lay-row lay-pm"><span class="lbl">Matasellos</span><select class="inp" data-laysel="pm" aria-label="Matasellos de esta postal"><option value="">Como todas</option><option value="no">Sin matasellos</option>${PM_POS.map(([v, l]) => `<option value="${v}"${p.lay && p.lay.pm === v ? ' selected' : ''}>${l}</option>`).join('')}</select></div>
             <div class="lay-row"><span class="lbl">Tamaño</span><div class="chips" data-lay="size">${[['','Como todas'],['chicos','Chicos'],['medianos','Medianos'],['grandes','Grandes']].map(([v, l]) => `<button type="button" data-v="${v}" aria-pressed="${((p.lay && p.lay.size) || '') === v}">${l}</button>`).join('')}</div></div>
           </div>
         </details>
@@ -3088,6 +3231,9 @@ photoList.addEventListener('input', e => {
   else if (f === 'title'){ p.title = e.target.value; e.target.rows = Math.min(3, Math.max(1, e.target.value.split('\n').length)); }
   else if (f === 'focus'){ p.focus = +e.target.value; drawThumb(p); }
   else if (nm !== undefined){ const c = p.colors[+nm]; c.name = e.target.value; c.auto = false; }
+  else if (e.target.dataset.laysel){
+    p.lay = Object.assign({}, p.lay); const v = e.target.value; if (v) p.lay.pm = v; else delete p.lay.pm; if (!Object.keys(p.lay).length) p.lay = null;
+  }
   else if (e.target.dataset.laystamp){
     p.lay = Object.assign({}, p.lay, {stamp:e.target.value});
     e.target.closest('[data-lay]').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', 'false'));
@@ -3100,9 +3246,9 @@ photoList.addEventListener('toggle', e => {
   const l = e.target.closest && e.target.closest('[data-layd]'); if (l){ const p = photoById(l.dataset.layd); if (p) p.layOpen = l.open; return; }
   const d = e.target.closest && e.target.closest('[data-tech]'); if (!d) return; const p = photoById(d.dataset.tech); if (p) p.techOpen = d.open;
 }, true);
-photoList.addEventListener('focusin', e => { const li = e.target.closest('.pcard'); if (li && isWide()) showOut(o => o.kind === 'postal' && state.photos[o.i] && state.photos[o.i].id === li.dataset.id); });
-photoList.addEventListener('pointerdown', e => { const li = e.target.closest('.pcard'); if (li && isWide() && !e.target.closest('[data-act]')) showOut(o => o.kind === 'postal' && state.photos[o.i] && state.photos[o.i].id === li.dataset.id); });
-$('#gridTitles').addEventListener('focusin', e => { const g = e.target.dataset.g; if (g !== undefined && isWide()) showOut(o => o.kind === 'grid' && o.g === +g); });
+photoList.addEventListener('focusin', e => { const li = e.target.closest('.pcard'); if (li) showOut(o => o.kind === 'postal' && state.photos[o.i] && state.photos[o.i].id === li.dataset.id); });
+photoList.addEventListener('pointerdown', e => { const li = e.target.closest('.pcard'); if (li && !e.target.closest('[data-act]')) showOut(o => o.kind === 'postal' && state.photos[o.i] && state.photos[o.i].id === li.dataset.id); });
+$('#gridTitles').addEventListener('focusin', e => { const g = e.target.dataset.g; if (g !== undefined) showOut(o => o.kind === 'grid' && o.g === +g); });
 photoList.addEventListener('click', e => {
   const li = e.target.closest('.pcard'); if (!li) return; const p = photoById(li.dataset.id); if (!p) return;
   const lay = e.target.closest('[data-lay] button[data-v]');
@@ -3117,11 +3263,7 @@ photoList.addEventListener('click', e => {
   if (ai){ suggestName(p, +ai.dataset.ai, ai); return; }
   const alt = e.target.closest('[data-alt]'); if (alt){ cycleName(p, +alt.dataset.alt); return; }
   if (ait){ suggestTitle(p, ait); return; }
-  if (chip){
-    const k = +chip.dataset.chip;
-    state.picking = (state.picking && state.picking.id === p.id && state.picking.k === k) ? null : {id:p.id, k};
-    syncPicking(); return;
-  }
+  if (chip){ openPicker(p, +chip.dataset.chip); return; }
   if (e.target.classList.contains('pc-thumb') && state.picking && state.picking.id === p.id){
     const c = e.target, r = c.getBoundingClientRect();
     const fx = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)), fy = Math.min(1, Math.max(0, (e.clientY - r.top) / r.height));
@@ -3177,6 +3319,7 @@ function syncDesign(){
     document.body.classList.toggle('bg-cada', foto && state.bgEach === 'cada'); renderBgSwatches(); renderFotoThumb(); }
   document.querySelectorAll('[data-ifpostal]').forEach(el => el.hidden = state.comp === 'ficha');
   $('#decoPostalRow').hidden = state.deco === 'ninguno';
+  document.body.classList.toggle('pm-on', state.pm !== 'ninguno');
   $('#pmIconRow').hidden = state.pm !== 'ilustrado'; $('#pmPosRow').hidden = state.pm === 'ninguno'; $('#linePosRow').hidden = state.lineStyle === 'ninguna';
   $('#counterInkRow').hidden = !state.extras.counter;
   document.querySelectorAll('select[data-sel]').forEach(x => x.value = state[x.dataset.sel]);
@@ -3406,20 +3549,27 @@ $('#gridTitles').addEventListener('click', e => {
   if (!pl){ toast('Primero escribí el lugar'); return; }
   state.titles[g] = pl.toUpperCase(); const inp = document.getElementById('gtitle-' + g); if (inp) inp.value = state.titles[g]; scheduleOut();
 });
+/* en el celu, la vista previa sigue a lo que estás editando */
 function renderPeek(){
   const outs = outputs(), a = $('#peekA'), b = $('#peekB');
-  const post = outs.findIndex(o => o.kind === 'postal'), grid = outs.findIndex(o => o.kind === 'grid');
-  $('#peek').hidden = !outs.length;
-  if (post >= 0) renderTo(a, outs[post], 360, false);
-  if (grid >= 0) renderTo(b, outs[grid], 360, false);
-  $('#peekALbl').textContent = post >= 0 ? outName(outs[post], post).label : '';
-  $('#peekBLbl').textContent = grid >= 0 ? 'Grilla 1' : '';
+  $('#peek').hidden = !outs.length; if (!outs.length) return;
+  const ka = Math.min(selK, outs.length - 1), kb = outs[ka].kind === 'grid' ? outs.findIndex(o => o.kind === 'postal') : outs.findIndex(o => o.kind === 'grid');
+  renderTo(a, outs[ka], 360, false); $('#peekALbl').textContent = outName(outs[ka], ka).label;
+  b.parentElement.hidden = kb < 0; if (kb >= 0){ renderTo(b, outs[kb], 360, false); $('#peekBLbl').textContent = outName(outs[kb], kb).label; }
+  a.parentElement.dataset.k = ka; if (kb >= 0) b.parentElement.dataset.k = kb;
+}
+function renderMini(){
+  const m = $('#mini'), outs = outputs(); if (!m) return;
+  const on = !isWide() && document.body.dataset.view === 'fotos' && outs.length && !state.sample;
+  m.hidden = !on; if (!on) return;
+  const k = Math.min(selK, outs.length - 1); renderTo($('#miniC'), outs[k], 300, false); $('#miniLbl').textContent = outName(outs[k], k).label;
 }
 $('#peek').addEventListener('click', e => {
   const b = e.target.closest('[data-peek]'); if (!b) return; const outs = outputs();
-  const k = outs.findIndex(o => o.kind === (b.dataset.peek === 'post' ? 'postal' : 'grid')); if (k >= 0) openLB(k);
+  const k = b.dataset.k !== undefined ? +b.dataset.k : outs.findIndex(o => o.kind === (b.dataset.peek === 'post' ? 'postal' : 'grid')); if (k >= 0) openLB(k);
 });
 function renderOutputs(){
+  requestAnimationFrame(() => { renderMini(); if (!isWide() && document.body.dataset.view === 'diseno') renderPeek(); });
   renderCoverSwatches(); renderBgSwatches(); if (state.style === 'foto') renderFotoThumb();
   const outs = outputs();
   const sig = outs.map(o => o.kind + (o.i ?? o.g)).join(',');
@@ -3439,7 +3589,7 @@ function renderOutputs(){
   $('#outCount').textContent = outs.length ? `${outs.length} ${outs.length === 1 ? 'imagen' : 'imágenes'}` : 'vacío';
 }
 let outT = 0;
-function scheduleOut(){ resetShare(); saveSessionSoon(); clearTimeout(outT); outT = setTimeout(() => requestAnimationFrame(() => { renderOutputs(); renderShapeThumbsSoon(); savePrefs(); pushUndo(); if (wantSel){ const w = wantSel; wantSel = null; if (isWide()) showOut(o => o.kind === w); } }), 90); }
+function scheduleOut(){ resetShare(); saveSessionSoon(); clearTimeout(outT); outT = setTimeout(() => requestAnimationFrame(() => { renderOutputs(); renderShapeThumbsSoon(); savePrefs(); pushUndo(); if (wantSel){ const w = wantSel; wantSel = null; showOut(o => o.kind === w); } }), 90); }
 let shapeT = 0, lastShapeSig = '';
 function renderShapeThumbsSoon(){
   const sig = state.photos[0] ? state.photos[0].colors.map(c => c.hex).join() : 'demo';
@@ -3461,7 +3611,7 @@ outList.addEventListener('click', async e => {
 /* ---------- wide layout: tabs, big stage, sticky header height ---------- */
 const isWide = () => window.matchMedia('(min-width:1100px)').matches;
 let selK = 0, stageT = 0;
-function selectOut(k){ selK = k; renderStage(); }
+function selectOut(k){ selK = k; renderStage(); if (!isWide()){ renderMini(); if (document.body.dataset.view === 'diseno') renderPeek(); } }
 /* el carrusel de abajo, las tarjetas de fotos y el panel se siguen entre sí */
 let wantSel = null;
 function scrollStrip(k){ const li = document.querySelectorAll('#outList .ocard')[k]; if (li) li.scrollIntoView({block:'nearest', inline:'center', behavior:'smooth'}); }
@@ -3486,6 +3636,12 @@ function renderStage(){
   $('#stageCap').textContent = `${String(selK+1).padStart(2,'0')} / ${String(outs.length).padStart(2,'0')} · ${outName(outs[selK], selK).label}`;
 }
 $('#stageView').addEventListener('click', () => openLB(selK));
+$('#mini').addEventListener('click', () => openLB(selK));
+$('#stageEdit').addEventListener('click', () => {
+  const o = outputs()[selK]; if (!o) return;
+  if (!isWide()) setView(o.kind === 'postal' || o.kind === 'grid' ? 'fotos' : 'diseno', true);
+  setTimeout(() => revealEditor(o), 80);
+});
 $('#stageSave').addEventListener('click', async e => {
   const o = outputs()[selK]; if (!o) return; const b = e.currentTarget, t = b.innerHTML; b.textContent = '…';
   try { await shareOrSave(outName(o, selK).file, await renderBlob(o, state.size)); } finally { b.innerHTML = t; }
@@ -3530,7 +3686,7 @@ function setView(v, keepScroll){
   document.querySelectorAll('.views [data-view]').forEach(b => { const on = b.dataset.view === v; b.setAttribute('aria-selected', String(on)); b.tabIndex = on ? 0 : -1; });
   try { localStorage.setItem(VIEW_KEY, v); } catch(e){}
   if (!keepScroll && !isWide()) window.scrollTo(0, 0);
-  requestAnimationFrame(() => { setTopH(); if (v === 'carrusel') renderStage(); if (v === 'diseno') renderPeek(); });
+  requestAnimationFrame(() => { setTopH(); if (v === 'carrusel') renderStage(); if (v === 'diseno') renderPeek(); renderMini(); });
 }
 document.querySelector('.views').addEventListener('click', e => { const b = e.target.closest('[data-view]'); if (b) setView(b.dataset.view); });
 { let v = 'fotos'; try { v = localStorage.getItem(VIEW_KEY) || v; } catch(e){} setView(v, true); }
@@ -3580,6 +3736,17 @@ $('#mSave').textContent = MSAVE_LABEL();
 if (useShare()) $('#lbSave').textContent = 'Compartir / guardar';
 
 /* ---------- adding photos ---------- */
+/* paleta de colores de la herramienta (como en la web): se guarda en este navegador */
+const PALETA_KEY = 'postales-ojodecristi-paleta', PALETA_THEME = {pastel:'#F7D8CB', girasoles:'#F5E2A5', mar:'#CFE3EC', crema:'#EEE7D1', noche:'#1A1915'};
+function applyPaleta(id){
+  if (!PALETA_THEME[id]) id = 'pastel';
+  document.documentElement.dataset.paleta = id; document.documentElement.dataset.theme = id === 'noche' ? 'dark' : 'light';
+  document.querySelectorAll('.paletas [data-paleta]').forEach(b => b.setAttribute('aria-checked', String(b.dataset.paleta === id)));
+  document.querySelectorAll('meta[name="theme-color"]').forEach(m => m.setAttribute('content', PALETA_THEME[id]));
+  try { localStorage.setItem(PALETA_KEY, id); } catch(e){}
+}
+{ let id = 'pastel'; try { id = localStorage.getItem(PALETA_KEY) || 'pastel'; } catch(e){} applyPaleta(id); }
+document.querySelector('.paletas').addEventListener('click', e => { const b = e.target.closest('[data-paleta]'); if (b) applyPaleta(b.dataset.paleta); });
 const DROP_TEXT = 'Soltá las fotos acá o tocá para elegirlas<small>Hasta 16, en el orden del carrusel</small>';
 const isImageFile = f => /^image\//.test(f.type) || /\.(jpe?g|png|webp|heic|heif|avif)$/i.test(f.name) || (!f.type && f.size > 0);
 const typeOf = f => f.type || (/\.png$/i.test(f.name) ? 'image/png' : /\.webp$/i.test(f.name) ? 'image/webp' : /\.hei[cf]$/i.test(f.name) ? 'image/heic' : 'image/jpeg');
