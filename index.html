@@ -326,6 +326,36 @@ body.lb-open .mbar{display:none}
 .rc-grid label,.rc-field{display:flex;flex-direction:column;gap:5px;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);min-width:0}
 .rc-grid .inp,.rc-field .inp{text-transform:none;letter-spacing:0;color:var(--ink)}
 textarea.inp{height:auto;padding:8px 10px;font-family:var(--mono);font-size:14px;line-height:1.55;resize:vertical}
+/* panel de diseño ordenado (15/10/2026) */
+.design [hidden]{display:none !important}
+.presetbar,.presetsave{display:flex;gap:8px;align-items:center}
+.presetbar select,.presetsave .inp{flex:1;height:36px;min-width:0}
+.pane{display:flex;flex-direction:column}
+.opt{display:grid;grid-template-columns:82px minmax(0,1fr);align-items:center;gap:8px 12px;padding:10px 0;border-bottom:1px solid var(--rule)}
+.opt.stack{grid-template-columns:minmax(0,1fr)}
+.opt .lbl b{font-weight:500;color:var(--ink);letter-spacing:.03em;text-transform:none}
+.opt select.inp{height:36px;width:auto;max-width:100%;justify-self:start}
+.optrow{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px}
+.sect{margin:16px 0 0;padding-bottom:5px;border-bottom:1px solid var(--ink);font-family:var(--mono);font-weight:500;font-size:11.5px;letter-spacing:.12em;text-transform:uppercase}
+.chips.segc{display:inline-flex;flex-wrap:wrap;gap:2px;padding:2px;border:1px solid var(--rule);border-radius:17px;background:var(--paper);justify-self:start;width:max-content;max-width:100%}
+.chips.segc button{border:0;border-radius:15px;min-height:28px;padding:0 9px;background:transparent;font-size:11.5px}
+.chips.segc button[aria-checked="true"]{background:var(--ink);color:var(--paper)}
+.checks{display:flex;flex-direction:column;gap:2px;padding:8px 0;border-bottom:1px solid var(--rule)}
+.optsub{padding:0 0 6px 26px}
+.check.big{font-size:15.5px;font-weight:500;padding:12px 0 6px}
+.more{border-bottom:1px solid var(--rule)}
+.more summary{display:flex;gap:10px;align-items:baseline;cursor:pointer;list-style:none;padding:12px 0;font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase}
+.more summary::-webkit-details-marker{display:none}
+.more summary::before{content:"+";width:10px}
+.more[open] summary::before{content:"–"}
+.more-sum{text-transform:none;letter-spacing:0;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1}
+.design .styles{grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}
+.design .shapes{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.design .shape-card{padding:4px 3px 3px}
+@media (max-width:420px){.design .styles{gap:6px}.opt{grid-template-columns:74px minmax(0,1fr)}}
+.lay-grid{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+.lay-row{display:grid;grid-template-columns:62px minmax(0,1fr);align-items:center;gap:8px}
+.lay-row .chips button{min-height:28px;padding:0 9px;font-size:11.5px}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 </style>
 </head>
@@ -385,279 +415,277 @@ textarea.inp{height:auto;padding:8px 10px;font-family:var(--mono);font-size:14px
 
       <section class="design" aria-labelledby="hDesign">
         <div class="col-head" style="margin-bottom:0"><h2 id="hDesign">Diseño</h2><span id="styleName" class="count"></span></div>
+
+        <div class="presetbar">
+          <select id="presetSel" class="inp" aria-label="Diseño guardado"></select>
+          <button type="button" id="presetNew" class="btn btn-ghost mini">Guardar</button>
+          <button type="button" id="presetDel" class="linkbtn" hidden>Borrar</button>
+        </div>
+        <div class="presetsave" id="presetSaveRow" hidden>
+          <input id="presetName" class="inp" type="text" placeholder="Nombre, ej. Costa vertical" autocomplete="off" aria-label="Nombre del diseño">
+          <button type="button" id="presetSave" class="btn btn-stamp mini">Guardar</button>
+          <button type="button" id="presetCancel" class="linkbtn">Cancelar</button>
+        </div>
+
         <div class="tabs" role="tablist" aria-label="Ajustes">
           <button type="button" role="tab" data-tab="estilo" aria-selected="true">Estilo</button>
+          <button type="button" role="tab" data-tab="postal" aria-selected="false">Postal</button>
           <button type="button" role="tab" data-tab="detalles" aria-selected="false">Detalles</button>
-          <button type="button" role="tab" data-tab="datos" aria-selected="false">Datos</button>
-          <button type="button" role="tab" data-tab="receta" aria-selected="false">Receta</button>
           <button type="button" role="tab" data-tab="portada" aria-selected="false">Portada</button>
+          <button type="button" role="tab" data-tab="receta" aria-selected="false">Receta</button>
         </div>
-        <div class="dgroup presets" data-pane="estilo">
-          <h3>Mis diseños guardados</h3>
-          <div id="presetList" class="chips"></div>
-          <div class="drow">
-            <input id="presetName" class="inp" type="text" placeholder="Nombre, ej. Costa vertical" autocomplete="off" style="flex:1;min-width:160px">
-            <button type="button" id="presetSave" class="btn btn-ghost mini">Guardar el diseño actual</button>
+
+        <!-- Estilo: cómo se ve el papel -->
+        <div class="pane" data-pane="estilo">
+          <div class="opt stack">
+            <span class="lbl">Papel · <b id="paperName"></b></span>
+            <div id="styles" class="styles" role="radiogroup" aria-label="Papel"></div>
           </div>
-          <p class="subhint">Guarda estilo, colores, formato, detalles y portada. Tocá uno para aplicarlo; ✕ lo borra.</p>
-        </div>
-        <div id="styles" class="styles" role="radiogroup" aria-label="Estilo" data-pane="estilo"></div>
-        <div class="drow" data-pane="estilo">
-          <label class="colorpick" for="customColor"><input type="color" id="customColor" value="#D8C7A6"> Fondo con tu color</label>
-          <label class="colorpick" for="stampColor"><input type="color" id="stampColor" value="#9E1610"> Color del sello</label>
-          <button type="button" id="stampReset" class="linkbtn" hidden>Usar el del estilo</button>
-        </div>
-        <div class="drow" data-pane="estilo">
-          <span class="lbl" id="lblPaper">Papel</span>
-          <div class="chips" role="radiogroup" aria-labelledby="lblPaper" data-radio="paperTex">
-            <button type="button" role="radio" data-v="textura">Con textura</button>
-            <button type="button" role="radio" data-v="liso">Liso</button>
+          <div class="opt" id="customRow">
+            <span class="lbl">Tu color</span>
+            <label class="colorpick" for="customColor"><input type="color" id="customColor" value="#D8C7A6"> Color del papel</label>
           </div>
-        </div>
-        <div class="drow" data-pane="estilo">
-          <span class="lbl" id="lblPhotoSize">Foto en la postal</span>
-          <div class="chips" role="radiogroup" aria-labelledby="lblPhotoSize" data-radio="photoSize">
-            <button type="button" role="radio" data-v="grande">Grande</button>
-            <button type="button" role="radio" data-v="normal">Pequeño</button>
+          <div class="opt">
+            <span class="lbl">Textura</span>
+            <div class="chips segc" role="radiogroup" aria-label="Textura del papel" data-radio="paperTex">
+              <button type="button" role="radio" data-v="textura">Con textura</button>
+              <button type="button" role="radio" data-v="liso">Liso</button>
+            </div>
           </div>
-        </div>
-        <div class="drow" data-pane="estilo">
-          <span class="lbl" id="lblFormat">Formato</span>
-          <div class="chips" role="radiogroup" aria-labelledby="lblFormat" data-radio="format">
-            <button type="button" role="radio" data-v="1:1">Cuadrado 1:1</button>
-            <button type="button" role="radio" data-v="4:5">Vertical 4:5</button>
-            <button type="button" role="radio" data-v="3:4">Vertical 3:4</button>
+          <div class="opt">
+            <span class="lbl">Sello</span>
+            <div class="optrow">
+              <label class="colorpick" for="stampColor"><input type="color" id="stampColor" value="#9E1610"> Color</label>
+              <button type="button" id="stampReset" class="linkbtn" hidden>Usar el del papel</button>
+            </div>
           </div>
-        </div>
-        <div class="drow" data-pane="estilo">
-          <span class="lbl" id="lblComp">Postales</span>
-          <div class="chips" role="radiogroup" aria-labelledby="lblComp" data-radio="comp">
-            <button type="button" role="radio" data-v="postal">Clásica</button>
-            <button type="button" role="radio" data-v="ficha">Ficha (con N.°, lugar y fecha)</button>
+          <div class="opt">
+            <span class="lbl">Títulos</span>
+            <div class="chips segc" role="radiogroup" aria-label="Letra de los títulos" data-radio="titleFont">
+              <button type="button" role="radio" data-v="mono">Máquina</button>
+              <button type="button" role="radio" data-v="hand">A mano</button>
+            </div>
           </div>
         </div>
 
-        <div class="drow" data-pane="estilo">
-          <span class="lbl" id="lblSwSize">Tamaño de los colores</span>
-          <div class="chips" role="radiogroup" aria-labelledby="lblSwSize" data-radio="swSize">
-            <button type="button" role="radio" data-v="chicos">Chicos</button>
-            <button type="button" role="radio" data-v="medianos">Medianos</button>
-            <button type="button" role="radio" data-v="grandes">Grandes</button>
-          </div>
-        </div>
-        <div class="drow" data-pane="estilo">
-          <span class="lbl" id="lblSwPos">Ubicación de los colores</span>
-          <div class="chips" role="radiogroup" aria-labelledby="lblSwPos" data-radio="swPos">
-            <button type="button" role="radio" data-v="centro">Abajo al centro</button>
-            <button type="button" role="radio" data-v="izquierda">Abajo a la izquierda</button>
-            <button type="button" role="radio" data-v="costado">Al costado (ideal fotos verticales)</button>
-          </div>
-        </div>
-        <div class="drow" data-pane="estilo">
-          <span class="lbl"></span>
-          <label class="check"><input type="checkbox" id="vertSep"> Las fotos verticales usan su propio diseño</label>
-        </div>
-        <div class="dgroup" data-pane="estilo" id="vertBox">
-          <h3>Fotos verticales</h3>
-          <div class="drow">
-            <span class="lbl" id="lblPhotoSizeV">Foto en la postal</span>
-            <div class="chips" role="radiogroup" aria-labelledby="lblPhotoSizeV" data-radio="photoSizeV">
-              <button type="button" role="radio" data-v="grande">Grande</button>
-              <button type="button" role="radio" data-v="normal">Pequeño</button>
+        <!-- Postal: tamaño y orden de las cosas -->
+        <div class="pane" data-pane="postal">
+          <div class="opt">
+            <span class="lbl">Formato</span>
+            <div class="chips segc" role="radiogroup" aria-label="Formato" data-radio="format" title="Es uno solo para todo el carrusel: Instagram recorta todas las imágenes a la proporción de la primera">
+              <button type="button" role="radio" data-v="1:1">1:1</button>
+              <button type="button" role="radio" data-v="4:5">4:5</button>
+              <button type="button" role="radio" data-v="3:4">3:4</button>
             </div>
           </div>
-          <div class="drow">
-            <span class="lbl" id="lblSwSizeV">Tamaño de los colores</span>
-            <div class="chips" role="radiogroup" aria-labelledby="lblSwSizeV" data-radio="swSizeV">
+          <div class="opt">
+            <span class="lbl">Tipo</span>
+            <div class="chips segc" role="radiogroup" aria-label="Tipo de postal" data-radio="comp">
+              <button type="button" role="radio" data-v="postal">Postal</button>
+              <button type="button" role="radio" data-v="ficha">Ficha</button>
+            </div>
+          </div>
+          <div class="opt" data-ifpostal>
+            <span class="lbl">Foto</span>
+            <div class="chips segc" role="radiogroup" aria-label="Tamaño de la foto" data-radio="photoSize">
+              <button type="button" role="radio" data-v="grande">Grande</button>
+              <button type="button" role="radio" data-v="normal">Pequeña</button>
+            </div>
+          </div>
+          <h3 class="sect">Colores</h3>
+          <div class="opt stack">
+            <span class="lbl">Forma</span>
+            <div id="shapes" class="shapes" role="radiogroup" aria-label="Forma de los colores"></div>
+          </div>
+          <div class="opt" data-ifpostal>
+            <span class="lbl">Tamaño</span>
+            <div class="chips segc" role="radiogroup" aria-label="Tamaño de los colores" data-radio="swSize">
               <button type="button" role="radio" data-v="chicos">Chicos</button>
               <button type="button" role="radio" data-v="medianos">Medianos</button>
               <button type="button" role="radio" data-v="grandes">Grandes</button>
             </div>
           </div>
-          <div class="drow">
-            <span class="lbl" id="lblSwPosV">Ubicación de los colores</span>
-            <div class="chips" role="radiogroup" aria-labelledby="lblSwPosV" data-radio="swPosV">
-              <button type="button" role="radio" data-v="centro">Abajo al centro</button>
-              <button type="button" role="radio" data-v="izquierda">Abajo a la izquierda</button>
-              <button type="button" role="radio" data-v="costado">Al costado</button>
+          <div class="opt" data-ifpostal>
+            <span class="lbl">Ubicación</span>
+            <div class="chips segc" role="radiogroup" aria-label="Ubicación de los colores" data-radio="swPos">
+              <button type="button" role="radio" data-v="auto" title="Verticales al costado, horizontales abajo">Auto</button>
+              <button type="button" role="radio" data-v="centro">Abajo</button>
+              <button type="button" role="radio" data-v="izquierda">Izquierda</button>
+              <button type="button" role="radio" data-v="costado">Costado</button>
             </div>
           </div>
-          <p class="subhint">Las de arriba quedan para las horizontales. El formato (1:1, 4:5…) es uno solo para todo el carrusel, porque Instagram recorta todas las imágenes a la proporción de la primera.</p>
-        </div>
-        <div class="dgroup" data-pane="estilo">
-          <h3 id="lblShape">Forma de los colores</h3>
-          <div id="shapes" class="shapes" role="radiogroup" aria-labelledby="lblShape"></div>
+          <p class="subhint" data-ifpostal>Vale para todas las fotos. <b>Auto</b> pone los colores al costado en las verticales y abajo en las horizontales. Para cambiar una sola, abrí «Diseño de esta postal» en su tarjeta.</p>
         </div>
 
-        <div class="dgroup" data-pane="detalles">
-          <h3>Foto y detalles</h3>
-          <div class="drow">
-            <span class="lbl" id="lblFrame">Marco</span>
-            <div class="chips" role="radiogroup" aria-labelledby="lblFrame" data-radio="frame">
-              <button type="button" role="radio" data-v="fina">Línea fina</button>
-              <button type="button" role="radio" data-v="blanca">Borde blanco</button>
-              <button type="button" role="radio" data-v="negativo">Negativo</button>
-              <button type="button" role="radio" data-v="ninguno">Sin marco</button>
-            </div>
+        <!-- Detalles: adornos y extras -->
+        <div class="pane" data-pane="detalles">
+          <div class="opt">
+            <label class="lbl" for="frameSel">Marco</label>
+            <select id="frameSel" class="inp" data-sel="frame">
+              <option value="fina">Línea fina</option>
+              <option value="blanca">Borde blanco</option>
+              <option value="negativo">Negativo</option>
+              <option value="ninguno">Sin marco</option>
+            </select>
           </div>
-          <div class="drow">
-            <label class="lbl" for="decoSel">Detalles</label>
-            <select id="decoSel" class="inp" style="width:auto;height:36px">
-              <optgroup label="Nuevos">
+          <div class="opt">
+            <label class="lbl" for="decoSel">Decoración</label>
+            <select id="decoSel" class="inp">
+              <optgroup label="Nuevas">
                 <option value="troquelado">Estampilla troquelada</option>
                 <option value="cortes">Marcas de imprenta</option>
                 <option value="cinta-color">Cinta del color de la foto</option>
                 <option value="paspartu">Paspartú de galería</option>
               </optgroup>
               <optgroup label="Anteriores">
-              <option value="cintas-clip">Cintas y clips (original)</option>
-              <option value="cintas">Solo cintas</option>
-              <option value="clips">Solo clips</option>
-              <option value="esquineros">Esquineros de álbum</option>
-              <option value="chinches">Chinches</option>
-              <option value="broches">Broches de madera e hilo</option>
+                <option value="cintas-clip">Cintas y clips (original)</option>
+                <option value="cintas">Solo cintas</option>
+                <option value="clips">Solo clips</option>
+                <option value="esquineros">Esquineros de álbum</option>
+                <option value="chinches">Chinches</option>
+                <option value="broches">Broches de madera e hilo</option>
               </optgroup>
-              <option value="ninguno">Sin detalles</option>
+              <option value="ninguno">Sin decoración</option>
             </select>
           </div>
-          <div class="drow">
+          <div class="opt" id="decoPostalRow">
             <span class="lbl"></span>
             <label class="check"><input type="checkbox" id="decoPostal"> También en las postales</label>
+          </div>
+          <h3 class="sect">Extras</h3>
+          <div class="checks">
+            <label class="check"><input type="checkbox" id="exCounter"> Numeración a fibrón (1/4, 2/4…)</label>
+            <div class="optsub" id="counterInkRow">
+              <div class="chips segc" role="radiogroup" aria-label="Color del fibrón" data-radio="counterInk">
+                <button type="button" role="radio" data-v="tinta">Tinta</button>
+                <button type="button" role="radio" data-v="sello">Color del sello</button>
+              </div>
+            </div>
+            <label class="check"><input type="checkbox" id="exPostmark"> Matasellos con lugar y fecha</label>
+            <label class="check"><input type="checkbox" id="exFilmdate"> Fecha de rollo sobre la foto</label>
+            <label class="check"><input type="checkbox" id="exBorder"> Borde de correo aéreo</label>
             <label class="check"><input type="checkbox" id="tilt"> Fotos inclinadas en la grilla</label>
           </div>
-          <div class="drow">
-            <span class="lbl">Extras</span>
-            <label class="check"><input type="checkbox" id="exPostmark"> Matasellos con lugar y fecha</label>
-            <label class="check"><input type="checkbox" id="exBorder"> Borde de correo aéreo</label>
-            <label class="check"><input type="checkbox" id="exFilmdate"> Fecha de rollo sobre la foto</label>
-          </div>
-          <div class="drow">
-            <span class="lbl"></span>
-            <label class="check"><input type="checkbox" id="exCounter"> Numerar las postales a fibrón (1/4, 2/4…)</label>
-            <div class="chips" role="radiogroup" aria-label="Color del fibrón" data-radio="counterInk">
-              <button type="button" role="radio" data-v="tinta">Tinta</button>
-              <button type="button" role="radio" data-v="sello">Color del sello</button>
+          <details class="more">
+            <summary><span>Datos que se ven</span><span class="more-sum" id="datosSum"></span></summary>
+            <div class="opt stack">
+              <span class="lbl" id="lblShowPostal">En las postales</span>
+              <div class="chips" data-scope="postal" role="group" aria-labelledby="lblShowPostal"></div>
             </div>
-          </div>
-          <div class="drow">
-            <span class="lbl" id="lblFont">Letra de títulos</span>
-            <div class="chips" role="radiogroup" aria-labelledby="lblFont" data-radio="titleFont">
-              <button type="button" role="radio" data-v="mono">Máquina de escribir</button>
-              <button type="button" role="radio" data-v="hand">A mano</button>
+            <div class="opt stack">
+              <span class="lbl" id="lblShowGrid">En fichas y grillas</span>
+              <div class="chips" data-scope="grid" role="group" aria-labelledby="lblShowGrid"></div>
+            </div>
+            <p class="subhint">Los datos de cámara salen de cada foto. Si faltan, completalos en «Datos de cámara» de esa foto.</p>
+          </details>
+        </div>
+
+        <!-- Portada -->
+        <div class="pane" data-pane="portada" id="coverBox">
+          <label class="check big"><input type="checkbox" id="cvOn"> Sumar una portada como primera imagen</label>
+          <p class="subhint" id="cvOffHint">La foto sola, sin plantilla, para frenar el scroll. También puede llevar título o ir como tapa de libro.</p>
+          <div id="cvOpts">
+            <div class="opt">
+              <label class="lbl" for="cvPhoto">Foto</label>
+              <select id="cvPhoto" class="inp"></select>
+            </div>
+            <div class="opt">
+              <span class="lbl">Diseño</span>
+              <div class="chips segc" role="radiogroup" aria-label="Diseño de la portada" data-cradio="look">
+                <button type="button" role="radio" data-v="sola">Solo foto</button>
+                <button type="button" role="radio" data-v="titulo">Título</button>
+                <button type="button" role="radio" data-v="libro">Libro</button>
+              </div>
+            </div>
+            <div class="opt stack" id="cvTextRow">
+              <div class="rc-grid">
+                <label>Título<input id="cvTitle" class="inp" type="text" placeholder="Vacío = el lugar" autocomplete="off"></label>
+                <label>Subtítulo<input id="cvSub" class="inp" type="text" placeholder="Ej. Postales de primavera" autocomplete="off"></label>
+              </div>
+            </div>
+            <div class="opt">
+              <span class="lbl">Tamaño</span>
+              <div class="chips segc" role="radiogroup" aria-label="Tamaño de la foto en la portada" data-cradio="size">
+                <button type="button" role="radio" data-v="grande">Grande</button>
+                <button type="button" role="radio" data-v="mediano">Mediana</button>
+              </div>
+            </div>
+            <div class="opt">
+              <label class="lbl" for="cvFrameSel">Marco</label>
+              <select id="cvFrameSel" class="inp" data-csel="frame">
+                <option value="ninguno">Sin marco</option>
+                <option value="fina">Línea fina</option>
+                <option value="blanca">Borde blanco</option>
+                <option value="paspartu">Paspartú</option>
+                <option value="troquelado">Estampilla</option>
+                <option value="negativo">Negativo</option>
+              </select>
+            </div>
+            <div class="opt">
+              <span class="lbl">Fondo</span>
+              <div class="chips segc" role="radiogroup" aria-label="Fondo de la portada" data-cradio="bg">
+                <button type="button" role="radio" data-v="blanco">Blanco</button>
+                <button type="button" role="radio" data-v="papel">Papel</button>
+                <button type="button" role="radio" data-v="foto">De la foto</button>
+                <button type="button" role="radio" data-v="otro">Otro</button>
+              </div>
+            </div>
+            <div class="opt" id="cvFotoRow">
+              <span class="lbl"></span>
+              <div class="optrow">
+                <div class="chips" id="cvSw" role="group" aria-label="Color de la foto"></div>
+                <div class="chips segc" role="radiogroup" aria-label="Intensidad" data-cradio="tone">
+                  <button type="button" role="radio" data-v="suave">Suave</button>
+                  <button type="button" role="radio" data-v="intenso">Intenso</button>
+                </div>
+              </div>
+            </div>
+            <div class="opt" id="cvColorRow">
+              <span class="lbl"></span>
+              <label class="colorpick" for="cvColor"><input type="color" id="cvColor" value="#F3EFE6"> Elegir color</label>
             </div>
           </div>
         </div>
 
-        <div class="dgroup" data-pane="datos">
-          <h3>Datos que se ven</h3>
-          <div class="drow">
-            <span class="lbl" id="lblShowPostal">En postales</span>
-            <div class="chips" data-scope="postal" role="group" aria-labelledby="lblShowPostal"></div>
-          </div>
-          <div class="drow">
-            <span class="lbl" id="lblShowGrid">En fichas y grillas</span>
-            <div class="chips" data-scope="grid" role="group" aria-labelledby="lblShowGrid"></div>
-          </div>
-          <p class="subhint">Los datos de cámara salen de cada foto. Si faltan, completalos en “Datos de cámara” de esa foto.</p>
-        </div>
-
-        <div class="dgroup" id="coverBox" data-pane="portada">
-          <h3>Portada</h3>
-          <div class="drow">
-            <label class="check"><input type="checkbox" id="cvOn"> Sumar una portada como primera imagen</label>
-          </div>
-          <div class="drow">
-            <label class="lbl" for="cvPhoto">Foto</label>
-            <select id="cvPhoto" class="inp" style="width:auto;height:36px"></select>
-          </div>
-          <div class="drow">
-            <span class="lbl" id="lblCvStyle">Diseño</span>
-            <div class="chips" role="radiogroup" aria-labelledby="lblCvStyle" data-cradio="look">
-              <button type="button" role="radio" data-v="sola">Solo la foto</button>
-              <button type="button" role="radio" data-v="titulo">Título arriba</button>
-              <button type="button" role="radio" data-v="libro">Tapa de libro</button>
+        <!-- Receta -->
+        <div class="pane" data-pane="receta" id="recipeBox">
+          <label class="check big"><input type="checkbox" id="rcOn"> Sumar la receta Fujifilm al carrusel</label>
+          <div id="rcOpts">
+            <div class="opt">
+              <span class="lbl">Posición</span>
+              <div class="chips segc" role="radiogroup" aria-label="Dónde va la receta" data-rradio="pos">
+                <button type="button" role="radio" data-v="start">Al principio</button>
+                <button type="button" role="radio" data-v="end">Al final</button>
+              </div>
             </div>
-          </div>
-          <div class="drow">
-            <span class="lbl" id="lblCvBg">Fondo</span>
-            <div class="chips" role="radiogroup" aria-labelledby="lblCvBg" data-cradio="bg">
-              <button type="button" role="radio" data-v="blanco">Blanco</button>
-              <button type="button" role="radio" data-v="papel">Papel del estilo</button>
-              <button type="button" role="radio" data-v="foto">Color de la foto</button>
-              <button type="button" role="radio" data-v="otro">Otro</button>
+            <div class="opt">
+              <span class="lbl">Hoja</span>
+              <div class="chips segc" role="radiogroup" aria-label="Hoja" data-rradio="paper">
+                <button type="button" role="radio" data-v="cuaderno">Cuaderno</button>
+                <button type="button" role="radio" data-v="carta">Carta</button>
+              </div>
             </div>
-            <label class="colorpick" for="cvColor"><input type="color" id="cvColor" value="#F3EFE6"> Elegir</label>
-          </div>
-          <div class="drow" id="cvFotoRow">
-            <span class="lbl">Color</span>
-            <div class="chips" id="cvSw" role="group" aria-label="Color de la foto"></div>
-            <div class="chips" role="radiogroup" aria-label="Intensidad" data-cradio="tone">
-              <button type="button" role="radio" data-v="suave">Suave</button>
-              <button type="button" role="radio" data-v="intenso">Intenso</button>
+            <div class="opt">
+              <span class="lbl">Tinta</span>
+              <div class="chips segc" role="radiogroup" aria-label="Tinta" data-rradio="ink">
+                <button type="button" role="radio" data-v="azul">Azul</button>
+                <button type="button" role="radio" data-v="negra">Negra</button>
+                <button type="button" role="radio" data-v="sepia">Sepia</button>
+              </div>
             </div>
-          </div>
-          <div class="drow">
-            <span class="lbl" id="lblCvSize">Tamaño de la foto</span>
-            <div class="chips" role="radiogroup" aria-labelledby="lblCvSize" data-cradio="size">
-              <button type="button" role="radio" data-v="grande">Grande</button>
-              <button type="button" role="radio" data-v="mediano">Mediano</button>
+            <div class="opt">
+              <label class="lbl" for="rcPhoto">Foto</label>
+              <select id="rcPhoto" class="inp"></select>
             </div>
-          </div>
-          <div class="drow">
-            <span class="lbl" id="lblCvFrame">Marco</span>
-            <div class="chips" role="radiogroup" aria-labelledby="lblCvFrame" data-cradio="frame">
-              <button type="button" role="radio" data-v="ninguno">Sin marco</button>
-              <button type="button" role="radio" data-v="fina">Línea fina</button>
-              <button type="button" role="radio" data-v="blanca">Borde blanco</button>
-              <button type="button" role="radio" data-v="paspartu">Paspartú</button>
-              <button type="button" role="radio" data-v="troquelado">Estampilla</button>
-              <button type="button" role="radio" data-v="negativo">Negativo</button>
+            <div class="opt stack">
+              <div class="rc-grid">
+                <label>Nombre de la receta<input id="rcTitle" class="inp" type="text" autocomplete="off"></label>
+                <label>Cámara<input id="rcCam" class="inp" type="text" autocomplete="off"></label>
+              </div>
+              <label class="rc-field">Ajustes · uno por renglón, «Nombre: valor»<textarea id="rcText" class="inp" rows="11" spellcheck="false"></textarea></label>
+              <label class="rc-field">Nota al pie (opcional)<input id="rcNote" class="inp" type="text" placeholder="Ej. ideal para días nublados" autocomplete="off"></label>
+              <div class="optrow"><button type="button" id="rcReset" class="btn btn-ghost mini">Volver a mi receta</button><span class="subhint">Queda guardado en este navegador.</span></div>
             </div>
-          </div>
-          <div class="rc-grid">
-            <label>Título<input id="cvTitle" class="inp" type="text" placeholder="Vacío = el lugar" autocomplete="off"></label>
-            <label>Subtítulo<input id="cvSub" class="inp" type="text" placeholder="Ej. Postales de primavera" autocomplete="off"></label>
-          </div>
-          <p class="subhint">«Solo la foto» no lleva texto: la foto entera, sin recortar, sobre el fondo. Va en el mismo formato que el resto del carrusel.</p>
-        </div>
-
-        <div class="dgroup" id="recipeBox" data-pane="receta">
-          <h3>Receta Fujifilm</h3>
-          <div class="drow">
-            <label class="check"><input type="checkbox" id="rcOn"> Sumar la receta al carrusel</label>
-            <div class="chips" role="radiogroup" aria-label="Dónde va la receta" data-rradio="pos">
-              <button type="button" role="radio" data-v="start">Al principio</button>
-              <button type="button" role="radio" data-v="end">Al final</button>
-            </div>
-          </div>
-          <div class="drow">
-            <span class="lbl" id="lblRcPaper">Hoja</span>
-            <div class="chips" role="radiogroup" aria-labelledby="lblRcPaper" data-rradio="paper">
-              <button type="button" role="radio" data-v="cuaderno">Hoja de cuaderno</button>
-              <button type="button" role="radio" data-v="carta">Carta doblada</button>
-            </div>
-          </div>
-          <div class="drow">
-            <span class="lbl" id="lblRcInk">Tinta</span>
-            <div class="chips" role="radiogroup" aria-labelledby="lblRcInk" data-rradio="ink">
-              <button type="button" role="radio" data-v="azul">Birome azul</button>
-              <button type="button" role="radio" data-v="negra">Negra</button>
-              <button type="button" role="radio" data-v="sepia">Sepia</button>
-            </div>
-          </div>
-          <div class="drow">
-            <label class="lbl" for="rcPhoto">Foto en la nota</label>
-            <select id="rcPhoto" class="inp" style="width:auto;height:36px"></select>
-          </div>
-          <div class="rc-grid">
-            <label>Nombre de la receta<input id="rcTitle" class="inp" type="text" autocomplete="off"></label>
-            <label>Cámara<input id="rcCam" class="inp" type="text" autocomplete="off"></label>
-          </div>
-          <label class="rc-field">Ajustes · uno por renglón, “Nombre: valor”<textarea id="rcText" class="inp" rows="11" spellcheck="false"></textarea></label>
-          <label class="rc-field">Nota al pie (opcional)<input id="rcNote" class="inp" type="text" placeholder="Ej. ideal para días nublados" autocomplete="off"></label>
-          <div class="drow">
-            <button type="button" id="rcReset" class="btn btn-ghost mini">Volver a mi receta</button>
-            <span class="subhint">Lo que escribas acá queda guardado en este navegador.</span>
           </div>
         </div>
       </section>
@@ -789,8 +817,7 @@ const state = {
   style:'archivo', custom:'#D8C7A6', deco:'cintas-clip', decoPostal:false, tilt:false,
   extras:{postmark:false, border:false, filmdate:false, counter:false},
   shape:'cuadrados', frame:'fina', format:'1:1', comp:'postal', titleFont:'mono', lastEnd:0,
-  photoSize:'grande', stampColor:'', paperTex:'textura', swSize:'medianos', swPos:'centro', counterInk:'tinta',
-  vertSep:true, photoSizeV:'grande', swSizeV:'medianos', swPosV:'costado',
+  photoSize:'grande', stampColor:'', paperTex:'textura', swSize:'medianos', swPos:'auto', counterInk:'tinta',
   show:{
     postal:{title:true, num:false, place:false, date:false, time:false, gps:false, cam:false, lens:false, focal:false, ap:false, sh:false, iso:false},
     grid:{num:true, place:true, date:true, time:false, gps:false, cam:false, lens:false, focal:false, ap:false, sh:false, iso:false}
@@ -809,7 +836,7 @@ const COVER_DEFAULT = {on:false, photo:0, look:'sola', bg:'blanco', color:'#F3EF
 state.cover = {...COVER_DEFAULT};
 const PENS = {azul:'#1F3A7A', negra:'#1E1D1B', sepia:'#5B3A22'};
 const PREF_KEY = 'postales-ojodecristi-v1';
-const PREF_FIELDS = ['style','custom','deco','decoPostal','tilt','extras','shape','frame','format','comp','titleFont','size','show','lastEnd','recipe','photoSize','stampColor','paperTex','swSize','swPos','counterInk','cover','vertSep','photoSizeV','swSizeV','swPosV'];
+const PREF_FIELDS = ['style','custom','deco','decoPostal','tilt','extras','shape','frame','format','comp','titleFont','size','show','lastEnd','recipe','photoSize','stampColor','paperTex','swSize','swPos','counterInk','cover'];
 function loadPrefs(){
   try{
     const o = JSON.parse(localStorage.getItem(PREF_KEY) || 'null'); if (!o || typeof o !== 'object') return;
@@ -822,6 +849,9 @@ function loadPrefs(){
       else state[k] = o[k];
     }
     if (!FORMATS[state.format]) state.format = '1:1';
+    /* antes había un bloque aparte para verticales; «Auto» hace lo mismo */
+    if (o.swPos === 'centro' && o.vertSep !== false && (o.swPosV || 'costado') === 'costado') state.swPos = 'auto';
+    if (!['auto','centro','izquierda','costado'].includes(state.swPos)) state.swPos = 'auto';
   } catch(e){}
 }
 function savePrefs(){ try{ const o = {}; PREF_FIELDS.forEach(k => o[k] = state[k]); localStorage.setItem(PREF_KEY, JSON.stringify(o)); } catch(e){} }
@@ -1690,10 +1720,16 @@ const dimsOf = size => ({w:size, h:Math.round(size * (FORMATS[state.format] || 1
 /* Layout de la postal, armado por partes: tamaño de foto (grande / pequeño),
    tamaño de los colores (chicos / medianos / grandes) y su ubicación (abajo al centro, abajo a la izquierda, al costado). */
 function isVert(p){ return !!(p && p.fw && p.fh && p.fh > p.fw*1.05); }
-/* las fotos verticales pueden tener su propio diseño (foto, tamaño y ubicación de los colores) */
+/* ubicación y tamaño de los colores: el general, o lo que se eligió en esa foto. «auto» = verticales al costado */
 function layOf(p){
-  const v = state.vertSep && isVert(p);
-  return v ? {v, photoSize:state.photoSizeV, swSize:state.swSizeV, swPos:state.swPosV} : {v:false, photoSize:state.photoSize, swSize:state.swSize, swPos:state.swPos};
+  const L = (p && p.lay) || {}, pos = L.pos || state.swPos, v = isVert(p);
+  return {v, photoSize:state.photoSize, swSize:L.size || state.swSize, swPos:pos === 'auto' ? (v ? 'costado' : 'centro') : pos};
+}
+const POS_TXT = {centro:'abajo', izquierda:'abajo a la izquierda', costado:'al costado'}, SIZE_TXT = {chicos:'chicos', medianos:'medianos', grandes:'grandes'};
+function laySummary(p){
+  const L = (p && p.lay) || {}, Lo = layOf(p);
+  if (!L.pos && !L.size) return 'Como todas · colores ' + POS_TXT[Lo.swPos];
+  return 'Colores ' + POS_TXT[Lo.swPos] + (L.size ? ', ' + SIZE_TXT[L.size] : '');
 }
 const PTOP = 50, SW_K = {chicos:0.75, medianos:1, grandes:1.15}, DECO_M = {troquelado:13, paspartu:17, cortes:18};
 function postalLayout(p, n, H, mini){
@@ -2298,6 +2334,13 @@ function renderPhotos(){
             <button type="button" class="ico" data-act="del" aria-label="Quitar foto ${i+1}">✕</button>
           </div>
         </div>
+        <details class="pc-tech" data-layd="${id}"${p.layOpen ? ' open' : ''}>
+          <summary><span>Diseño de esta postal</span><span class="pc-tech-sum" id="laysum-${id}">${esc(laySummary(p))}</span></summary>
+          <div class="lay-grid">
+            <div class="lay-row"><span class="lbl">Colores</span><div class="chips" data-lay="pos">${[['','Como todas'],['centro','Abajo'],['izquierda','Izquierda'],['costado','Costado']].map(([v, l]) => `<button type="button" data-v="${v}" aria-pressed="${((p.lay && p.lay.pos) || '') === v}">${l}</button>`).join('')}</div></div>
+            <div class="lay-row"><span class="lbl">Tamaño</span><div class="chips" data-lay="size">${[['','Como todas'],['chicos','Chicos'],['medianos','Medianos'],['grandes','Grandes']].map(([v, l]) => `<button type="button" data-v="${v}" aria-pressed="${((p.lay && p.lay.size) || '') === v}">${l}</button>`).join('')}</div></div>
+          </div>
+        </details>
         <details class="pc-tech" data-tech="${id}"${p.techOpen ? ' open' : ''}>
           <summary><span>Datos de cámara</span><span class="pc-tech-sum" id="techsum-${id}">${esc(techSummary(p))}</span></summary>
           <div class="tech-grid">
@@ -2321,9 +2364,20 @@ photoList.addEventListener('input', e => {
   else if (tk){ p.tech[tk] = e.target.value; const s = document.getElementById('techsum-' + p.id); if (s) s.textContent = techSummary(p); }
   scheduleOut();
 });
-photoList.addEventListener('toggle', e => { const d = e.target.closest && e.target.closest('[data-tech]'); if (!d) return; const p = photoById(d.dataset.tech); if (p) p.techOpen = d.open; }, true);
+photoList.addEventListener('toggle', e => {
+  const l = e.target.closest && e.target.closest('[data-layd]'); if (l){ const p = photoById(l.dataset.layd); if (p) p.layOpen = l.open; return; }
+  const d = e.target.closest && e.target.closest('[data-tech]'); if (!d) return; const p = photoById(d.dataset.tech); if (p) p.techOpen = d.open;
+}, true);
 photoList.addEventListener('click', e => {
   const li = e.target.closest('.pcard'); if (!li) return; const p = photoById(li.dataset.id); if (!p) return;
+  const lay = e.target.closest('[data-lay] button[data-v]');
+  if (lay){
+    const box = lay.parentElement, key = box.dataset.lay, v = lay.dataset.v;
+    p.lay = Object.assign({}, p.lay); if (v) p.lay[key] = v; else delete p.lay[key]; if (!Object.keys(p.lay).length) p.lay = null;
+    box.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b === lay)));
+    const sum = document.getElementById('laysum-' + p.id); if (sum) sum.textContent = laySummary(p);
+    scheduleOut(); return;
+  }
   const chip = e.target.closest('[data-chip]'), act = e.target.closest('[data-act]'), ai = e.target.closest('[data-ai]'), ait = e.target.closest('[data-aititle]');
   if (ai){ suggestName(p, +ai.dataset.ai, ai); return; }
   const alt = e.target.closest('[data-alt]'); if (alt){ cycleName(p, +alt.dataset.alt); return; }
@@ -2365,7 +2419,7 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape' && state.pick
 /* ---------- UI: design panel ---------- */
 function buildDesign(){
   const all = [...STYLES, {id:'custom', name:'Tu color'}];
-  $('#styles').innerHTML = all.map(s => `<button type="button" class="style-card" role="radio" data-style="${s.id}" aria-checked="${s.id === state.style}"><canvas width="176" height="176" data-style="${s.id}"></canvas><span>${esc(s.name)}</span></button>`).join('');
+  $('#styles').innerHTML = all.map(s => `<button type="button" class="style-card" role="radio" title="${esc(s.name)}" data-style="${s.id}" aria-checked="${s.id === state.style}"><canvas width="176" height="176" data-style="${s.id}"></canvas><span class="sr">${esc(s.name)}</span></button>`).join('');
   $('#shapes').innerHTML = SHAPES.map(([id, name]) => `<button type="button" class="shape-card" role="radio" data-shape="${id}" aria-checked="${id === state.shape}"><canvas width="192" height="88" data-shape="${id}"></canvas><span>${name}</span></button>`).join('');
   document.querySelectorAll('.chips[data-scope]').forEach(box => {
     const scope = box.dataset.scope;
@@ -2380,11 +2434,22 @@ function syncDesign(){
   $('#decoSel').value = state.deco; $('#decoPostal').checked = state.decoPostal; $('#tilt').checked = state.tilt;
   $('#exPostmark').checked = state.extras.postmark; $('#exBorder').checked = state.extras.border; $('#exFilmdate').checked = state.extras.filmdate; $('#exCounter').checked = !!state.extras.counter;
   $('#customColor').value = state.custom;
-  $('#vertSep').checked = state.vertSep; $('#vertBox').hidden = !state.vertSep;
-  { const h = state.vertSep ? ' (horizontales)' : ''; $('#lblPhotoSize').textContent = 'Foto en la postal' + h; $('#lblSwSize').textContent = 'Tamaño de los colores' + h; $('#lblSwPos').textContent = 'Ubicación de los colores' + h; }
+  $('#paperName').textContent = currentStyle().name;
+  $('#customRow').hidden = state.style !== 'custom';
+  document.querySelectorAll('[data-ifpostal]').forEach(el => el.hidden = state.comp === 'ficha');
+  $('#decoPostalRow').hidden = state.deco === 'ninguno';
+  $('#counterInkRow').hidden = !state.extras.counter;
+  document.querySelectorAll('select[data-sel]').forEach(x => x.value = state[x.dataset.sel]);
+  $('#datosSum').textContent = datosSummary();
+  state.photos.forEach(p => { const el = document.getElementById('laysum-' + p.id); if (el) el.textContent = laySummary(p); });
   { const st = baseStyle(); $('#stampColor').value = state.stampColor || st.stamp || '#9E1610'; $('#stampReset').hidden = !state.stampColor; }
   document.querySelectorAll('.seg button').forEach(x => x.setAttribute('aria-checked', String(+x.dataset.size === state.size)));
   document.querySelectorAll('.chips[data-scope]').forEach(box => box.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(!!state.show[box.dataset.scope][b.dataset.k]))));
+  syncPresetSel();
+}
+function datosSummary(){
+  const on = sc => FIELDS.filter(([k]) => state.show[sc][k]).map(([, l]) => l).join(', ') || 'nada';
+  return 'Postal: ' + on('postal') + ' · Grilla: ' + on('grid');
 }
 const DEMO = [{hex:'#4F86B1', name:''}, {hex:'#E69E65', name:''}, {hex:'#7E4021', name:''}];
 function renderShapeThumbs(){
@@ -2430,7 +2495,8 @@ $('#customColor').addEventListener('input', e => {
   if (c){ const keep = S; S = customStyle(state.custom); const ctx = c.getContext('2d'); ctx.setTransform(c.width/D,0,0,c.height/D,0,0); if (state.photos[0]) drawPostal(ctx, state.photos[0], state.startNum, false, true, D); else paper(ctx, false, D); ctx.setTransform(1,0,0,1,0,0); S = keep; }
   scheduleOut();
 });
-$('#decoSel').addEventListener('change', e => { state.deco = e.target.value; scheduleOut(); });
+$('#decoSel').addEventListener('change', e => { state.deco = e.target.value; syncDesign(); scheduleOut(); });
+document.querySelectorAll('select[data-sel]').forEach(x => x.addEventListener('change', () => { state[x.dataset.sel] = x.value; syncDesign(); scheduleOut(); }));
 $('#stampColor').addEventListener('input', e => { state.stampColor = e.target.value; syncDesign(); renderStyleThumbs(); scheduleOut(); });
 $('#stampReset').addEventListener('click', () => { state.stampColor = ''; syncDesign(); renderStyleThumbs(); scheduleOut(); });
 $('#decoPostal').addEventListener('change', e => { state.decoPostal = e.target.checked; scheduleOut(); });
@@ -2438,12 +2504,11 @@ $('#tilt').addEventListener('change', e => { state.tilt = e.target.checked; sche
 $('#exPostmark').addEventListener('change', e => { state.extras.postmark = e.target.checked; scheduleOut(); });
 $('#exBorder').addEventListener('change', e => { state.extras.border = e.target.checked; scheduleOut(); });
 $('#exFilmdate').addEventListener('change', e => { state.extras.filmdate = e.target.checked; scheduleOut(); });
-$('#vertSep').addEventListener('change', e => { state.vertSep = e.target.checked; syncDesign(); scheduleOut(); });
-$('#exCounter').addEventListener('change', e => { state.extras.counter = e.target.checked; scheduleOut(); });
+$('#exCounter').addEventListener('change', e => { state.extras.counter = e.target.checked; syncDesign(); scheduleOut(); });
 document.querySelectorAll('.chips[data-scope]').forEach(box => box.addEventListener('click', e => {
   const b = e.target.closest('button[data-k]'); if (!b) return;
   const sc = state.show[box.dataset.scope]; sc[b.dataset.k] = !sc[b.dataset.k];
-  b.setAttribute('aria-pressed', String(sc[b.dataset.k])); scheduleOut();
+  b.setAttribute('aria-pressed', String(sc[b.dataset.k])); $('#datosSum').textContent = datosSummary(); scheduleOut();
 }));
 
 /* ---------- UI: recipe note ---------- */
@@ -2462,11 +2527,14 @@ function renderCoverSwatches(){
 $('#cvSw').addEventListener('click', e => { const b = e.target.closest('[data-pick]'); if (!b) return; state.cover.pick = +b.dataset.pick; renderCoverSwatches(); scheduleOut(); });
 function syncCover(){
   const C = state.cover; renderCoverSwatches();
+  $('#cvOpts').hidden = !C.on; $('#cvOffHint').hidden = C.on; $('#cvTextRow').hidden = C.look === 'sola'; $('#cvColorRow').hidden = C.bg !== 'otro';
+  document.querySelectorAll('select[data-csel]').forEach(x => x.value = C[x.dataset.csel]);
   $('#cvOn').checked = C.on; $('#cvTitle').value = C.title; $('#cvSub').value = C.sub; $('#cvColor').value = C.color;
   document.querySelectorAll('.chips[data-cradio]').forEach(box => box.querySelectorAll('button').forEach(b => b.setAttribute('aria-checked', String(C[box.dataset.cradio] === b.dataset.v))));
-  renderCoverPhotos();
+  renderCoverPhotos(); syncPresetSel();
 }
-$('#cvOn').addEventListener('change', e => { state.cover.on = e.target.checked; scheduleOut(); });
+$('#cvOn').addEventListener('change', e => { state.cover.on = e.target.checked; syncCover(); scheduleOut(); });
+document.querySelectorAll('select[data-csel]').forEach(x => x.addEventListener('change', () => { state.cover[x.dataset.csel] = x.value; syncCover(); scheduleOut(); }));
 $('#cvPhoto').addEventListener('change', e => { state.cover.photo = +e.target.value; state.cover.pick = -1; renderCoverSwatches(); scheduleOut(); });
 $('#cvTitle').addEventListener('input', e => { state.cover.title = e.target.value; scheduleOut(); });
 $('#cvSub').addEventListener('input', e => { state.cover.sub = e.target.value; scheduleOut(); });
@@ -2478,32 +2546,57 @@ document.querySelectorAll('.chips[data-cradio]').forEach(box => box.addEventList
 
 /* ---------- mis diseños guardados ---------- */
 const PRESET_KEY = 'postales-ojodecristi-disenos';
-const PRESET_FIELDS = ['style','custom','deco','decoPostal','tilt','extras','shape','frame','format','comp','titleFont','photoSize','stampColor','paperTex','swSize','swPos','counterInk','vertSep','photoSizeV','swSizeV','swPosV'];
+const PRESET_FIELDS = ['style','custom','deco','decoPostal','tilt','extras','shape','frame','format','comp','titleFont','photoSize','stampColor','paperTex','swSize','swPos','counterInk'];
 const PRESET_EXAMPLES = [
   {name:'Clásica', d:{style:'archivo', deco:'cintas-clip', decoPostal:false, frame:'fina', format:'1:1', comp:'postal', shape:'cuadrados', photoSize:'normal', paperTex:'textura', swSize:'medianos', swPos:'centro', stampColor:'', extras:{postmark:false, border:false, filmdate:false, counter:false}}},
   {name:'Costa vertical', d:{style:'archivo', deco:'paspartu', decoPostal:true, frame:'fina', format:'4:5', comp:'postal', shape:'cuadrados', photoSize:'grande', paperTex:'liso', swSize:'medianos', swPos:'costado', counterInk:'tinta', extras:{postmark:false, border:false, filmdate:false, counter:true}}, cover:{on:true, look:'sola', bg:'blanco'}}
 ];
-function loadPresets(){ try { const v = JSON.parse(localStorage.getItem(PRESET_KEY) || 'null'); return Array.isArray(v) ? v : PRESET_EXAMPLES.map(x => JSON.parse(JSON.stringify(x))); } catch(e){ return PRESET_EXAMPLES.slice(); } }
+function migratePreset(pr){ if (pr && pr.d && pr.d.vertSep === true && pr.d.swPos === 'centro' && (pr.d.swPosV || 'costado') === 'costado') pr.d.swPos = 'auto'; return pr; }
+function loadPresets(){ try { const v = JSON.parse(localStorage.getItem(PRESET_KEY) || 'null'); return Array.isArray(v) ? v.map(migratePreset) : PRESET_EXAMPLES.map(x => JSON.parse(JSON.stringify(x))); } catch(e){ return PRESET_EXAMPLES.slice(); } }
 function savePresets(list){ try { localStorage.setItem(PRESET_KEY, JSON.stringify(list)); } catch(e){} }
-let PRESETS = [];
-function renderPresets(){
-  $('#presetList').innerHTML = PRESETS.length ? PRESETS.map((pr, i) => `<button type="button" data-preset="${i}">${esc(pr.name)}<span class="x" data-del="${i}" role="button" aria-label="Borrar ${esc(pr.name)}">✕</span></button>`).join('') : '<span class="subhint">Todavía no guardaste ninguno.</span>';
+let PRESETS = [], lastPreset = '';
+const sameVal = (a, b) => (a && typeof a === 'object' && b && typeof b === 'object') ? Object.keys(a).every(k => sameVal(a[k], b[k])) : (a === b || (!a && !b));
+function presetMatches(pr){
+  for (const k in pr.d) if (PRESET_FIELDS.includes(k) && !sameVal(pr.d[k], state[k])) return false;
+  if (pr.cover) for (const k in pr.cover) if (!sameVal(pr.cover[k], state.cover[k])) return false;
+  return true;
 }
-$('#presetSave').addEventListener('click', () => {
-  const name = $('#presetName').value.trim(); if (!name){ toast('Ponele un nombre al diseño'); $('#presetName').focus(); return; }
-  const d = {}; PRESET_FIELDS.forEach(k => d[k] = JSON.parse(JSON.stringify(state[k])));
-  const cover = {on:state.cover.on, look:state.cover.look, bg:state.cover.bg, color:state.cover.color, size:state.cover.size, frame:state.cover.frame, tone:state.cover.tone};
-  const i = PRESETS.findIndex(x => x.name.toLowerCase() === name.toLowerCase());
-  if (i >= 0) PRESETS[i] = {name, d, cover}; else PRESETS.push({name, d, cover});
-  savePresets(PRESETS); renderPresets(); $('#presetName').value = ''; toast('Guardado: ' + name);
-});
-$('#presetList').addEventListener('click', e => {
-  const del = e.target.closest('[data-del]');
-  if (del){ const i = +del.dataset.del, pr = PRESETS[i]; PRESETS.splice(i, 1); savePresets(PRESETS); renderPresets(); toast('Borrado: ' + pr.name); return; }
-  const b = e.target.closest('[data-preset]'); if (!b) return; const pr = PRESETS[+b.dataset.preset]; if (!pr) return;
+let delT = 0;
+function presetDelDisarm(){ const b = $('#presetDel'); clearTimeout(delT); b.classList.remove('armed'); b.textContent = 'Borrar'; }
+function syncPresetSel(){
+  const sel = $('#presetSel'); if (!sel) return;
+  const i = PRESETS.findIndex(presetMatches);
+  sel.innerHTML = `<option value="-1">${i < 0 ? 'Diseño sin guardar' : 'Elegí un diseño…'}</option>` + PRESETS.map((pr, k) => `<option value="${k}">${esc(pr.name)}</option>`).join('');
+  sel.value = String(i); $('#presetDel').hidden = i < 0; presetDelDisarm();
+}
+function applyPreset(pr){
   for (const k of PRESET_FIELDS) if (k in pr.d){ if (k === 'extras') Object.assign(state.extras, pr.d.extras); else state[k] = JSON.parse(JSON.stringify(pr.d[k])); }
   if (pr.cover) Object.assign(state.cover, pr.cover);
+  lastPreset = pr.name;
   syncDesign(); syncCover(); renderStyleThumbs(); renderShapeThumbsSoon(); scheduleOut(); toast('Aplicado: ' + pr.name);
+}
+$('#presetSel').addEventListener('change', e => { const pr = PRESETS[+e.target.value]; if (pr) applyPreset(pr); else syncPresetSel(); });
+function closePresetSave(){ $('#presetSaveRow').hidden = true; }
+$('#presetNew').addEventListener('click', () => {
+  const i = PRESETS.findIndex(presetMatches), row = $('#presetSaveRow');
+  if (!row.hidden){ closePresetSave(); return; }
+  $('#presetName').value = i >= 0 ? PRESETS[i].name : lastPreset; row.hidden = false; $('#presetName').focus(); $('#presetName').select();
+});
+$('#presetCancel').addEventListener('click', closePresetSave);
+function savePresetNow(){
+  const name = $('#presetName').value.trim(); if (!name){ toast('Ponele un nombre al diseño'); $('#presetName').focus(); return; }
+  const d = {}; PRESET_FIELDS.forEach(k => d[k] = JSON.parse(JSON.stringify(state[k])));
+  const C = state.cover, cover = {on:C.on, look:C.look, bg:C.bg, color:C.color, size:C.size, frame:C.frame, tone:C.tone};
+  const i = PRESETS.findIndex(x => x.name.toLowerCase() === name.toLowerCase());
+  if (i >= 0) PRESETS[i] = {name, d, cover}; else PRESETS.push({name, d, cover});
+  lastPreset = name; savePresets(PRESETS); closePresetSave(); syncPresetSel(); toast((i >= 0 ? 'Actualizado: ' : 'Guardado: ') + name);
+}
+$('#presetSave').addEventListener('click', savePresetNow);
+$('#presetName').addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDefault(); savePresetNow(); } else if (e.key === 'Escape') closePresetSave(); });
+$('#presetDel').addEventListener('click', () => {
+  const b = $('#presetDel'), i = +$('#presetSel').value, pr = PRESETS[i]; if (!pr) return;
+  if (!b.classList.contains('armed')){ b.classList.add('armed'); b.textContent = '¿Borrar «' + pr.name + '»?'; clearTimeout(delT); delT = setTimeout(presetDelDisarm, 4000); return; }
+  PRESETS.splice(i, 1); savePresets(PRESETS); syncPresetSel(); toast('Borrado: ' + pr.name);
 });
 function renderRecipePhotos(){
   renderCoverPhotos();
@@ -2514,12 +2607,12 @@ function renderRecipePhotos(){
 }
 function syncRecipe(){
   const R = state.recipe;
-  $('#rcOn').checked = R.on;
+  $('#rcOn').checked = R.on; $('#rcOpts').hidden = !R.on;
   document.querySelectorAll('.chips[data-rradio]').forEach(box => box.querySelectorAll('button').forEach(b => b.setAttribute('aria-checked', String(R[box.dataset.rradio] === b.dataset.v))));
   $('#rcTitle').value = R.title; $('#rcCam').value = R.cam; $('#rcText').value = R.text; $('#rcNote').value = R.note;
   renderRecipePhotos();
 }
-$('#rcOn').addEventListener('change', e => { state.recipe.on = e.target.checked; scheduleOut(); });
+$('#rcOn').addEventListener('change', e => { state.recipe.on = e.target.checked; syncRecipe(); scheduleOut(); });
 document.querySelectorAll('.chips[data-rradio]').forEach(box => box.addEventListener('click', e => {
   const b = e.target.closest('button[data-v]'); if (!b) return;
   state.recipe[box.dataset.rradio] = b.dataset.v; syncRecipe(); scheduleOut();
@@ -2636,7 +2729,7 @@ document.querySelector('.tabs').addEventListener('keydown', e => {
   const bs = [...document.querySelectorAll('.tabs [data-tab]')], i = bs.findIndex(b => b.getAttribute('aria-selected') === 'true');
   const nb = bs[(i + (e.key === 'ArrowRight' ? 1 : -1) + bs.length) % bs.length]; setTab(nb.dataset.tab); nb.focus(); e.preventDefault();
 });
-{ let t = 'estilo'; try { t = localStorage.getItem(TAB_KEY) || t; } catch(e){} setTab(t); }
+{ let t = 'estilo'; try { t = localStorage.getItem(TAB_KEY) || t; } catch(e){} if (!['estilo','postal','detalles','portada','receta'].includes(t)) t = 'estilo'; setTab(t); }
 function placeBar(){
   const bar = $('.bar'), top = $('.top'), views = $('.views');
   if (isWide()){ if (bar.parentNode !== top) top.appendChild(bar); }
@@ -2794,7 +2887,7 @@ async function saveSession(){
     const fresh = state.photos.filter(p => !SAVED.has(p.id)), gone = [...SAVED].filter(id => !ids.has(id));
     if (fresh.length || gone.length) await idbDo('blobs', 'readwrite', st => { fresh.forEach(p => st.put(p.fullBlob, p.id)); gone.forEach(id => st.delete(id)); });
     fresh.forEach(p => SAVED.add(p.id)); gone.forEach(id => SAVED.delete(id));
-    const meta = state.photos.map(p => ({id:p.id, fw:p.fw, fh:p.fh, place:p.place, focus:p.focus, date:p.date, title:p.title, file:p.file || '',
+    const meta = state.photos.map(p => ({id:p.id, fw:p.fw, fh:p.fh, place:p.place, focus:p.focus, date:p.date, title:p.title, file:p.file || '', lay:p.lay || null,
       tech:p.tech, colors:p.colors.map(c => ({hex:c.hex, name:c.name, auto:!!c.auto, pt:c.pt || null}))}));
     await idbDo('kv', 'readwrite', st => st.put({v:1, at:Date.now(), startNum:state.startNum, place:state.place, titles:state.titles, photos:meta}, 'session'));
   })();
@@ -2849,7 +2942,7 @@ async function boot(){
     const imgs = await Promise.all(SAMPLE.map(s => loadImg(s.src)));
     state.photos = await Promise.all(imgs.map((im, i) => makePhoto(im, {date:'04-09-2025', colors: SAMPLE[i].colors.map(([hex, name]) => ({hex, name, auto:false}))})));
   }
-  buildDesign(); syncDesign(); syncRecipe(); syncCover(); PRESETS = loadPresets(); renderPresets();
+  buildDesign(); syncDesign(); syncRecipe(); syncCover(); PRESETS = loadPresets(); syncPresetSel();
   afterStructure();
 }
 window.__postales = {state, outputs, renderTo, renderBlob, extractPalette, colorName, readExif, STYLES, saveOneByOne};
