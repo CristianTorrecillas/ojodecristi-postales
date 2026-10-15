@@ -638,6 +638,29 @@ body.bg-cada .lay-bg{display:grid !important}
             <span class="lbl"></span>
             <label class="check"><input type="checkbox" id="decoPostal"> También en las postales</label>
           </div>
+          <div class="opt">
+            <label class="lbl" for="pmSel">Matasellos</label>
+            <select id="pmSel" class="inp" data-sel="pm">
+              <option value="ninguno">Sin matasellos</option>
+              <option value="circular">Circular de doble aro</option>
+              <option value="rodillo">De rodillo, con barras</option>
+              <option value="octogono">Octogonal</option>
+              <option value="ilustrado">Ilustrado según el lugar</option>
+            </select>
+          </div>
+          <div class="opt" id="pmIconRow">
+            <label class="lbl" for="pmIconSel">Dibujo</label>
+            <select id="pmIconSel" class="inp" data-sel="pmIcon">
+              <option value="auto">Según el lugar de cada foto</option>
+              <option value="mar">Olas</option>
+              <option value="faro">Faro</option>
+              <option value="montana">Montañas</option>
+              <option value="cactus">Cactus</option>
+              <option value="ciudad">Ciudad</option>
+              <option value="bosque">Bosque</option>
+              <option value="sol">Sol en el horizonte</option>
+            </select>
+          </div>
           <h3 class="sect">Extras</h3>
           <div class="checks">
             <label class="check"><input type="checkbox" id="exCounter"> Numeración a fibrón (1/4, 2/4…)</label>
@@ -647,11 +670,8 @@ body.bg-cada .lay-bg{display:grid !important}
                 <button type="button" role="radio" data-v="sello">Color del sello</button>
               </div>
             </div>
-            <label class="check"><input type="checkbox" id="exPostmark"> Matasellos con lugar y fecha</label>
             <label class="check"><input type="checkbox" id="exFilmdate"> Fecha de rollo sobre la foto</label>
             <label class="check"><input type="checkbox" id="exIcons"> Íconos en los datos (lugar, fecha, cámara…)</label>
-            <label class="check"><input type="checkbox" id="exParAvion"> Etiqueta «Por avión»</label>
-            <label class="check"><input type="checkbox" id="exWaves"> Ondas de matasellos sobre el sello</label>
             <label class="check"><input type="checkbox" id="exBorder"> Borde de correo aéreo</label>
             <label class="check"><input type="checkbox" id="tilt"> Fotos inclinadas en la grilla</label>
           </div>
@@ -966,10 +986,10 @@ const TECH_LABELS = {cam:'Cámara', lens:'Lente', focal:'Focal', ap:'Apertura', 
 const state = {
   photos:[], startNum:1, place:'Chubut', titles:['FLORENTINO AMEGHINO'], size:1080, sample:true, picking:null,
   style:'archivo', custom:'#D8C7A6', deco:'cintas-clip', decoPostal:false, tilt:false,
-  extras:{postmark:false, border:false, filmdate:false, counter:false, icons:false, parAvion:false, waves:false},
+  extras:{postmark:false, border:false, filmdate:false, counter:false, icons:false},
   shape:'cuadrados', frame:'fina', format:'1:1', comp:'postal', titleFont:'mono', lastEnd:0,
   photoSize:'grande', stampColor:'', stampMode:'papel', paperTex:'textura', swSize:'medianos', swPos:'auto', counterInk:'tinta',
-  bgEach:'cada', bgTone:'suave', bgPick:-1,
+  bgEach:'cada', bgTone:'suave', bgPick:-1, pm:'ninguno', pmIcon:'auto',
   show:{
     postal:{title:true, num:false, place:false, date:false, time:false, gps:false, cam:false, lens:false, focal:false, ap:false, sh:false, iso:false, hex:false},
     grid:{num:true, place:true, date:true, time:false, gps:false, cam:false, lens:false, focal:false, ap:false, sh:false, iso:false}
@@ -988,7 +1008,7 @@ const COVER_DEFAULT = {on:false, photo:0, look:'sola', bg:'blanco', color:'#F3EF
 state.cover = {...COVER_DEFAULT};
 const PENS = {azul:'#1F3A7A', negra:'#1E1D1B', sepia:'#5B3A22'};
 const PREF_KEY = 'postales-ojodecristi-v1';
-const PREF_FIELDS = ['style','custom','deco','decoPostal','tilt','extras','shape','frame','format','comp','titleFont','size','show','lastEnd','recipe','photoSize','stampColor','stampMode','paperTex','swSize','swPos','counterInk','cover','bgEach','bgTone','bgPick'];
+const PREF_FIELDS = ['style','custom','deco','decoPostal','tilt','extras','shape','frame','format','comp','titleFont','size','show','lastEnd','recipe','photoSize','stampColor','stampMode','paperTex','swSize','swPos','counterInk','cover','bgEach','bgTone','bgPick','pm','pmIcon'];
 function loadPrefs(){
   try{
     const o = JSON.parse(localStorage.getItem(PREF_KEY) || 'null'); if (!o || typeof o !== 'object') return;
@@ -1002,6 +1022,7 @@ function loadPrefs(){
     }
     if (!FORMATS[state.format]) state.format = '1:1';
     if (!('stampMode' in o)) state.stampMode = o.stampColor ? 'elegido' : 'papel';
+    if (!('pm' in o) && o.extras && o.extras.postmark) state.pm = 'circular';
     /* antes había un bloque aparte para verticales; «Auto» hace lo mismo */
     if (o.swPos === 'centro' && o.vertSep !== false && (o.swPosV || 'costado') === 'costado') state.swPos = 'auto';
     if (!['auto','centro','izquierda','costado'].includes(state.swPos)) state.swPos = 'auto';
@@ -1619,6 +1640,102 @@ function arcText(x, text, cx, cy, rad, center, top, maxArc){
     a += top ? half + track/rad : -(half + track/rad);
   }
 }
+/* ---------- matasellos: varios modelos, con el lugar y la fecha de la foto ---------- */
+const PM_PATHS = {"waves": "M222.16,177.25a8,8,0,0,1-1,11.25c-17.36,14.39-32.86,19.5-47,19.5-18.58,0-34.82-8.82-49.93-17-25.35-13.76-47.24-25.64-79.07.74a8,8,0,1,1-10.22-12.31c40.17-33.28,70.32-16.92,96.93-2.48,25.35,13.75,47.24,25.63,79.07-.74A8,8,0,0,1,222.16,177.25Zm-11.27-57c-31.83,26.38-53.72,14.5-79.07.74-26.61-14.43-56.76-30.79-96.93,2.49a8,8,0,0,0,10.22,12.31c31.83-26.38,53.72-14.5,79.07-.74,15.11,8.19,31.35,17,49.93,17,14.14,0,29.64-5.11,47-19.5a8,8,0,1,0-10.22-12.31ZM45.11,79.8c31.83-26.37,53.72-14.49,79.07-.74,15.11,8.2,31.35,17,49.93,17,14.14,0,29.64-5.12,47-19.5a8,8,0,1,0-10.22-12.31c-31.83,26.38-53.72,14.5-79.07.74C105.21,50.58,75.06,34.22,34.89,67.5A8,8,0,1,0,45.11,79.8Z", "mountains": "M164,80a28,28,0,1,0-28-28A28,28,0,0,0,164,80Zm0-40a12,12,0,1,1-12,12A12,12,0,0,1,164,40Zm90.88,155.92-54.56-92.08A15.87,15.87,0,0,0,186.55,96h0a15.85,15.85,0,0,0-13.76,7.84L146.63,148l-44.84-76.1a16,16,0,0,0-27.58,0L1.11,195.94A8,8,0,0,0,8,208H248a8,8,0,0,0,6.88-12.08ZM88,80l23.57,40H64.43ZM22,192l33-56h66l18.74,31.8,0,0L154,192Zm150.57,0-16.66-28.28L186.55,112,234,192Z", "cactus": "M216,208H168V184h4a68.07,68.07,0,0,0,68-68,28,28,0,0,0-56,0,12,12,0,0,1-12,12h-4V56a40,40,0,0,0-80,0V88H84A12,12,0,0,1,72,76a28,28,0,0,0-56,0,68.07,68.07,0,0,0,68,68h4v64H40a8,8,0,0,0,0,16H216a8,8,0,0,0,0-16ZM96,128H84A52.06,52.06,0,0,1,32,76a12,12,0,0,1,24,0,28,28,0,0,0,28,28H96a8,8,0,0,0,8-8V56a24,24,0,0,1,48,0v80a8,8,0,0,0,8,8h12a28,28,0,0,0,28-28,12,12,0,0,1,24,0,52.06,52.06,0,0,1-52,52H160a8,8,0,0,0-8,8v32H104V136A8,8,0,0,0,96,128Z", "buildings": "M240,208H224V96a16,16,0,0,0-16-16H144V32a16,16,0,0,0-24.88-13.32L39.12,72A16,16,0,0,0,32,85.34V208H16a8,8,0,0,0,0,16H240a8,8,0,0,0,0-16ZM208,96V208H144V96ZM48,85.34,128,32V208H48ZM112,112v16a8,8,0,0,1-16,0V112a8,8,0,1,1,16,0Zm-32,0v16a8,8,0,0,1-16,0V112a8,8,0,1,1,16,0Zm0,56v16a8,8,0,0,1-16,0V168a8,8,0,0,1,16,0Zm32,0v16a8,8,0,0,1-16,0V168a8,8,0,0,1,16,0Z", "tree-evergreen": "M230.32,187.09l-46-59.09H208a8,8,0,0,0,6.34-12.88l-80-104a8,8,0,0,0-12.68,0l-80,104A8,8,0,0,0,48,128H71.64l-46,59.09A8,8,0,0,0,32,200h88v40a8,8,0,0,0,16,0V200h88a8,8,0,0,0,6.32-12.91ZM48.36,184l46-59.09A8,8,0,0,0,88,112H64.25L128,29.12,191.75,112H168a8,8,0,0,0-6.31,12.91L207.64,184Z", "sun-horizon": "M240,152H199.55a73.54,73.54,0,0,0,.45-8,72,72,0,0,0-144,0,73.54,73.54,0,0,0,.45,8H16a8,8,0,0,0,0,16H240a8,8,0,0,0,0-16ZM72,144a56,56,0,1,1,111.41,8H72.59A56.13,56.13,0,0,1,72,144Zm144,56a8,8,0,0,1-8,8H48a8,8,0,0,1,0-16H208A8,8,0,0,1,216,200ZM72.84,43.58a8,8,0,0,1,14.32-7.16l8,16a8,8,0,0,1-14.32,7.16Zm-56,48.84a8,8,0,0,1,10.74-3.57l16,8a8,8,0,0,1-7.16,14.31l-16-8A8,8,0,0,1,16.84,92.42Zm192,15.16a8,8,0,0,1,3.58-10.73l16-8a8,8,0,1,1,7.16,14.31l-16,8a8,8,0,0,1-10.74-3.58Zm-48-55.16,8-16a8,8,0,0,1,14.32,7.16l-8,16a8,8,0,1,1-14.32-7.16Z", "lighthouse": "M208,80a8,8,0,0,0-8,8v16H188.85L184,55.2A8,8,0,0,0,181.32,50L138.44,11.88l-.2-.17a16,16,0,0,0-20.48,0l-.2.17L74.68,50A8,8,0,0,0,72,55.2L67.15,104H56V88a8,8,0,0,0-16,0v24a8,8,0,0,0,8,8H65.54l-9.47,94.48A16,16,0,0,0,72,232H184a16,16,0,0,0,15.92-17.56L190.46,120H208a8,8,0,0,0,8-8V88A8,8,0,0,0,208,80ZM128,24l27,24H101ZM87.24,64h81.52l4,40H136V88a8,8,0,0,0-16,0v16H83.23ZM72,216l4-40H180l4,40Zm106.39-56H77.61l4-40h92.76Z"};
+const PM_PICT = {mar:'waves', faro:'lighthouse', montana:'mountains', cactus:'cactus', ciudad:'buildings', bosque:'tree-evergreen', sol:'sun-horizon'};
+const PM_WORDS = [
+  ['cactus', /salta|jujuy|cafayate|purmamarca|humahuaca|tilcara|quebrada|catamarca|tucuman|desierto|atacama|la rioja|san juan/],
+  ['faro', /faro|lighthouse/],
+  ['mar', /mar del plata|mar de |playa|costa|puerto|madryn|necochea|pinamar|gesell|miramar|bahia|ushuaia|chapadmalal|beach|sea\b|ocean|isla|oceano|las grutas/],
+  ['montana', /bariloche|mendoza|andes|cerro|chubut|neuquen|patagonia|tandil|sierra|cordoba|monta|glaciar|calafate|chalten|islandia|iceland|stevens|mountain|volcan|esquel|trevelin/],
+  ['ciudad', /buenos aires|caba|ciudad|city|san isidro|rosario|new york|nueva york|madrid|barcelona|london|londres|paris|seattle|roma/],
+  ['bosque', /bosque|parque|park|forest|selva|delta|tigre|lago/]
+];
+/* el dibujo sale del nombre del lugar; si no lo reconoce, de los colores de la foto (azules: mar, verdes: bosque, tierras: montaña) */
+function pmPict(p){
+  if (state.pmIcon !== 'auto') return PM_PICT[state.pmIcon] || 'sun-horizon';
+  const t = placeOf(p).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  for (const [k, re] of PM_WORDS) if (re.test(t)) return PM_PICT[k];
+  const n = {waves:0, 'tree-evergreen':0, mountains:0};
+  (p.colors || []).forEach(c => { const o = hex2ok(c.hex); if (Math.hypot(o[1], o[2]) < 0.03) return; const h = Math.atan2(o[2], o[1])*180/Math.PI; if (h > 185 || h < -60) n.waves++; else if (h > 115) n['tree-evergreen']++; else n.mountains++; });
+  const best = Object.keys(n).sort((a, b) => n[b] - n[a])[0];
+  return n[best] ? best : 'sun-horizon';
+}
+function pmParts(s){
+  const m = String(s || '').trim().match(/^(\d{1,2})[-/.](\d{1,2})[-/.](\d{2,4})$/);
+  if (m) return {dm:m[1].padStart(2,'0') + ' ' + (MONTHS[+m[2]-1] || m[2]), y:m[3].length === 2 ? '20' + m[3] : m[3]};
+  const d = new Date(); return {dm:String(d.getDate()).padStart(2,'0') + ' ' + MONTHS[d.getMonth()], y:String(d.getFullYear())};
+}
+function pmStar(x, cx, cy, r){ x.beginPath(); for (let i = 0; i < 10; i++){ const a = -Math.PI/2 + i*Math.PI/5, rr = i % 2 ? r*0.45 : r; i ? x.lineTo(cx + rr*Math.cos(a), cy + rr*Math.sin(a)) : x.moveTo(cx + rr*Math.cos(a), cy + rr*Math.sin(a)); } x.closePath(); x.fill(); }
+function pmPoly(x, R, k, rot){ x.beginPath(); for (let i = 0; i <= k; i++){ const a = rot + i*2*Math.PI/k; i ? x.lineTo(R*Math.cos(a), R*Math.sin(a)) : x.moveTo(R*Math.cos(a), R*Math.sin(a)); } x.stroke(); }
+function pmCenterDate(x, dt, y0){ x.textAlign = 'center'; x.textBaseline = 'alphabetic'; x.font = `500 12.5px ${MONO}`; x.fillText(dt.dm, 0, y0); x.font = `500 9.5px ${MONO}`; x.fillText(dt.y, 0, y0 + 12.5); }
+const PM_R = {circular:41, rodillo:35, octogono:41, ilustrado:45}, PM_K = 1.22;
+/* dónde va: alrededor del sello, mordiendo su borde, en el lugar que menos tapa la foto, los colores, los nombres y la tira de datos */
+function pmSpot(p, n, L, H, dy, style){
+  const st = L.stamp, R = PM_R[style]*PM_K, rr = [], add = (x, y, w, h) => rr.push({x, y, w, h});
+  const ph = L.photo; add(ph.x - 6, ph.y - 6, ph.w + 12, ph.h + 12);
+  if (L.sw) add(L.sw.xs[0] - 4, L.sw.y - 4, L.sw.xs[2] + L.sw.w - L.sw.xs[0] + 8, L.label.base + (state.show.postal.hex ? 38 : 24) - L.sw.y);
+  if (L.column) L.column.items.forEach(it => add(it.x - 4, it.y - 4, L.column.w + 8, L.column.h + 54));
+  if (L.lines) add(L.lines.x0 - 4, L.lines.ys[0] - 8, L.lines.x1 - L.lines.x0 + 8, 30);
+  if (stripText(p, n).some(Boolean)) add(0, H - dy - 40, D, 40);
+  if (L.counter) add(L.counter.xr - 96, L.counter.base - dy - 52, 98, 62);
+  const inter = (a, b) => Math.max(0, Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x)) * Math.max(0, Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y));
+  const outside = b => { const x0 = Math.max(b.x, 8), x1 = Math.min(b.x + b.w, D - 8), y0 = Math.max(b.y, -dy + 8), y1 = Math.min(b.y + b.h, H - dy - 8); return b.w*b.h - Math.max(0, x1 - x0)*Math.max(0, y1 - y0); };
+  const cost = b => rr.reduce((a, r) => a + inter(b, r), 0) + outside(b)*6;
+  let best = null;
+  [140, 115, 165, 90, 190, 65, 215, 40].forEach((deg, i) => {
+    const t = deg*Math.PI/180, dist = st.d*0.5 + R*0.42, cx = st.cx + Math.cos(t)*dist, cy = st.cy + Math.sin(t)*dist;
+    const box = {x:cx - R, y:cy - R, w:2*R, h:2*R};
+    let c = cost(box) + i*25, dir = 0;
+    if (style === 'rodillo'){
+      /* las barras van hacia el lado libre; pueden cruzar el sello o salirse del borde */
+      const L2 = 112*PM_K, bars = d => ({x:d < 0 ? cx - R - L2 : cx + R, y:cy - 21*PM_K, w:L2, h:42*PM_K});
+      const bcost = b => rr.reduce((a, r) => a + inter(b, r), 0);  /* las barras pueden salirse del borde, como en una postal real */
+      const cl = bcost(bars(-1)), cr = bcost(bars(1));
+      dir = cl <= cr ? -1 : 1; c += Math.min(cl, cr);
+    }
+    if (!best || c < best.c) best = {cx, cy, dir, c};
+  });
+  return best;
+}
+function drawPostmark(ctx, p, n, L, H, dy){
+  const style = state.pm, at = pmSpot(p, n, L, H, dy, style), R = PM_R[style], ds = devScale(ctx), rnd = rng(311 + n);
+  const half = (R + 130)*PM_K, rot = (-9 + (rnd() - 0.5)*8)*Math.PI/180;
+  const c = document.createElement('canvas'); c.width = c.height = Math.max(1, Math.ceil(2*half*ds));
+  const x = c.getContext('2d'); x.setTransform(ds, 0, 0, ds, half*ds, half*ds); x.rotate(rot); x.scale(PM_K, PM_K);
+  x.strokeStyle = x.fillStyle = S.ink; x.lineCap = 'round';
+  const dt = pmParts(p.date), place = placeOf(p).toUpperCase();
+  if (style === 'circular'){
+    x.lineWidth = 2.2; x.beginPath(); x.arc(0, 0, R, 0, Math.PI*2); x.stroke();
+    x.lineWidth = 0.9; x.beginPath(); x.arc(0, 0, R - 6, 0, Math.PI*2); x.stroke();
+    arcText(x, place, 0, 0, R - 13, -Math.PI/2, true, Math.PI*1.2);
+    pmCenterDate(x, dt, 2);
+    [-0.32, 0, 0.32].forEach(a => pmStar(x, (R - 13)*Math.cos(Math.PI/2 + a), (R - 13)*Math.sin(Math.PI/2 + a), 3.2));
+  } else if (style === 'rodillo'){
+    x.lineWidth = 2.1; x.beginPath(); x.arc(0, 0, R, 0, Math.PI*2); x.stroke();
+    arcText(x, place, 0, 0, R - 8, -Math.PI/2, true, Math.PI*1.15);
+    pmCenterDate(x, dt, 3);
+    x.lineWidth = 1.9; const d = at.dir || -1;
+    for (let i = 0; i < 5; i++){ const y = -16 + i*8, xa = d*(R + 5), xb = d*(R + 5 + 112); x.beginPath(); x.moveTo(xa, y); for (let k = 1; k <= 8; k++) x.lineTo(xa + (xb - xa)*k/8, y + (rnd() - 0.5)*0.9); x.stroke(); }
+  } else if (style === 'octogono'){
+    x.lineWidth = 2.2; pmPoly(x, R, 8, Math.PI/8); x.lineWidth = 0.9; pmPoly(x, R - 7, 8, Math.PI/8);
+    arcText(x, place, 0, 0, R - 15, -Math.PI/2, true, Math.PI*0.95);
+    pmCenterDate(x, dt, 4);
+    x.fillRect(-14, 12, 28, 1.2);
+  } else {
+    x.lineWidth = 2.2; x.beginPath(); x.arc(0, 0, R, 0, Math.PI*2); x.stroke();
+    x.lineWidth = 0.9; x.beginPath(); x.arc(0, 0, R - 15, 0, Math.PI*2); x.stroke();
+    arcText(x, place, 0, 0, R - 7.5, -Math.PI/2, true, Math.PI*1.05);
+    arcText(x, dt.dm + ' ' + dt.y, 0, 0, R - 7.5, Math.PI/2, false, Math.PI*0.8);
+    const k = pmPict(p), path = new Path2D(PM_PATHS[k]), sz = 34;
+    x.save(); x.translate(-sz/2, -sz/2); x.scale(sz/256, sz/256); x.fill(path); x.restore();
+  }
+  x.setTransform(1, 0, 0, 1, 0, 0); x.globalCompositeOperation = 'destination-out';
+  const dots = Math.round(c.width*c.height/170);
+  for (let i = 0; i < dots; i++){ x.globalAlpha = 0.4 + rnd()*0.6; x.beginPath(); x.arc(rnd()*c.width, rnd()*c.height, (0.25 + rnd()*0.75)*ds, 0, Math.PI*2); x.fill(); }
+  ctx.save(); ctx.globalAlpha = 0.84; ctx.drawImage(c, at.cx - half, at.cy - half, 2*half, 2*half); ctx.restore();
+  releaseCanvas(c);
+}
 function postmark(ctx, p, n, at){
   const cx = at ? at.cx : 86, cy = at ? at.cy : 600, r = 36, rot = -9, ds = devScale(ctx);
   const bx = cx - r - 6, by = cy - r - 6, bw = 2*r + 12, bh = 2*r + 12, pad = 14;
@@ -1891,28 +2008,6 @@ function iconStrip(ctx, p, n, base, L){
   run(left, L.x0); run(right, L.x1 - wOf(right, size)); ctx.font = `400 ${size}px ${MONO}`;
   ctx.restore();
 }
-/* etiqueta azul de correo aéreo */
-function parAvion(ctx, x, y, rot){
-  const w = 138, h = 36, ds = devScale(ctx);
-  ctx.save(); ctx.translate(x, y); ctx.rotate(rot*Math.PI/180);
-  ctx.shadowColor = 'rgba(0,0,0,.18)'; ctx.shadowBlur = 2*ds; ctx.shadowOffsetY = 0.8*ds;
-  ctx.fillStyle = '#244A96'; ctx.beginPath(); rrect(ctx, 0, 0, w, h, 2.5); ctx.fill(); ctx.shadowColor = 'transparent';
-  ctx.strokeStyle = 'rgba(255,255,255,.8)'; ctx.lineWidth = 0.9; ctx.strokeRect(3.5, 3.5, w - 7, h - 7);
-  ctx.fillStyle = '#FFFFFF'; drawIcon(ctx, 'plane', 10, 27, 20);
-  ctx.textAlign = 'left'; ctx.font = `600 13px ${SANS}`; ctx.fillText('POR AVIÓN', 38, 17.5);
-  ctx.globalAlpha = 0.88; ctx.font = `400 8.6px ${SANS}`; ctx.fillText('PAR AVION · BY AIR MAIL', 38, 28.5);
-  ctx.restore();
-}
-/* ondas de matasellos que cruzan el sello, como en una postal que ya pasó por el correo */
-function cancelWaves(ctx, cx, cy, d, seed){
-  const r = rng(seed), x0 = cx - d*0.95, x1 = cx + d*0.32;
-  ctx.save(); ctx.strokeStyle = S.ink; ctx.globalAlpha = 0.62; ctx.lineWidth = 1.6; ctx.lineCap = 'round';
-  for (let i = 0; i < 5; i++){
-    const y = cy - d*0.2 + i*d*0.1, ph = r()*0.6;
-    ctx.beginPath(); for (let x = x0; x <= x1; x += 2){ const yy = y + Math.sin((x - x0)/8.5 + ph)*2.8; x === x0 ? ctx.moveTo(x, yy) : ctx.lineTo(x, yy); } ctx.stroke();
-  }
-  ctx.restore();
-}
 function fichaText(ctx, p, n){
   const sh = state.show.grid;
   const big = sh.num ? 'N.° ' + pad3(n) : '';
@@ -2039,14 +2134,11 @@ function drawPostal(ctx, p, n, hi, mini, H){
   framedPhoto(ctx, srcOf(p, hi), r, L.pad, p.focus);
   if (state.extras.filmdate && !mini) filmDate(ctx, r, p.date, Math.min(555, L.stamp.cx - 70));
   if (kind !== 'none') decorate(ctx, r, kind, true, p);
-  if (state.extras.postmark && !mini) postmark(ctx, p, n, L.pm);
-  const label = !mini && state.extras.parAvion, labelTop = r.y - frameTop() - underPad(kind) + dy - (state.extras.border ? BORDER : 0) >= 46;
   if (!mini && state.show.postal.title && (p.title || '').trim()){
     const ft = titleFont(15), top = (state.extras.border ? BORDER : 0) - dy, fTop = r.y - frameTop() - underPad(kind) - (kind === 'broches' ? 22 : kind === 'cinta-color' ? 12 : 0);
     const base = (top + fTop)/2 + ft.size*0.3;
-    ctx.fillStyle = S.ink; centerText(ctx, p.title.trim(), r.x + r.w/2, base, ft.size, label && labelTop ? 360 : 560, ft.family, ft.weight);
+    ctx.fillStyle = S.ink; centerText(ctx, p.title.trim(), r.x + r.w/2, base, ft.size, 560, ft.family, ft.weight);
   }
-  if (label){ if (labelTop) parAvion(ctx, r.x - 2, r.y - frameTop() - underPad(kind) - 42, -2); else parAvion(ctx, r.x + 14, r.y + r.h - 50, -3); }
   if (L.lines) inkLines(ctx, L.lines, 11);
   if (L.column){
     const C = L.column;
@@ -2058,7 +2150,7 @@ function drawPostal(ctx, p, n, hi, mini, H){
   if (!mini) postalStrip(ctx, p, n, H - Math.max(22, dy*0.5) - dy, L.strip);
   const keepS = S; if (!mini) S = withPhotoStamp(S, p);
   stamp(ctx, L.stamp.cx, L.stamp.cy, L.stamp.d, L.stamp.rot);
-  if (!mini && state.extras.waves) cancelWaves(ctx, L.stamp.cx, L.stamp.cy, L.stamp.d, n);
+  if (!mini && state.pm !== 'ninguno') drawPostmark(ctx, p, n, L, H, dy);
   ctx.restore();
   if (L.counter) markerFraction(ctx, n - state.startNum + 1, state.photos.length, L.counter.xr, L.counter.base);
   S = keepS;
@@ -2093,7 +2185,6 @@ function drawFichaTall(ctx, p, n, cell, hi, single){
   inkLines(ctx, {x0, x1:x0 + 58, ys:[st.cy - 8, st.cy + 1.5, st.cy + 11], w:2.1}, 23 + n);
   const keepS = S; S = withPhotoStamp(S, p);
   stamp(ctx, st.cx, st.cy, st.d, GRID.rots[cell]);
-  if (state.extras.waves) cancelWaves(ctx, st.cx, st.cy, st.d, n);
   S = keepS;
 }
 function drawFicha(ctx, p, n, cell, hi, single){
@@ -2113,7 +2204,6 @@ function drawFicha(ctx, p, n, cell, hi, single){
   drawSwatches(ctx, p.colors, F.sw, F.label, n, single, false);
   const st = high ? F.stampHigh : F.stamp, keepS = S; S = withPhotoStamp(S, p);
   stamp(ctx, st.cx, st.cy, st.d, GRID.rots[cell]);
-  if (state.extras.waves) cancelWaves(ctx, st.cx, st.cy, st.d, n);
   S = keepS;
 }
 function gridTitle(g){ return (state.titles[g] || '').trim(); }
@@ -2734,7 +2824,7 @@ function syncDesign(){
   document.querySelectorAll('.chips[data-radio]').forEach(box => box.querySelectorAll('button').forEach(b => b.setAttribute('aria-checked', String(state[box.dataset.radio] === b.dataset.v))));
   $('#styleName').textContent = currentStyle().name;
   $('#decoSel').value = state.deco; $('#decoPostal').checked = state.decoPostal; $('#tilt').checked = state.tilt;
-  $('#exPostmark').checked = state.extras.postmark; $('#exBorder').checked = state.extras.border; $('#exFilmdate').checked = state.extras.filmdate; $('#exCounter').checked = !!state.extras.counter; $('#exIcons').checked = !!state.extras.icons; $('#exParAvion').checked = !!state.extras.parAvion; $('#exWaves').checked = !!state.extras.waves;
+  $('#exBorder').checked = state.extras.border; $('#exFilmdate').checked = state.extras.filmdate; $('#exCounter').checked = !!state.extras.counter; $('#exIcons').checked = !!state.extras.icons;
   $('#customColor').value = state.custom;
   $('#paperName').textContent = currentStyle().name;
   $('#customRow').hidden = state.style !== 'custom';
@@ -2743,6 +2833,7 @@ function syncDesign(){
     document.body.classList.toggle('bg-cada', foto && state.bgEach === 'cada'); renderBgSwatches(); renderFotoThumb(); }
   document.querySelectorAll('[data-ifpostal]').forEach(el => el.hidden = state.comp === 'ficha');
   $('#decoPostalRow').hidden = state.deco === 'ninguno';
+  $('#pmIconRow').hidden = state.pm !== 'ilustrado';
   $('#counterInkRow').hidden = !state.extras.counter;
   document.querySelectorAll('select[data-sel]').forEach(x => x.value = state[x.dataset.sel]);
   $('#datosSum').textContent = datosSummary();
@@ -2818,10 +2909,9 @@ document.querySelectorAll('select[data-sel]').forEach(x => x.addEventListener('c
 $('#stampColor').addEventListener('input', e => { state.stampColor = e.target.value; state.stampMode = 'elegido'; syncDesign(); renderStyleThumbs(); scheduleOut(); });
 $('#decoPostal').addEventListener('change', e => { state.decoPostal = e.target.checked; scheduleOut(); });
 $('#tilt').addEventListener('change', e => { state.tilt = e.target.checked; scheduleOut(); });
-$('#exPostmark').addEventListener('change', e => { state.extras.postmark = e.target.checked; scheduleOut(); });
 $('#exBorder').addEventListener('change', e => { state.extras.border = e.target.checked; scheduleOut(); });
 $('#exFilmdate').addEventListener('change', e => { state.extras.filmdate = e.target.checked; scheduleOut(); });
-['icons','parAvion','waves'].forEach(k => $('#ex' + k[0].toUpperCase() + k.slice(1)).addEventListener('change', e => { state.extras[k] = e.target.checked; scheduleOut(); }));
+['icons'].forEach(k => $('#ex' + k[0].toUpperCase() + k.slice(1)).addEventListener('change', e => { state.extras[k] = e.target.checked; scheduleOut(); }));
 $('#exCounter').addEventListener('change', e => { state.extras.counter = e.target.checked; syncDesign(); scheduleOut(); });
 document.querySelectorAll('.chips[data-scope]').forEach(box => box.addEventListener('click', e => {
   const b = e.target.closest('button[data-k]'); if (!b) return;
@@ -2867,7 +2957,7 @@ document.querySelectorAll('.chips[data-cradio]').forEach(box => box.addEventList
 
 /* ---------- mis diseños guardados ---------- */
 const PRESET_KEY = 'postales-ojodecristi-disenos';
-const PRESET_FIELDS = ['style','custom','deco','decoPostal','tilt','extras','shape','frame','format','comp','titleFont','photoSize','stampColor','stampMode','paperTex','swSize','swPos','counterInk','bgEach','bgTone'];
+const PRESET_FIELDS = ['style','custom','deco','decoPostal','tilt','extras','shape','frame','format','comp','titleFont','photoSize','stampColor','stampMode','paperTex','swSize','swPos','counterInk','bgEach','bgTone','pm','pmIcon'];
 const PRESET_EXAMPLES = [
   {name:'Clásica', d:{style:'archivo', deco:'cintas-clip', decoPostal:false, frame:'fina', format:'1:1', comp:'postal', shape:'cuadrados', photoSize:'normal', paperTex:'textura', swSize:'medianos', swPos:'centro', stampColor:'', extras:{postmark:false, border:false, filmdate:false, counter:false}}},
   {name:'Costa vertical', d:{style:'archivo', deco:'paspartu', decoPostal:true, frame:'fina', format:'4:5', comp:'postal', shape:'cuadrados', photoSize:'grande', paperTex:'liso', swSize:'medianos', swPos:'costado', counterInk:'tinta', extras:{postmark:false, border:false, filmdate:false, counter:true}}, cover:{on:true, look:'sola', bg:'blanco'}}
