@@ -223,6 +223,7 @@ body.dragging .drop{border-color:var(--stamp);color:var(--ink);background:var(--
 @media (max-width:700px){
   .mbar{display:flex;gap:10px;position:fixed;left:0;right:0;bottom:0;z-index:15;padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));background:var(--panel);border-top:1px solid var(--rule);box-shadow:0 -6px 18px -12px rgba(0,0,0,.4)}
   .mbar .btn{flex:1;height:44px}
+  .mbar #mDrive{flex:0 0 52px;padding:0}
   .bar .saves{display:none}
   .wrap{padding-block-end:96px}
   .toast{bottom:calc(84px + env(safe-area-inset-bottom,0px)) !important}
@@ -357,6 +358,19 @@ textarea.inp{height:auto;padding:8px 10px;font-family:var(--mono);font-size:14px
 .lay-grid{display:flex;flex-direction:column;gap:8px;margin-top:8px}
 .lay-row{display:grid;grid-template-columns:62px minmax(0,1fr);align-items:center;gap:8px}
 .lay-row .chips button{min-height:28px;padding:0 9px;font-size:11.5px}
+textarea.inp.pc-title,textarea.inp.ttl{height:auto;min-height:34px;padding:6px 10px;font-family:var(--sans);font-size:15px;line-height:1.35;resize:none;overflow:hidden}
+textarea.inp.pc-title{font-style:italic}
+.flash{animation:flash 1.2s ease-out}
+@keyframes flash{0%{box-shadow:0 0 0 3px var(--stamp)}100%{box-shadow:0 0 0 0 transparent}}
+@media (prefers-reduced-motion:reduce){.flash{animation:none;outline:2px solid var(--stamp)}}
+.drive-dlg{border:1px solid var(--rule);border-radius:12px;background:var(--panel);color:var(--ink);max-width:560px;width:calc(100% - 32px);padding:22px 22px 18px;box-shadow:0 30px 80px -20px rgba(0,0,0,.5)}
+.drive-dlg::backdrop{background:rgba(20,16,10,.45)}
+.drive-dlg h2{margin:0 0 6px;font-size:18px;font-weight:600}
+.drive-dlg ol{margin:10px 0 14px;padding-left:20px;display:flex;flex-direction:column;gap:8px;font-size:14px}
+.drive-dlg code{font-family:var(--mono);font-size:12.5px;background:var(--well);padding:1px 5px;border-radius:4px}
+.drive-dlg .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
+.drive-dlg .inp{flex:1;min-width:200px}
+.drive-dlg .msg{min-height:20px;font-size:13.5px;margin:10px 0 0;color:var(--muted)}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 /* ---------- pasada visual (15/10/2026): la mesa de correo ---------- */
 :root{--air-red:#C0392B;--air-blue:#24448E;--air-gap:#FBF8F0;--r-sm:6px;--r-md:10px;--r-lg:14px}
@@ -445,6 +459,8 @@ body.bg-cada .lay-bg{display:grid !important}
       </div>
     </div>
     <div class="saves push">
+      <button type="button" id="driveBtn" class="btn btn-ghost" title="Subir todas las imágenes a tu carpeta de Google Drive"><svg viewBox="0 0 256 256" aria-hidden="true"><path d="M178.34,165.66,160,147.31V208a8,8,0,0,1-16,0V147.31l-18.34,18.35a8,8,0,0,1-11.32-11.32l32-32a8,8,0,0,1,11.32,0l32,32a8,8,0,0,1-11.32,11.32ZM160,40A88.08,88.08,0,0,0,81.29,88.68,64,64,0,1,0,72,216h40a8,8,0,0,0,0-16H72a48,48,0,0,1,0-96c1.1,0,2.2,0,3.29.12A88,88,0,0,0,72,128a8,8,0,0,0,16,0,72,72,0,1,1,100.8,66,8,8,0,0,0,3.2,15.34,7.9,7.9,0,0,0,3.2-.68A88,88,0,0,0,160,40Z"/></svg>Subir a Drive</button>
+      <button type="button" id="driveCfgBtn" class="ico" title="Conexión con Google Drive" aria-label="Conexión con Google Drive"><svg viewBox="0 0 256 256" aria-hidden="true"><path d="M216,72H130.67L102.93,51.2a16.12,16.12,0,0,0-9.6-3.2H40A16,16,0,0,0,24,64V200a16,16,0,0,0,16,16H216.89A15.13,15.13,0,0,0,232,200.89V88A16,16,0,0,0,216,72Zm0,128H40V64H93.33L123.2,86.4A8,8,0,0,0,128,88h88Z"/></svg></button>
       <button type="button" id="oneBtn" class="btn btn-ghost">Guardar una por una</button>
       <button type="button" id="zipBtn" class="btn btn-stamp"><svg viewBox="0 0 256 256" aria-hidden="true"><path d="M224,144v64a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V144a8,8,0,0,1,16,0v56H208V144a8,8,0,0,1,16,0Zm-101.66,5.66a8,8,0,0,0,11.32,0l40-40a8,8,0,0,0-11.32-11.32L136,124.69V32a8,8,0,0,0-16,0v92.69L93.66,98.34a8,8,0,0,0-11.32,11.32Z"/></svg>Descargar todo (.zip)</button>
     </div>
@@ -639,6 +655,25 @@ body.bg-cada .lay-bg{display:grid !important}
             <label class="check"><input type="checkbox" id="decoPostal"> También en las postales</label>
           </div>
           <div class="opt">
+            <label class="lbl" for="lineSel">Líneas</label>
+            <select id="lineSel" class="inp" data-sel="lineStyle">
+              <option value="tinta">Las de siempre (tinta)</option>
+              <option value="ondas">Onduladas</option>
+              <option value="renglones">Renglones de carta</option>
+              <option value="trazos">Trazos cortados</option>
+              <option value="ninguna">Sin líneas</option>
+            </select>
+          </div>
+          <div class="opt" id="linePosRow">
+            <label class="lbl" for="linePosSel">Dónde</label>
+            <select id="linePosSel" class="inp" data-sel="linePos">
+              <option value="auto">Automático</option>
+              <option value="izquierda">A la izquierda</option>
+              <option value="sello">Debajo del sello</option>
+              <option value="arriba">Arriba a la derecha</option>
+            </select>
+          </div>
+          <div class="opt">
             <label class="lbl" for="pmSel">Matasellos</label>
             <select id="pmSel" class="inp" data-sel="pm">
               <option value="ninguno">Sin matasellos</option>
@@ -646,6 +681,14 @@ body.bg-cada .lay-bg{display:grid !important}
               <option value="rodillo">De rodillo, con barras</option>
               <option value="octogono">Octogonal</option>
               <option value="ilustrado">Ilustrado según el lugar</option>
+            </select>
+          </div>
+          <div class="opt" id="pmPosRow">
+            <label class="lbl" for="pmPosSel">Dónde</label>
+            <select id="pmPosSel" class="inp" data-sel="pmPos">
+              <option value="libre">En un lugar libre, sin tocar el sello</option>
+              <option value="sello">Mordiendo el borde del sello</option>
+              <option value="foto">Sobre la esquina de la foto</option>
             </select>
           </div>
           <div class="opt" id="pmIconRow">
@@ -708,8 +751,8 @@ body.bg-cada .lay-bg{display:grid !important}
             </div>
             <div class="opt stack" id="cvTextRow">
               <div class="rc-grid">
-                <label>Título<input id="cvTitle" class="inp" type="text" placeholder="Vacío = el lugar" autocomplete="off"></label>
-                <label>Subtítulo<input id="cvSub" class="inp" type="text" placeholder="Ej. Postales de primavera" autocomplete="off"></label>
+                <label>Título<textarea id="cvTitle" class="inp ttl" rows="1" placeholder="Vacío = el lugar" autocomplete="off"></textarea></label>
+                <label>Subtítulo<textarea id="cvSub" class="inp ttl" rows="1" placeholder="Ej. Postales de primavera" autocomplete="off"></textarea></label>
               </div>
             </div>
             <div class="opt" id="cvFootRow">
@@ -836,6 +879,7 @@ body.bg-cada .lay-bg{display:grid !important}
 
 <div class="mbar" aria-label="Acciones rápidas">
   <span class="picker btn btn-ghost"><svg viewBox="0 0 256 256" aria-hidden="true"><path d="M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z"/></svg>Fotos<input type="file" class="pick" accept="image/*" multiple aria-label="Agregar fotos"></span>
+  <button type="button" id="mDrive" class="btn btn-ghost" aria-label="Subir a Drive" title="Subir a Drive"><svg viewBox="0 0 256 256" aria-hidden="true"><path d="M178.34,165.66,160,147.31V208a8,8,0,0,1-16,0V147.31l-18.34,18.35a8,8,0,0,1-11.32-11.32l32-32a8,8,0,0,1,11.32,0l32,32a8,8,0,0,1-11.32,11.32ZM160,40A88.08,88.08,0,0,0,81.29,88.68,64,64,0,1,0,72,216h40a8,8,0,0,0,0-16H72a48,48,0,0,1,0-96c1.1,0,2.2,0,3.29.12A88,88,0,0,0,72,128a8,8,0,0,0,16,0,72,72,0,1,1,100.8,66,8,8,0,0,0,3.2,15.34,7.9,7.9,0,0,0,3.2-.68A88,88,0,0,0,160,40Z"/></svg></button>
   <button type="button" id="mSave" class="btn btn-stamp">Guardar imágenes</button>
 </div>
 
@@ -850,6 +894,19 @@ body.bg-cada .lay-bg{display:grid !important}
     <span class="lb-tip">En el celu también podés mantener apretada la imagen para guardarla en Fotos.</span>
   </div>
 </div>
+<dialog id="driveDlg" class="drive-dlg" aria-labelledby="driveTitle">
+  <h2 id="driveTitle">Conectar con tu carpeta de Drive</h2>
+  <p class="subhint">Se hace una sola vez. Un pequeño script en tu cuenta de Google recibe las imágenes y las guarda en tu carpeta <b>ojodecristi</b>. Solo funciona con la clave de esta herramienta.</p>
+  <ol>
+    <li><button type="button" class="btn btn-ghost mini" id="driveCopy">Copiar el código</button> (ya trae tu carpeta y tu clave).</li>
+    <li>Abrí <a href="https://script.new" target="_blank" rel="noopener">script.new</a> con tu cuenta de Google, borrá lo que haya y pegá el código. Guardá con el disquete.</li>
+    <li>Tocá <b>Implementar → Nueva implementación</b>. En el engranaje elegí <b>Aplicación web</b>. «Ejecutar como»: <b>Yo</b>. «Quién tiene acceso»: <b>Cualquier usuario</b>. Tocá <b>Implementar</b> y aceptá los permisos (si dice que la app no está verificada: «Configuración avanzada» → «Ir a…»).</li>
+    <li>Copiá la <b>URL de la aplicación web</b> (termina en <code>/exec</code>) y pegala acá:</li>
+  </ol>
+  <div class="row"><input id="driveUrl" class="inp" type="url" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off"><button type="button" class="btn btn-stamp" id="driveTest">Conectar</button></div>
+  <p class="msg" id="driveMsg" role="status"></p>
+  <div class="row" style="justify-content:space-between"><button type="button" class="linkbtn" id="driveForget" hidden>Desconectar</button><button type="button" class="btn btn-ghost mini" id="driveClose">Cerrar</button></div>
+</dialog>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
 <script src="vendor/jszip.min.js" defer></script>
@@ -989,7 +1046,7 @@ const state = {
   extras:{postmark:false, border:false, filmdate:false, counter:false, icons:false},
   shape:'cuadrados', frame:'fina', format:'1:1', comp:'postal', titleFont:'mono', lastEnd:0,
   photoSize:'grande', stampColor:'', stampMode:'papel', paperTex:'textura', swSize:'medianos', swPos:'auto', counterInk:'tinta',
-  bgEach:'cada', bgTone:'suave', bgPick:-1, pm:'ninguno', pmIcon:'auto',
+  bgEach:'cada', bgTone:'suave', bgPick:-1, pm:'ninguno', pmIcon:'auto', pmPos:'libre', lineStyle:'tinta', linePos:'auto',
   show:{
     postal:{title:true, num:false, place:false, date:false, time:false, gps:false, cam:false, lens:false, focal:false, ap:false, sh:false, iso:false, hex:false},
     grid:{num:true, place:true, date:true, time:false, gps:false, cam:false, lens:false, focal:false, ap:false, sh:false, iso:false}
@@ -1008,7 +1065,7 @@ const COVER_DEFAULT = {on:false, photo:0, look:'sola', bg:'blanco', color:'#F3EF
 state.cover = {...COVER_DEFAULT};
 const PENS = {azul:'#1F3A7A', negra:'#1E1D1B', sepia:'#5B3A22'};
 const PREF_KEY = 'postales-ojodecristi-v1';
-const PREF_FIELDS = ['style','custom','deco','decoPostal','tilt','extras','shape','frame','format','comp','titleFont','size','show','lastEnd','recipe','photoSize','stampColor','stampMode','paperTex','swSize','swPos','counterInk','cover','bgEach','bgTone','bgPick','pm','pmIcon'];
+const PREF_FIELDS = ['style','custom','deco','decoPostal','tilt','extras','shape','frame','format','comp','titleFont','size','show','lastEnd','recipe','photoSize','stampColor','stampMode','paperTex','swSize','swPos','counterInk','cover','bgEach','bgTone','bgPick','pm','pmIcon','pmPos','lineStyle','linePos'];
 function loadPrefs(){
   try{
     const o = JSON.parse(localStorage.getItem(PREF_KEY) || 'null'); if (!o || typeof o !== 'object') return;
@@ -1457,6 +1514,35 @@ function framedPhoto(ctx, src, r, pad, focus){
   else if (state.frame === 'fina'){ ctx.save(); ctx.strokeStyle = S.frame; ctx.lineWidth = 1.6; ctx.strokeRect(r.x-pad, r.y-pad, r.w+2*pad, r.h+2*pad); ctx.restore(); }
   drawCover(ctx, src, r, focus);
 }
+/* Las tres líneas de la postal: distintos estilos, y la ubicación la elige quien diseña */
+const LINE_W = {tinta:68, ondas:104, renglones:118, trazos:84, ninguna:0};
+function lineWidthFor(){ return LINE_W[state.lineStyle] || 68; }
+function pickLineSpot(spots, autoOrder){
+  if (state.lineStyle === 'ninguna') return null;
+  if (state.linePos !== 'auto' && spots[state.linePos]) return spots[state.linePos];
+  for (const k of autoOrder) if (spots[k]) return spots[k];
+  return null;
+}
+function drawLines(ctx, B, seed, lw){
+  const st = state.lineStyle, w = B.x1 - B.x0, r = rng(seed*7 + 3); lw = lw || 2.3;
+  if (st === 'tinta'){ inkLines(ctx, {x0:B.x0, x1:B.x1, ys:[B.y0 + 5.5, B.y0 + 15.5, B.y0 + 25.5], w:lw}, seed); return; }
+  ctx.save(); ctx.strokeStyle = S.ink; ctx.lineCap = 'round';
+  if (st === 'ondas'){
+    ctx.globalAlpha = 0.72; ctx.lineWidth = lw*0.68;
+    for (let i = 0; i < 4; i++){ const y = B.y0 + 4 + i*7.6, ph = r()*0.8; ctx.beginPath(); for (let x = 0; x <= w; x += 1.5){ const yy = y + Math.sin(x/8.2 + ph)*2.4; x ? ctx.lineTo(B.x0 + x, yy) : ctx.moveTo(B.x0, yy); } ctx.stroke(); }
+  } else if (st === 'renglones'){
+    ctx.globalAlpha = 0.6; ctx.lineWidth = lw*0.42;
+    for (let i = 0; i < 3; i++){ const y = B.y0 + 6 + i*10.5; ctx.beginPath(); ctx.moveTo(B.x0, y + (r() - 0.5)*0.4); ctx.lineTo(B.x1 - i*w*0.08, y + (r() - 0.5)*0.4); ctx.stroke(); }
+  } else if (st === 'trazos'){
+    ctx.restore();
+    for (let i = 0; i < 3; i++){
+      let x = B.x0 + (i === 1 ? 6 : 0); const y = B.y0 + 5.5 + i*10;
+      while (x < B.x1 - 6){ const len = Math.min(B.x1 - x, 13 + r()*14); inkLines(ctx, {x0:x, x1:x + len, ys:[y], w:lw}, seed + i*13 + Math.round(x)); x += len + 5 + r()*4; }
+    }
+    return;
+  }
+  ctx.restore();
+}
 function inkLines(ctx, L, seed){
   const r = rng(seed); ctx.save(); ctx.fillStyle = S.ink;
   for (const y of L.ys){
@@ -1470,6 +1556,7 @@ function inkLines(ctx, L, seed){
   }
   ctx.restore();
 }
+const splitLines = t => String(t || '').split('\n').map(x => x.trim()).filter(Boolean);
 function fitFont(ctx, text, maxW, size, family, weight){
   let s = size; ctx.font = `${weight || 400} ${s}px ${family}`;
   const w = ctx.measureText(text).width; if (maxW && w > maxW){ s = size*maxW/w; ctx.font = `${weight || 400} ${s}px ${family}`; }
@@ -1672,11 +1759,13 @@ function pmCenterDate(x, dt, y0){ x.textAlign = 'center'; x.textBaseline = 'alph
 const PM_R = {circular:41, rodillo:35, octogono:41, ilustrado:45}, PM_K = 1.22;
 /* dónde va: alrededor del sello, mordiendo su borde, en el lugar que menos tapa la foto, los colores, los nombres y la tira de datos */
 function pmSpot(p, n, L, H, dy, style){
+  if (state.pmPos === 'foto'){ const ph = L.photo, R = PM_R[style]*PM_K; return {cx:ph.x + ph.w - R*0.75, cy:ph.y + R*0.8, dir:-1}; }
+  if (state.pmPos === 'libre') return pmFree(p, n, L, H, dy, style);
   const st = L.stamp, R = PM_R[style]*PM_K, rr = [], add = (x, y, w, h) => rr.push({x, y, w, h});
   const ph = L.photo; add(ph.x - 6, ph.y - 6, ph.w + 12, ph.h + 12);
   if (L.sw) add(L.sw.xs[0] - 4, L.sw.y - 4, L.sw.xs[2] + L.sw.w - L.sw.xs[0] + 8, L.label.base + (state.show.postal.hex ? 38 : 24) - L.sw.y);
   if (L.column) L.column.items.forEach(it => add(it.x - 4, it.y - 4, L.column.w + 8, L.column.h + 54));
-  if (L.lines) add(L.lines.x0 - 4, L.lines.ys[0] - 8, L.lines.x1 - L.lines.x0 + 8, 30);
+  if (L.lineBox) add(L.lineBox.x0 - 4, L.lineBox.y0 - 4, L.lineBox.x1 - L.lineBox.x0 + 8, 36);
   if (stripText(p, n).some(Boolean)) add(0, H - dy - 40, D, 40);
   if (L.counter) add(L.counter.xr - 96, L.counter.base - dy - 52, 98, 62);
   const inter = (a, b) => Math.max(0, Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x)) * Math.max(0, Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y));
@@ -1696,6 +1785,29 @@ function pmSpot(p, n, L, H, dy, style){
     }
     if (!best || c < best.c) best = {cx, cy, dir, c};
   });
+  return best;
+}
+/* lugar libre: busca en toda la postal un hueco que no toque la foto, los colores, el sello ni los textos, cerca del sello */
+function pmFree(p, n, L, H, dy, style){
+  const st = L.stamp, R = PM_R[style]*PM_K, rr = [], add = (x, y, w, h) => rr.push({x, y, w, h});
+  const ph = L.photo; add(ph.x - 8, ph.y - 8, ph.w + 16, ph.h + 16);
+  add(st.cx - st.d*0.56, st.cy - st.d*0.56, st.d*1.12, st.d*1.12);
+  if (L.sw) add(L.sw.xs[0] - 6, L.sw.y - 6, L.sw.xs[2] + L.sw.w - L.sw.xs[0] + 12, L.label.base + (state.show.postal.hex ? 40 : 26) - L.sw.y);
+  if (L.column) L.column.items.forEach(it => add(it.x - 6, it.y - 6, L.column.w + 12, L.column.h + 56));
+  if (L.lineBox) add(L.lineBox.x0 - 6, L.lineBox.y0 - 6, L.lineBox.x1 - L.lineBox.x0 + 12, 40);
+  if (stripText(p, n).some(Boolean)) add(0, H - dy - 40, D, 40);
+  if (L.counter) add(L.counter.xr - 96, L.counter.base - dy - 52, 98, 62);
+  if (state.show.postal.title && (p.title || '').trim()) add(ph.x + ph.w*0.1, ph.y - 48, ph.w*0.8, 44);
+  const inter = (a, b) => Math.max(0, Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x)) * Math.max(0, Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y));
+  const outside = b => { const x0 = Math.max(b.x, 6), x1 = Math.min(b.x + b.w, D - 6), y0 = Math.max(b.y, -dy + 6), y1 = Math.min(b.y + b.h, H - dy - 6); return b.w*b.h - Math.max(0, x1 - x0)*Math.max(0, y1 - y0); };
+  const cost = b => rr.reduce((a, r) => a + inter(b, r), 0);
+  let best = null;
+  for (let cy = -dy + R + 6; cy <= H - dy - R - 6; cy += 9) for (let cx = R + 6; cx <= D - R - 6; cx += 9){
+    const box = {x:cx - R, y:cy - R, w:2*R, h:2*R};
+    let c = cost(box)*3 + outside(box)*8 + Math.hypot(cx - st.cx, cy - st.cy)*0.9, dir = -1;
+    if (style === 'rodillo'){ const L2 = 112*PM_K, bars = d => ({x:d < 0 ? cx - R - L2 : cx + R, y:cy - 21*PM_K, w:L2, h:42*PM_K}); const cl = cost(bars(-1)), cr = cost(bars(1)); dir = cl <= cr ? -1 : 1; c += Math.min(cl, cr)*2; }
+    if (!best || c < best.c) best = {cx, cy, dir, c};
+  }
   return best;
 }
 function drawPostmark(ctx, p, n, L, H, dy){
@@ -2210,9 +2322,15 @@ function postalLayout(p, n, H, mini){
     const pb = top + h + m*0.8, colBot = colTop + colH;
     const fits = colBot + 70 + 57 + dy < H - (counter ? 64 : 12);
     const stampAt = fits ? {cx:colX + swW/2, cy:colBot + 70} : {cx:x + w + m - 45.5, cy:pb + 27.3 - m*0.5};
+    const LW = lineWidthFor();
+    const spots = {
+      izquierda:{x0:side, x1:side + LW, y0:pb + 20},
+      sello: fits && colBot + 70 + 72 + 30 + dy < H - (strip ? 44 : 14) - (counter ? 60 : 0) ? {x0:D - side - LW, x1:D - side, y0:colBot + 70 + 72} : null,
+      arriba: top + dy >= 40 ? {x0:D - side - LW, x1:D - side, y0:top - 34} : null
+    };
     return Object.assign(out, {
       photo:{x, y:top, w, h}, dy, column:{items, w:swW, h:swH, inset, lab},
-      lines:{x0:side, x1:side + 68, ys:[pb + 26, pb + 36, pb + 46], w:P.lines.w},
+      lineBox:pickLineSpot(spots, ['izquierda', 'sello', 'arriba']),
       stamp:Object.assign(stampAt, {d:P.stamp.d, rot:P.stamp.rot}),
       pm:(pb + 95 + 45 + dy < H) ? {cx:side + 45, cy:pb + 95} : {cx:side + 50, cy:pb - 50}
     });
@@ -2224,21 +2342,24 @@ function postalLayout(p, n, H, mini){
   const w = Math.min(D - 2*side - 2*m, maxH*a), h = w/a, x = (D - w)/2;
   const pb = top + h + m*0.8, sy = pb + 42.3;
   const stampCx = Math.max(x + w + m, D - side) - 45.5, stampLeft = stampCx - P.stamp.d/2;
-  const T = 3*swW + 2*gap;
-  let x0, lines;
-  if (Lo.swPos === 'izquierda'){
-    x0 = side;
-    const lx = x0 + T + 24;
-    lines = lx + 68 < stampLeft - 8 ? {x0:lx, x1:lx + 68} : null;
-  } else {
+  const T = 3*swW + 2*gap, LW = lineWidthFor(), left = Lo.swPos === 'izquierda';
+  let x0;
+  if (left) x0 = side;
+  else {
     let cx = (P.sw.xs[0] + P.sw.xs[2] + P.sw.w)/2;
     if (cx + T/2 > stampLeft - 8) cx = stampLeft - 8 - T/2;
-    cx = Math.max(cx, side + 68 + 18 + T/2);
-    x0 = cx - T/2; lines = {x0:side, x1:side + 68};
+    cx = Math.max(cx, side + Math.min(LW, 68) + 18 + T/2);
+    x0 = cx - T/2;
   }
+  const dyc = Math.max(0, (maxH - h)/2), stampCy = pb + 27.3 - m*0.5, botLim = H - dyc - (strip ? 44 : 14);
+  const spots = {
+    izquierda: left ? null : {x0:side, x1:side + LW, y0:sy},
+    sello: (stampCy + 72 + 30 < botLim && !(counter && stampCy + 72 + 30 > H - dyc - 80)) ? {x0:D - side - LW, x1:D - side, y0:stampCy + 72} : null,
+    arriba: top - m*0.6 + dyc >= 40 ? {x0:D - side - LW, x1:D - side, y0:top - m*0.6 - 34} : null
+  };
   return Object.assign(out, {
-    photo:{x, y:top, w, h}, dy:Math.max(0, (maxH - h)/2),
-    lines:lines && Object.assign(lines, {ys:[sy + 5.5, sy + 15.5, sy + 25.5], w:P.lines.w}),
+    photo:{x, y:top, w, h}, dy:dyc,
+    lineBox:pickLineSpot(spots, left ? ['sello', 'arriba'] : ['izquierda', 'sello', 'arriba']),
     sw:{xs:[0, 1, 2].map(i => x0 + i*(swW + gap)), y:sy, w:swW, h:swH, inset},
     label:{size:lab.size, base:sy + swH + 25, maxW:lab.maxW},
     stamp:{cx:stampCx, cy:pb + 27.3 - m*0.5, d:P.stamp.d, rot:P.stamp.rot},
@@ -2283,10 +2404,11 @@ function drawPostal(ctx, p, n, hi, mini, H){
   if (kind !== 'none') decorate(ctx, r, kind, true, p);
   if (!mini && state.show.postal.title && (p.title || '').trim()){
     const ft = titleFont(15), top = (state.extras.border ? BORDER : 0) - dy, fTop = r.y - frameTop() - underPad(kind) - (kind === 'broches' ? 22 : kind === 'cinta-color' ? 12 : 0);
-    const base = (top + fTop)/2 + ft.size*0.3;
-    ctx.fillStyle = S.ink; centerText(ctx, p.title.trim(), r.x + r.w/2, base, ft.size, 560, ft.family, ft.weight);
+    const ls = splitLines(p.title), lh = ft.size*1.18, base = (top + fTop)/2 + ft.size*0.3 - (ls.length - 1)*lh/2;
+    const maxW = L.lineBox && L.lineBox.y0 < r.y ? 2*(L.lineBox.x0 - 12 - (r.x + r.w/2)) : 560;
+    ctx.fillStyle = S.ink; ls.forEach((t, i) => centerText(ctx, t, r.x + r.w/2, base + i*lh, ft.size, Math.min(560, maxW), ft.family, ft.weight));
   }
-  if (L.lines) inkLines(ctx, L.lines, 11);
+  if (L.lineBox) drawLines(ctx, L.lineBox, 11);
   if (L.column){
     const C = L.column;
     p.colors.forEach((c, i) => {
@@ -2329,7 +2451,7 @@ function drawFichaTall(ctx, p, n, cell, hi, single){
   p.colors.forEach((c, i) => drawSwatches(ctx, [c], {xs:[x0], y:top + i*step, w:sw, h:shh, inset:4*k}, {size:FICHA.label.size*Math.max(k, 0.8), base:top + i*step + shh + 21*k, maxW:sw + 14}, n*5 + i, single, false));
   const swEnd = top + 3*step - gap*k;
   const st = {cx:x0 + Math.min(colW, 200) - 58, cy:Math.min(631, Math.max(swEnd + 64, r.y + r.h - 50)), d:110};
-  inkLines(ctx, {x0, x1:x0 + 58, ys:[st.cy - 8, st.cy + 1.5, st.cy + 11], w:2.1}, 23 + n);
+  if (state.lineStyle !== 'ninguna') drawLines(ctx, {x0, x1:x0 + Math.min(58*lineWidthFor()/68, st.cx - 58 - x0), y0:st.cy - 13.5}, 23 + n, 2.1);
   const keepS = S; S = withPhotoStamp(S, p);
   stamp(ctx, st.cx, st.cy, st.d, GRID.rots[cell]);
   S = keepS;
@@ -2347,7 +2469,7 @@ function drawFicha(ctx, p, n, cell, hi, single){
   decorate(ctx, r, kind, false, p);
   ctx.restore();
   fichaText(ctx, p, n);
-  inkLines(ctx, high ? F.linesHigh : F.lines, 23 + n);
+  if (state.lineStyle !== 'ninguna'){ const FL = high ? F.linesHigh : F.lines, wl = (FL.x1 - FL.x0)*lineWidthFor()/68; drawLines(ctx, {x0:FL.x1 - wl, x1:FL.x1, y0:FL.ys[0] - 5.5}, 23 + n, 2.1); }
   drawSwatches(ctx, p.colors, F.sw, F.label, n, single, false);
   const st = high ? F.stampHigh : F.stamp, keepS = S; S = withPhotoStamp(S, p);
   stamp(ctx, st.cx, st.cy, st.d, GRID.rots[cell]);
@@ -2560,8 +2682,9 @@ function drawPortada(ctx, hi, H){
   const title = (C.title || '').trim() || placeOf(p), sub = (C.sub || '').trim();
   const ar = p.fw && p.fh ? p.fw/p.fh : 1.5, M = C.size === 'mediano' ? 36 : 14, fp = COVER_FRAME[C.frame] || 0;
   let top = M, bot = M;
-  if (C.look === 'titulo') top = sub ? 104 : 86;
-  if (C.look === 'libro'){ top = sub ? 176 : 150; bot = C.foot === 'nada' ? M + 6 : 70; }
+  const TL = splitLines(title), SL = splitLines(sub);
+  if (C.look === 'titulo') top = (sub ? 104 : 86) + (TL.length - 1)*30 + (SL.length - 1)*19;
+  if (C.look === 'libro'){ top = (sub ? 176 : 150) + (TL.length - 1)*46 + (SL.length - 1)*20; bot = C.foot === 'nada' ? M + 6 : 70; }
   const aw = D - 2*(M + fp), ah = H - top - bot - 2*fp;
   let w = aw, h = w/ar; if (h > ah){ h = ah; w = h*ar; }
   const r = {x:(D - w)/2, y:top + fp + (ah - h)/2, w, h};
@@ -2571,17 +2694,17 @@ function drawPortada(ctx, hi, H){
   else { const keepF = state.frame, keepS = S; state.frame = C.frame; if (dark) S = Object.assign({}, S, {frame:'#C9C4B8'}); framedPhoto(ctx, srcOf(p, hi), r, 3.9, 0); state.frame = keepF; S = keepS; }
   ctx.fillStyle = ink;
   if (C.look === 'titulo'){
-    const ft = titleFont(24), t = state.titleFont === 'hand' ? title : title.toUpperCase();
-    const base = r.y - fp - (sub ? 52 : 30);
-    centerText(ctx, t, D/2, base, ft.size, 600, ft.family, ft.weight);
-    const tw = Math.min(600, ctx.measureText(t).width); const keep = S; S = Object.assign({}, S, {ink}); underline(ctx, D/2 - tw/2 - 7, D/2 + tw/2 + 7, base + 10, base + 5); S = keep;
-    if (sub){ ctx.globalAlpha = 0.8; centerText(ctx, sub, D/2, r.y - fp - 16, 15, 560, SANS, 400); ctx.globalAlpha = 1; }
+    const ft = titleFont(24), lines = TL.map(t => state.titleFont === 'hand' ? t : t.toUpperCase()), lh = ft.size*1.2;
+    const base = r.y - fp - (sub ? 52 + (SL.length - 1)*19 : 30);
+    let tw = 0; lines.forEach((t, i) => { centerText(ctx, t, D/2, base - (lines.length - 1 - i)*lh, ft.size, 600, ft.family, ft.weight); tw = Math.max(tw, Math.min(600, ctx.measureText(t).width)); });
+    const keep = S; S = Object.assign({}, S, {ink}); underline(ctx, D/2 - tw/2 - 7, D/2 + tw/2 + 7, base + 10, base + 5); S = keep;
+    if (sub){ ctx.globalAlpha = 0.8; SL.forEach((t, i) => centerText(ctx, t, D/2, r.y - fp - 16 - (SL.length - 1 - i)*19, 15, 560, SANS, 400)); ctx.globalAlpha = 1; }
   } else if (C.look === 'libro'){
     ctx.globalAlpha = 0.75; ctx.font = `500 11px ${MONO}`; spaced(ctx, 'OJODECRISTI', D/2, 46, 4.2); ctx.globalAlpha = 1;
     ctx.fillRect(D/2 - 16, 60, 32, 1.4);
-    const T = title.toUpperCase(), fs = fitSpaced(ctx, T, D - 2*M - 20, 40, SANS, 500, 0.16);
-    spaced(ctx, T, D/2, 112, fs*0.16);
-    if (sub){ ctx.globalAlpha = 0.8; ctx.font = `400 16px ${SANS}`; const ss = fitSpaced(ctx, sub, D - 2*M - 40, 16, SANS, 400, 0.04); spaced(ctx, sub, D/2, 142, ss*0.04); ctx.globalAlpha = 1; }
+    const Ts = TL.map(t => t.toUpperCase()), fs = Math.min(...Ts.map(t => fitSpaced(ctx, t, D - 2*M - 20, 40, SANS, 500, 0.16)));
+    ctx.font = `500 ${fs}px ${SANS}`; Ts.forEach((t, i) => spaced(ctx, t, D/2, 112 + i*46, fs*0.16));
+    if (sub){ ctx.globalAlpha = 0.8; const ss = Math.min(...SL.map(t => fitSpaced(ctx, t, D - 2*M - 40, 16, SANS, 400, 0.04))); ctx.font = `400 ${ss}px ${SANS}`; SL.forEach((t, i) => spaced(ctx, t, D/2, 142 + (Ts.length - 1)*46 + i*20, ss*0.04)); ctx.globalAlpha = 1; }
     const F = coverFoot(p);
     if (F){
       const fy = H - 36, tr = s => s*0.22, maxW = D - 2*M;
@@ -2665,6 +2788,77 @@ async function saveBlob(filename, blob, quiet){
   return true;
 }
 function slug(s){ return s.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,40); }
+/* ---------- subir a Google Drive ---------- */
+const DRIVE_KEY = 'postales-ojodecristi-drive', DRIVE_FOLDER = '1PndvCL3enX8aplVMaufEBaMlZqB0oORl';
+function driveCfg(){ let c = null; try { c = JSON.parse(localStorage.getItem(DRIVE_KEY) || 'null'); } catch(e){} if (!c || !c.clave){ const a = new Uint8Array(12); crypto.getRandomValues(a); c = {clave:[...a].map(x => x.toString(16).padStart(2, '0')).join(''), url:''}; try { localStorage.setItem(DRIVE_KEY, JSON.stringify(c)); } catch(e){} } return c; }
+function driveSave(c){ try { localStorage.setItem(DRIVE_KEY, JSON.stringify(c)); } catch(e){} }
+function driveScript(c){
+  return `// Postales ojodecristi → Google Drive
+// Guarda en tu carpeta las imágenes que manda la herramienta. Solo acepta pedidos con esta clave.
+const CARPETA = '${DRIVE_FOLDER}';
+const CLAVE = '${c.clave}';
+
+function doPost(e) {
+  const d = JSON.parse(e.postData.contents);
+  if (d.clave !== CLAVE) return salida({ ok: false, error: 'La clave no coincide' });
+  let carpeta = DriveApp.getFolderById(CARPETA);
+  if (d.prueba) return salida({ ok: true, carpeta: carpeta.getName() });
+  if (d.subcarpeta) {
+    const hay = carpeta.getFoldersByName(d.subcarpeta);
+    carpeta = hay.hasNext() ? hay.next() : carpeta.createFolder(d.subcarpeta);
+  }
+  const blob = Utilities.newBlob(Utilities.base64Decode(d.datos), d.tipo || 'image/jpeg', d.nombre);
+  carpeta.createFile(blob);
+  return salida({ ok: true, url: carpeta.getUrl() });
+}
+
+function salida(o) {
+  return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON);
+}
+`;
+}
+async function drivePost(url, body){ const r = await fetch(url, {method:'POST', body:JSON.stringify(body)}); const t = await r.text(); try { return JSON.parse(t); } catch(e){ throw new Error('respuesta rara'); } }
+function blobB64(b){ return new Promise((res, rej) => { const fr = new FileReader(); fr.onload = () => res(String(fr.result).split(',')[1]); fr.onerror = rej; fr.readAsDataURL(b); }); }
+function openDriveDlg(){ const c = driveCfg(), d = $('#driveDlg'); $('#driveUrl').value = c.url || ''; $('#driveMsg').textContent = c.url ? 'Conectado. Podés cambiar la URL o desconectar.' : ''; $('#driveForget').hidden = !c.url; if (d.showModal) d.showModal(); else d.setAttribute('open', ''); }
+$('#driveClose').addEventListener('click', () => $('#driveDlg').close());
+$('#driveCopy').addEventListener('click', async () => {
+  const code = driveScript(driveCfg());
+  try { await navigator.clipboard.writeText(code); toast('Código copiado'); }
+  catch(e){ const t = document.createElement('textarea'); t.value = code; document.body.appendChild(t); t.select(); try { document.execCommand('copy'); toast('Código copiado'); } catch(_){ toast('No se pudo copiar'); } t.remove(); }
+});
+$('#driveTest').addEventListener('click', async () => {
+  const url = $('#driveUrl').value.trim(), m = $('#driveMsg');
+  if (!/^https:\/\/script\.google(usercontent)?\.com\/.+/.test(url)){ m.textContent = 'Pegá la URL de la aplicación web: empieza con https://script.google.com/ y termina en /exec.'; return; }
+  m.textContent = 'Probando la conexión…';
+  try {
+    const r = await drivePost(url, {clave:driveCfg().clave, prueba:true});
+    if (!r.ok){ m.textContent = 'El script respondió, pero la clave no coincide. Volvé a copiar el código y reemplazalo en script.new.'; return; }
+    const c = driveCfg(); c.url = url; driveSave(c); m.textContent = `Listo: conectado a la carpeta «${r.carpeta}». Ya podés usar «Subir a Drive».`; $('#driveForget').hidden = false;
+  } catch(e){ m.textContent = 'No respondió. Revisá que «Quién tiene acceso» sea «Cualquier usuario» y que la URL termine en /exec.'; }
+});
+$('#driveForget').addEventListener('click', () => { const c = driveCfg(); c.url = ''; driveSave(c); $('#driveUrl').value = ''; $('#driveForget').hidden = true; $('#driveMsg').textContent = 'Desconectado.'; });
+let driveBusy = false;
+$('#driveBtn').addEventListener('click', async () => {
+  const c = driveCfg(); if (!c.url){ openDriveDlg(); return; }
+  const outs = outputs(); if (!outs.length || driveBusy) return;
+  driveBusy = true; const b = $('#driveBtn'), label = b.innerHTML; b.disabled = true;
+  const d = new Date(), pad = x => String(x).padStart(2, '0');
+  const sub = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}.${pad(d.getMinutes())} · ${(gridTitle(0) || state.place || 'carrusel').replace(/[\\/:*?"<>|]/g, '').trim()}`;
+  let done = 0, url = '';
+  try {
+    for (let k = 0; k < outs.length; k++){
+      b.textContent = `Subiendo ${k + 1}/${outs.length}…`;
+      const blob = await renderBlob(outs[k], state.size);
+      const r = await drivePost(c.url, {clave:c.clave, subcarpeta:sub, nombre:outName(outs[k], k).file, tipo:'image/jpeg', datos:await blobB64(blob)});
+      if (!r.ok) throw new Error(r.error || 'error'); done++; url = r.url || url;
+    }
+    rememberNumbering(); toast(`Listo: ${done} imágenes en Drive, en «${sub}»`);
+  } catch(e){ toast(done ? `Se subieron ${done} de ${outs.length}. Probá de nuevo.` : 'No se pudo subir. Revisá la conexión con Drive.'); if (!done) openDriveDlg(); }
+  finally { b.innerHTML = label; b.disabled = false; driveBusy = false; }
+});
+$('#driveBtn').addEventListener('contextmenu', e => { e.preventDefault(); openDriveDlg(); });
+$('#driveCfgBtn').addEventListener('click', openDriveDlg);
+$('#mDrive').addEventListener('click', () => $('#driveBtn').click());
 function rememberNumbering(){ if (state.sample || !state.photos.length) return; state.lastEnd = state.startNum + state.photos.length - 1; savePrefs(); }
 let busySaving = false;
 async function saveOneByOne(btn){
@@ -2843,7 +3037,7 @@ function renderPhotos(){
           <input class="inp pc-place" id="place-${id}" data-f="place" value="${esc(p.place)}" placeholder="${esc(state.place || 'Lugar')}" aria-label="Lugar de la foto ${i+1} (vacío usa el general)" autocomplete="off">
         </div>
         <div class="pc-titlebox">
-          <input class="inp" id="title-${id}" data-f="title" value="${esc(p.title)}" placeholder="Título (opcional), ej. El Arco / The Bow" aria-label="Título de la foto ${i+1}" autocomplete="off">
+          <textarea class="inp pc-title" id="title-${id}" data-f="title" rows="${Math.min(3, Math.max(1, String(p.title || '').split('\n').length))}" placeholder="Título (opcional). Enter = otro renglón" aria-label="Título de la foto ${i+1}" autocomplete="off">${esc(p.title)}</textarea>
           <button type="button" class="sw-ai" data-aititle="1" title="Sugerir un título con Claude (tocá de nuevo para otra opción)" aria-label="Sugerir título para la foto ${i+1} con Claude">${STAR}</button>
         </div>
         <div class="sws">
@@ -2891,7 +3085,7 @@ photoList.addEventListener('input', e => {
   const f = e.target.dataset.f, nm = e.target.dataset.name, tk = e.target.dataset.t;
   if (f === 'date') p.date = e.target.value;
   else if (f === 'place') p.place = e.target.value;
-  else if (f === 'title') p.title = e.target.value;
+  else if (f === 'title'){ p.title = e.target.value; e.target.rows = Math.min(3, Math.max(1, e.target.value.split('\n').length)); }
   else if (f === 'focus'){ p.focus = +e.target.value; drawThumb(p); }
   else if (nm !== undefined){ const c = p.colors[+nm]; c.name = e.target.value; c.auto = false; }
   else if (e.target.dataset.laystamp){
@@ -2906,6 +3100,9 @@ photoList.addEventListener('toggle', e => {
   const l = e.target.closest && e.target.closest('[data-layd]'); if (l){ const p = photoById(l.dataset.layd); if (p) p.layOpen = l.open; return; }
   const d = e.target.closest && e.target.closest('[data-tech]'); if (!d) return; const p = photoById(d.dataset.tech); if (p) p.techOpen = d.open;
 }, true);
+photoList.addEventListener('focusin', e => { const li = e.target.closest('.pcard'); if (li && isWide()) showOut(o => o.kind === 'postal' && state.photos[o.i] && state.photos[o.i].id === li.dataset.id); });
+photoList.addEventListener('pointerdown', e => { const li = e.target.closest('.pcard'); if (li && isWide() && !e.target.closest('[data-act]')) showOut(o => o.kind === 'postal' && state.photos[o.i] && state.photos[o.i].id === li.dataset.id); });
+$('#gridTitles').addEventListener('focusin', e => { const g = e.target.dataset.g; if (g !== undefined && isWide()) showOut(o => o.kind === 'grid' && o.g === +g); });
 photoList.addEventListener('click', e => {
   const li = e.target.closest('.pcard'); if (!li) return; const p = photoById(li.dataset.id); if (!p) return;
   const lay = e.target.closest('[data-lay] button[data-v]');
@@ -2980,7 +3177,7 @@ function syncDesign(){
     document.body.classList.toggle('bg-cada', foto && state.bgEach === 'cada'); renderBgSwatches(); renderFotoThumb(); }
   document.querySelectorAll('[data-ifpostal]').forEach(el => el.hidden = state.comp === 'ficha');
   $('#decoPostalRow').hidden = state.deco === 'ninguno';
-  $('#pmIconRow').hidden = state.pm !== 'ilustrado';
+  $('#pmIconRow').hidden = state.pm !== 'ilustrado'; $('#pmPosRow').hidden = state.pm === 'ninguno'; $('#linePosRow').hidden = state.lineStyle === 'ninguna';
   $('#counterInkRow').hidden = !state.extras.counter;
   document.querySelectorAll('select[data-sel]').forEach(x => x.value = state[x.dataset.sel]);
   $('#datosSum').textContent = datosSummary();
@@ -3085,7 +3282,7 @@ function syncCover(){
   $('#cvOpts').hidden = !C.on; $('#cvOffHint').hidden = C.on; $('#cvTextRow').hidden = C.look === 'sola'; $('#cvColorRow').hidden = C.bg !== 'otro';
   document.querySelectorAll('select[data-csel]').forEach(x => x.value = C[x.dataset.csel]);
   $('#cvFootRow').hidden = C.look !== 'libro'; $('#cvFootTextRow').hidden = C.look !== 'libro' || C.foot !== 'texto'; $('#cvFootText').value = C.footText || '';
-  $('#cvOn').checked = C.on; $('#cvSign').checked = !!C.sign; $('#cvSignRow').hidden = C.look === 'libro'; $('#cvTitle').value = C.title; $('#cvSub').value = C.sub; $('#cvColor').value = C.color;
+  $('#cvOn').checked = C.on; $('#cvSign').checked = !!C.sign; $('#cvSignRow').hidden = C.look === 'libro'; $('#cvTitle').value = C.title; $('#cvSub').value = C.sub; ['cvTitle', 'cvSub'].forEach(id => { const t = $('#' + id); t.rows = Math.min(3, Math.max(1, t.value.split('\n').length)); }); $('#cvColor').value = C.color;
   document.querySelectorAll('.chips[data-cradio]').forEach(box => box.querySelectorAll('button').forEach(b => b.setAttribute('aria-checked', String(C[box.dataset.cradio] === b.dataset.v))));
   renderCoverPhotos(); syncPresetSel();
 }
@@ -3094,8 +3291,8 @@ document.querySelectorAll('select[data-csel]').forEach(x => x.addEventListener('
 $('#cvPhoto').addEventListener('change', e => { state.cover.photo = +e.target.value; state.cover.pick = -1; renderCoverSwatches(); scheduleOut(); });
 $('#cvFootText').addEventListener('input', e => { state.cover.footText = e.target.value; scheduleOut(); });
 $('#cvSign').addEventListener('change', e => { state.cover.sign = e.target.checked; scheduleOut(); });
-$('#cvTitle').addEventListener('input', e => { state.cover.title = e.target.value; scheduleOut(); });
-$('#cvSub').addEventListener('input', e => { state.cover.sub = e.target.value; scheduleOut(); });
+$('#cvTitle').addEventListener('input', e => { e.target.rows = Math.min(3, Math.max(1, e.target.value.split('\n').length)); state.cover.title = e.target.value; scheduleOut(); });
+$('#cvSub').addEventListener('input', e => { e.target.rows = Math.min(3, Math.max(1, e.target.value.split('\n').length)); state.cover.sub = e.target.value; scheduleOut(); });
 $('#cvColor').addEventListener('input', e => { state.cover.color = e.target.value; state.cover.bg = 'otro'; syncCover(); scheduleOut(); });
 document.querySelectorAll('.chips[data-cradio]').forEach(box => box.addEventListener('click', e => {
   const b = e.target.closest('button[data-v]'); if (!b) return;
@@ -3104,7 +3301,7 @@ document.querySelectorAll('.chips[data-cradio]').forEach(box => box.addEventList
 
 /* ---------- mis diseños guardados ---------- */
 const PRESET_KEY = 'postales-ojodecristi-disenos';
-const PRESET_FIELDS = ['style','custom','deco','decoPostal','tilt','extras','shape','frame','format','comp','titleFont','photoSize','stampColor','stampMode','paperTex','swSize','swPos','counterInk','bgEach','bgTone','pm','pmIcon'];
+const PRESET_FIELDS = ['style','custom','deco','decoPostal','tilt','extras','shape','frame','format','comp','titleFont','photoSize','stampColor','stampMode','paperTex','swSize','swPos','counterInk','bgEach','bgTone','pm','pmIcon','pmPos','lineStyle','linePos'];
 const PRESET_EXAMPLES = [
   {name:'Clásica', d:{style:'archivo', deco:'cintas-clip', decoPostal:false, frame:'fina', format:'1:1', comp:'postal', shape:'cuadrados', photoSize:'normal', paperTex:'textura', swSize:'medianos', swPos:'centro', stampColor:'', extras:{postmark:false, border:false, filmdate:false, counter:false}}},
   {name:'Costa vertical', d:{style:'archivo', deco:'paspartu', decoPostal:true, frame:'fina', format:'4:5', comp:'postal', shape:'cuadrados', photoSize:'grande', paperTex:'liso', swSize:'medianos', swPos:'costado', counterInk:'tinta', extras:{postmark:false, border:false, filmdate:false, counter:true}}, cover:{on:true, look:'sola', bg:'blanco'}}
@@ -3242,18 +3439,18 @@ function renderOutputs(){
   $('#outCount').textContent = outs.length ? `${outs.length} ${outs.length === 1 ? 'imagen' : 'imágenes'}` : 'vacío';
 }
 let outT = 0;
-function scheduleOut(){ resetShare(); saveSessionSoon(); clearTimeout(outT); outT = setTimeout(() => requestAnimationFrame(() => { renderOutputs(); renderShapeThumbsSoon(); savePrefs(); pushUndo(); }), 90); }
+function scheduleOut(){ resetShare(); saveSessionSoon(); clearTimeout(outT); outT = setTimeout(() => requestAnimationFrame(() => { renderOutputs(); renderShapeThumbsSoon(); savePrefs(); pushUndo(); if (wantSel){ const w = wantSel; wantSel = null; if (isWide()) showOut(o => o.kind === w); } }), 90); }
 let shapeT = 0, lastShapeSig = '';
 function renderShapeThumbsSoon(){
   const sig = state.photos[0] ? state.photos[0].colors.map(c => c.hex).join() : 'demo';
   if (sig === lastShapeSig) return; lastShapeSig = sig; clearTimeout(shapeT); shapeT = setTimeout(renderShapeThumbs, 60);
 }
 function afterStructure(){ resetShare(); saveSessionSoon(); $('#clearAll').hidden = state.sample || !state.photos.length; state.picking = null; renderPhotos(); renderGridTitles(); renderRecipePhotos(); renderOutputs(); renderStyleThumbs(); renderShapeThumbsSoon(); updateEmpty(); }
-function updateEmpty(){ const none = !state.photos.length; $('#zipBtn').disabled = none; $('#oneBtn').disabled = none; $('#mSave').disabled = none; }
+function updateEmpty(){ const none = !state.photos.length; $('#zipBtn').disabled = none; $('#driveBtn').disabled = none; $('#oneBtn').disabled = none; $('#mSave').disabled = none; }
 
 outList.addEventListener('click', async e => {
   const open = e.target.closest('[data-k]'), sv = e.target.closest('[data-save]');
-  if (open){ const k = +open.dataset.k; if (isWide()) selectOut(k); else if (document.body.dataset.view === 'carrusel'){ if (k === selK) openLB(k); else selectOut(k); } else openLB(k); }
+  if (open){ const k = +open.dataset.k; if (isWide()){ selectOut(k); revealEditor(outputs()[k]); } else if (document.body.dataset.view === 'carrusel'){ if (k === selK) openLB(k); else selectOut(k); } else openLB(k); }
   else if (sv){
     const k = +sv.dataset.save, o = outputs()[k]; if (!o) return;
     sv.textContent = '…';
@@ -3265,6 +3462,18 @@ outList.addEventListener('click', async e => {
 const isWide = () => window.matchMedia('(min-width:1100px)').matches;
 let selK = 0, stageT = 0;
 function selectOut(k){ selK = k; renderStage(); }
+/* el carrusel de abajo, las tarjetas de fotos y el panel se siguen entre sí */
+let wantSel = null;
+function scrollStrip(k){ const li = document.querySelectorAll('#outList .ocard')[k]; if (li) li.scrollIntoView({block:'nearest', inline:'center', behavior:'smooth'}); }
+function showOut(pred){ const k = outputs().findIndex(pred); if (k >= 0 && k !== selK){ selectOut(k); scrollStrip(k); } }
+function flash(el){ if (!el) return; el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 1300); }
+function revealEditor(o){
+  if (!o) return;
+  if (o.kind === 'postal'){ const p = state.photos[o.i], card = p && document.querySelector(`.pcard[data-id="${p.id}"]`); if (card){ card.scrollIntoView({block:'center', behavior:'smooth'}); flash(card); } }
+  else if (o.kind === 'grid'){ const inp = document.getElementById('gtitle-' + o.g); if (inp){ inp.scrollIntoView({block:'center', behavior:'smooth'}); flash(inp.closest('.gt')); } }
+  else if (o.kind === 'cover'){ setTab('portada'); flash($('#coverBox')); }
+  else if (o.kind === 'recipe'){ setTab('receta'); flash($('#recipeBox')); }
+}
 function renderStage(){
   const outs = outputs();
   document.querySelectorAll('#outList .ocard').forEach((li, k) => li.classList.toggle('sel', k === selK));
@@ -3278,8 +3487,8 @@ function renderStage(){
 }
 $('#stageView').addEventListener('click', () => openLB(selK));
 $('#stageSave').addEventListener('click', async e => {
-  const o = outputs()[selK]; if (!o) return; const b = e.currentTarget, t = b.textContent; b.textContent = '…';
-  try { await shareOrSave(outName(o, selK).file, await renderBlob(o, state.size)); } finally { b.textContent = t; }
+  const o = outputs()[selK]; if (!o) return; const b = e.currentTarget, t = b.innerHTML; b.textContent = '…';
+  try { await shareOrSave(outName(o, selK).file, await renderBlob(o, state.size)); } finally { b.innerHTML = t; }
 });
 document.addEventListener('keydown', e => {
   if (!isWide() || !lb.hidden || /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement && document.activeElement.tagName)) return;
@@ -3292,7 +3501,10 @@ function setTab(t){
   document.querySelectorAll('.tabs [data-tab]').forEach(b => { const on = b.dataset.tab === t; b.setAttribute('aria-selected', String(on)); b.tabIndex = on ? 0 : -1; });
   document.querySelectorAll('.design [data-pane]').forEach(el => el.classList.toggle('pane-off', el.dataset.pane !== t));
   try { localStorage.setItem(TAB_KEY, t); } catch(e){}
+  if (t === 'portada' && state.cover.on) showOut(o => o.kind === 'cover');
+  if (t === 'receta' && state.recipe.on) showOut(o => o.kind === 'recipe');
 }
+['coverBox', 'recipeBox'].forEach(id => ['input', 'change', 'click'].forEach(ev => $('#' + id).addEventListener(ev, () => { wantSel = id === 'coverBox' ? 'cover' : 'recipe'; })));
 document.querySelector('.tabs').addEventListener('click', e => { const b = e.target.closest('[data-tab]'); if (b){ setTab(b.dataset.tab); $('.design').scrollTop = 0; } });
 document.querySelector('.tabs').addEventListener('keydown', e => {
   if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
