@@ -411,6 +411,9 @@ section[aria-labelledby="hPhotos"] .col-head h2::before{background:var(--well)}
 .lay-pm{display:none !important}
 body.pm-on .lay-pm{display:grid !important}
 .lay-row select.inp{height:32px;font-size:13.5px;width:auto;max-width:100%}
+.lay-nudge{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px}
+.lay-nudge label{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
+.lay-nudge input[type=range]{width:104px}
 .pick-dlg{border:0;border-radius:14px;background:var(--panel);color:var(--ink);padding:14px;max-width:calc(100vw - 16px);max-height:calc(100vh - 16px);box-shadow:0 30px 80px -20px rgba(0,0,0,.6)}
 .pick-dlg::backdrop{background:rgba(15,12,8,.6)}
 .pick-head{display:flex;align-items:center;gap:12px;margin-bottom:10px;flex-wrap:wrap}
@@ -623,8 +626,45 @@ body.bg-cada .lay-bg{display:grid !important}
             <div class="chips segc" role="radiogroup" aria-label="Letra de los títulos" data-radio="titleFont">
               <button type="button" role="radio" data-v="mono">Máquina</button>
               <button type="button" role="radio" data-v="hand">A mano</button>
+              <button type="button" role="radio" data-v="sans">Moderna</button>
             </div>
           </div>
+          <div class="opt" data-ifpostal>
+            <span class="lbl">Tamaño</span>
+            <div class="chips segc" role="radiogroup" aria-label="Tamaño del título" data-radio="titleSize">
+              <button type="button" role="radio" data-v="chico">Chico</button>
+              <button type="button" role="radio" data-v="medio">Medio</button>
+              <button type="button" role="radio" data-v="grande">Grande</button>
+            </div>
+            <div class="chips segc" role="radiogroup" aria-label="Mayúsculas en el título" data-radio="titleCaps">
+              <button type="button" role="radio" data-v="normal">Abc</button>
+              <button type="button" role="radio" data-v="mayus">ABC</button>
+            </div>
+          </div>
+          <div class="opt" data-ifpostal>
+            <label class="lbl" for="titlePosSel">Dónde</label>
+            <select id="titlePosSel" class="inp" data-sel="titlePos" aria-label="Posición del título">
+              <optgroup label="Arriba de la foto">
+                <option value="arriba-izq">Arriba, a la izquierda</option>
+                <option value="arriba-centro">Arriba, al centro</option>
+                <option value="arriba-der">Arriba, a la derecha</option>
+              </optgroup>
+              <optgroup label="Debajo de la foto">
+                <option value="abajo-izq">Debajo, a la izquierda</option>
+                <option value="abajo-centro">Debajo, al centro</option>
+                <option value="abajo-der">Debajo, a la derecha</option>
+              </optgroup>
+              <optgroup label="Sobre la foto">
+                <option value="sobre-arriba-izq">Sobre la foto: arriba a la izquierda</option>
+                <option value="sobre-arriba-centro">Sobre la foto: arriba al centro</option>
+                <option value="sobre-arriba-der">Sobre la foto: arriba a la derecha</option>
+                <option value="sobre-abajo-izq">Sobre la foto: abajo a la izquierda</option>
+                <option value="sobre-abajo-centro">Sobre la foto: abajo al centro</option>
+                <option value="sobre-abajo-der">Sobre la foto: abajo a la derecha</option>
+              </optgroup>
+            </select>
+          </div>
+          <p class="subhint" data-ifpostal>Foto por foto la podés mover distinto, y ajustar fino, en «Diseño de esta postal».</p>
         </div>
 
         <!-- Postal: tamaño y orden de las cosas -->
@@ -1116,7 +1156,7 @@ const state = {
   photos:[], startNum:1, place:'Chubut', titles:['FLORENTINO AMEGHINO'], size:1080, sample:true, picking:null,
   style:'archivo', custom:'#D8C7A6', deco:'cintas-clip', decoPostal:false, tilt:false,
   extras:{postmark:false, border:false, filmdate:false, counter:false, icons:false},
-  shape:'cuadrados', frame:'fina', format:'1:1', comp:'postal', titleFont:'mono', lastEnd:0,
+  shape:'cuadrados', frame:'fina', format:'1:1', comp:'postal', titleFont:'mono', titlePos:'arriba-centro', titleSize:'medio', titleCaps:'normal', lastEnd:0,
   photoSize:'grande', stampColor:'', stampMode:'papel', paperTex:'textura', swSize:'medianos', swPos:'auto', counterInk:'tinta',
   bgEach:'cada', bgTone:'suave', bgPick:-1, pm:'ninguno', pmIcon:'auto', pmPos:'libre', lineStyle:'tinta', linePos:'auto',
   show:{
@@ -1137,7 +1177,7 @@ const COVER_DEFAULT = {on:false, photo:0, look:'sola', bg:'blanco', color:'#F3EF
 state.cover = {...COVER_DEFAULT};
 const PENS = {azul:'#1F3A7A', negra:'#1E1D1B', sepia:'#5B3A22'};
 const PREF_KEY = 'postales-ojodecristi-v1';
-const PREF_FIELDS = ['style','custom','deco','decoPostal','tilt','extras','shape','frame','format','comp','titleFont','size','show','lastEnd','recipe','photoSize','stampColor','stampMode','paperTex','swSize','swPos','counterInk','cover','bgEach','bgTone','bgPick','pm','pmIcon','pmPos','lineStyle','linePos'];
+const PREF_FIELDS = ['style','custom','deco','decoPostal','tilt','extras','shape','frame','format','comp','titleFont','titlePos','titleSize','titleCaps','size','show','lastEnd','recipe','photoSize','stampColor','stampMode','paperTex','swSize','swPos','counterInk','cover','bgEach','bgTone','bgPick','pm','pmIcon','pmPos','lineStyle','linePos'];
 function loadPrefs(){
   try{
     const o = JSON.parse(localStorage.getItem(PREF_KEY) || 'null'); if (!o || typeof o !== 'object') return;
@@ -1840,21 +1880,33 @@ function pmSpot(p, n, L, H, dy, style){
   const corner = {'foto-si':[P0.x + Rr*0.85, P0.y + Rr*0.85], 'foto-sd':[P0.x + P0.w - Rr*0.85, P0.y + Rr*0.85], 'foto':[P0.x + P0.w - Rr*0.85, P0.y + Rr*0.85],
                   'foto-ii':[P0.x + Rr*0.85, P0.y + P0.h - Rr*0.85], 'foto-id':[P0.x + P0.w - Rr*0.85, P0.y + P0.h - Rr*0.85],
                   'arriba-izq':[P0.x + Rr*0.95, yTop], 'arriba-der':[P0.x + P0.w - Rr*0.95, yTop]}[pos];
-  if (corner) return {cx:corner[0], cy:corner[1], dir:pos === 'foto-si' || pos === 'foto-ii' || pos === 'arriba-izq' ? 1 : -1};
+  if (corner){
+    let cx = corner[0], cy = corner[1]; const T = L.title && L.title.box, top = pos === 'foto-si' || pos === 'foto-sd' || pos === 'foto';
+    /* si el título cae justo en ese rincón, el matasellos se corre para no taparlo */
+    if (T && inter1({x:cx - Rr, y:cy - Rr, w:2*Rr, h:2*Rr}, T) > 0){
+      if (pos === 'arriba-izq') cx = Math.min(P0.x + P0.w - Rr*0.95, Math.max(cx, T.x + T.w + Rr*0.95));
+      else if (pos === 'arriba-der') cx = Math.max(P0.x + Rr*0.95, Math.min(cx, T.x - Rr*0.95));
+      else cy = top ? Math.min(T.y + T.h + Rr*0.9, P0.y + P0.h - Rr*0.85) : Math.max(T.y - Rr*0.9, P0.y + Rr*0.85);
+    }
+    return {cx, cy, dir:pos === 'foto-si' || pos === 'foto-ii' || pos === 'arriba-izq' ? 1 : -1};
+  }
   if (pos !== 'sello') return pmFree(p, n, L, H, dy, style, pos);
   const st = L.stamp, R = PM_R[style]*PM_K, rr = [], add = (x, y, w, h) => rr.push({x, y, w, h});
   const ph = L.photo; add(ph.x - 6, ph.y - 6, ph.w + 12, ph.h + 12);
   if (L.sw) add(L.sw.xs[0] - 4, L.sw.y - 4, L.sw.xs[2] + L.sw.w - L.sw.xs[0] + 8, L.label.base + (state.show.postal.hex ? 38 : 24) - L.sw.y);
   if (L.column) L.column.items.forEach(it => add(it.x - 4, it.y - 4, L.column.w + 8, L.column.h + 54));
-  if (L.lineBox) add(L.lineBox.x0 - 4, L.lineBox.y0 - 4, L.lineBox.x1 - L.lineBox.x0 + 8, 36);
-  if (stripText(p, n).some(Boolean)) add(0, H - dy - 40, D, 40);
+  if (L.lineBox) for (let k = 0; k < 4; k++) add(L.lineBox.x0 - 4, L.lineBox.y0 - 4, L.lineBox.x1 - L.lineBox.x0 + 8, 36);
+  if (stripText(p, n).some(Boolean)) add(0, H - dy - Math.max(22, dy*0.5) - 18, D, 28);
   if (L.counter) add(L.counter.xr - 96, L.counter.base - dy - 52, 98, 62);
+  if (L.title) add(L.title.box.x - 4, L.title.box.y - 4, L.title.box.w + 8, L.title.box.h + 8);
   const inter = (a, b) => Math.max(0, Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x)) * Math.max(0, Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y));
   const outside = b => { const x0 = Math.max(b.x, 8), x1 = Math.min(b.x + b.w, D - 8), y0 = Math.max(b.y, -dy + 8), y1 = Math.min(b.y + b.h, H - dy - 8); return b.w*b.h - Math.max(0, x1 - x0)*Math.max(0, y1 - y0); };
-  const cost = b => rr.reduce((a, r) => a + inter(b, r), 0) + outside(b)*6;
+  const cost = b => rr.reduce((a, r) => a + inter(b, r), 0)*3 + outside(b)*6;
   let best = null;
-  [140, 115, 165, 90, 190, 65, 215, 40].forEach((deg, i) => {
-    const t = deg*Math.PI/180, dist = st.d*0.5 + R*0.42, cx = st.cx + Math.cos(t)*dist, cy = st.cy + Math.sin(t)*dist;
+  const cands = [];
+  [1, 1.7, 2.4].forEach((km, ki) => [140, 115, 165, 90, 190, 65, 215, 40, 245, 15, 270, 330].forEach((deg, i) => cands.push({deg, km, i: i + ki*14})));
+  cands.forEach(({deg, km, i}) => {
+    const t = deg*Math.PI/180, dist = (st.d*0.5 + R*0.42)*km, cx = st.cx + Math.cos(t)*dist, cy = st.cy + Math.sin(t)*dist;
     const box = {x:cx - R, y:cy - R, w:2*R, h:2*R};
     let c = cost(box) + i*25, dir = 0;
     if (style === 'rodillo'){
@@ -1875,10 +1927,10 @@ function pmFree(p, n, L, H, dy, style, pos){
   add(st.cx - st.d*0.56, st.cy - st.d*0.56, st.d*1.12, st.d*1.12);
   if (L.sw) add(L.sw.xs[0] - 6, L.sw.y - 6, L.sw.xs[2] + L.sw.w - L.sw.xs[0] + 12, L.label.base + (state.show.postal.hex ? 40 : 26) - L.sw.y);
   if (L.column) L.column.items.forEach(it => add(it.x - 6, it.y - 6, L.column.w + 12, L.column.h + 56));
-  if (L.lineBox) add(L.lineBox.x0 - 6, L.lineBox.y0 - 6, L.lineBox.x1 - L.lineBox.x0 + 12, 40);
-  if (stripText(p, n).some(Boolean)) add(0, H - dy - 40, D, 40);
+  if (L.lineBox) for (let k = 0; k < 4; k++) add(L.lineBox.x0 - 6, L.lineBox.y0 - 6, L.lineBox.x1 - L.lineBox.x0 + 12, 40);
+  if (stripText(p, n).some(Boolean)) add(0, H - dy - Math.max(22, dy*0.5) - 18, D, 28);
   if (L.counter) add(L.counter.xr - 96, L.counter.base - dy - 52, 98, 62);
-  if (state.show.postal.title && (p.title || '').trim()) add(ph.x + ph.w*0.1, ph.y - 48, ph.w*0.8, 44);
+  if (L.title) add(L.title.box.x - 6, L.title.box.y - 6, L.title.box.w + 12, L.title.box.h + 12);
   const inter = (a, b) => Math.max(0, Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x)) * Math.max(0, Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y));
   const outside = b => { const x0 = Math.max(b.x, 6), x1 = Math.min(b.x + b.w, D - 6), y0 = Math.max(b.y, -dy + 6), y1 = Math.min(b.y + b.h, H - dy - 6); return b.w*b.h - Math.max(0, x1 - x0)*Math.max(0, y1 - y0); };
   const cost = b => rr.reduce((a, r) => a + inter(b, r), 0);
@@ -2382,7 +2434,94 @@ function fichaText(ctx, p, n){
   let ty = 573;
   for (let i = tech.length-1; i >= 0; i--){ itemText(ctx, tech[i], tx, ty, 12.8, MONO, hasLeft ? 232 : 400); ty -= 18; }
 }
-function titleFont(size){ return state.titleFont === 'hand' ? {family:HAND, weight:600, size:size*1.6} : {family:MONO, weight:400, size}; }
+function titleFont(size){ return state.titleFont === 'hand' ? {family:HAND, weight:600, size:size*1.6} : state.titleFont === 'sans' ? {family:SANS, weight:500, size:size*1.3} : {family:MONO, weight:400, size}; }
+/* ---------- título de la postal: dónde va, cuánto ocupa y con qué esquiva el resto ---------- */
+const TITLE_K = {chico:0.82, medio:1, grande:1.5};
+const TITLE_POS = [['arriba-izq','Arriba, a la izquierda'],['arriba-centro','Arriba, al centro'],['arriba-der','Arriba, a la derecha'],['abajo-izq','Debajo, a la izquierda'],['abajo-centro','Debajo, al centro'],['abajo-der','Debajo, a la derecha'],['sobre-arriba-izq','Sobre la foto: arriba a la izquierda'],['sobre-arriba-centro','Sobre la foto: arriba al centro'],['sobre-arriba-der','Sobre la foto: arriba a la derecha'],['sobre-abajo-izq','Sobre la foto: abajo a la izquierda'],['sobre-abajo-centro','Sobre la foto: abajo al centro'],['sobre-abajo-der','Sobre la foto: abajo a la derecha']];
+function titlePosOf(p){ const m = /^(arriba|abajo|sobre-arriba|sobre-abajo)-(izq|centro|der)$/.exec((p && p.lay && p.lay.tpos) || state.titlePos); return m ? {row:m[1], col:m[2]} : {row:'arriba', col:'centro'}; }
+function titleShown(p){ return !!(state.show.postal.title && p && (p.title || '').trim()); }
+function titleLines(p){ const ls = splitLines(p.title); return state.titleCaps === 'mayus' ? ls.map(t => t.toUpperCase()) : ls; }
+function titleHeight(p){ const ft = titleFont(15*(TITLE_K[state.titleSize] || 1)); return (titleLines(p).length - 1)*ft.size*1.18 + ft.size; }
+const MCTX = document.createElement('canvas').getContext('2d');
+const inter1 = (a, b) => Math.max(0, Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x)) * Math.max(0, Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y));
+/* todo lo que ocupa lugar en la postal (coordenadas de la postal, sin el corrimiento vertical dy) */
+function postalBoxes(p, n, L, H){
+  const dy = L.dy, o = {}, ph = L.photo;
+  o.photo = {x:ph.x - L.pad, y:ph.y - L.pad, w:ph.w + 2*L.pad, h:ph.h + 2*L.pad};
+  if (L.lineBox) o.lines = {x:L.lineBox.x0 - 4, y:L.lineBox.y0 - 2, w:L.lineBox.x1 - L.lineBox.x0 + 8, h:34};
+  if (L.sw) o.swatches = {x:L.sw.xs[0] - 4, y:L.sw.y - 4, w:L.sw.xs[2] + L.sw.w - L.sw.xs[0] + 8, h:L.label.base + (state.show.postal.hex ? 32 : 18) - L.sw.y + 4};
+  if (L.column) L.column.items.forEach((it, i) => { o['swatch' + i] = {x:it.x - 4, y:it.y - 4, w:L.column.w + 8, h:L.column.h + 54}; });
+  o.stamp = {x:L.stamp.cx - L.stamp.d*0.49, y:L.stamp.cy - L.stamp.d*0.49, w:L.stamp.d*0.98, h:L.stamp.d*0.98};
+  if (stripText(p, n).some(Boolean)){ const base = H - Math.max(22, dy*0.5) - dy; o.strip = {x:L.strip.x0, y:base - 11, w:L.strip.x1 - L.strip.x0, h:16}; }
+  if (L.counter) o.counter = {x:L.counter.xr - 62, y:L.counter.base - dy - 30, w:64, h:36};
+  if (state.extras.filmdate && /^\d{1,2}[-/.]\d{1,2}[-/.]\d{2,4}$/.test((p.date || '').trim())){ const right = Math.min(ph.x + ph.w - 16, Math.min(555, L.stamp.cx - 70)); o.filmdate = {x:right - 86, y:ph.y + ph.h - 28, w:88, h:18}; }
+  return o;
+}
+function pmCornerBox(p, L, H){
+  if (state.pm === 'ninguno') return null; const pos = pmPosOf(p); if (!/^(arriba-izq|arriba-der|foto-si|foto-sd|foto-ii|foto-id)$/.test(pos)) return null;
+  const at = pmSpot(p, 0, L, H, L.dy, state.pm), R = PM_R[state.pm]*PM_K;
+  let b = {x:at.cx - R, y:at.cy - R, w:2*R, h:2*R};
+  if (state.pm === 'rodillo'){ const L2 = 112*PM_K, x0 = at.dir < 0 ? at.cx - R - L2 : at.cx - R, x1 = at.dir < 0 ? at.cx + R : at.cx + R + L2; b = {x:Math.min(b.x, x0), y:b.y, w:Math.max(b.x + b.w, x1) - Math.min(b.x, x0), h:b.h}; }
+  return b;
+}
+function titleLayout(p, L, n, H){
+  const {row, col} = titlePosOf(p), dy = L.dy, ph = L.photo, kind = state.decoPostal ? postalDeco() : 'none', inside = row.startsWith('sobre');
+  const ft = titleFont(15*(TITLE_K[state.titleSize] || 1)), ls = titleLines(p), lh = ft.size*1.18, nl = ls.length, size = ft.size;
+  const boxes = postalBoxes(p, n, L, H), photoBox = boxes.photo; delete boxes.photo;
+  { const pc = pmCornerBox(p, L, H); if (pc) boxes.pm = pc; }
+  const w0 = (MCTX.font = `${ft.weight} ${size}px ${ft.family}`, Math.max(...ls.map(t => MCTX.measureText(t).width)));
+  /* primera línea de base según la fila */
+  let base;
+  if (row === 'arriba'){
+    const top0 = (state.extras.border ? BORDER : 0) - dy, fTop = ph.y - frameTop() - underPad(kind) - (kind === 'broches' ? 22 : kind === 'cinta-color' ? 12 : 0);
+    base = (top0 + fTop)/2 + size*0.3 - (nl - 1)*lh/2;
+  } else if (row === 'abajo'){
+    const y0 = L.pb + 3 + Math.max(0, frameTop() - 4), y1 = (L.sw ? L.sw.y : L.pb + 46 + (L.extraBot || 0)) - 4;
+    base = (y0 + y1)/2 + size*0.3 - (nl - 1)*lh/2;
+  } else if (row === 'sobre-arriba') base = ph.y + L.pad + 14 + size*0.8;
+  else base = ph.y + ph.h - L.pad - 16 - (nl - 1)*lh;
+  const band = {x:0, y:base - size*0.85, w:D, h:(nl - 1)*lh + size*1.1};
+  /* tramo horizontal libre: pegado a la foto y esquivando lo que cruce esa franja */
+  const gap = inside && kind !== 'none' && col !== 'centro' ? 44 : inside ? 22 : 0;
+  let xa = photoBox.x + gap, xb = photoBox.x + photoBox.w - gap;
+  if (!inside){ xa = ph.x; xb = ph.x + ph.w; }
+  const blocked = Object.values(boxes).filter(b => inter1(b, band) > 0 && b.x < xb && b.x + b.w > xa).map(b => [b.x - 10, b.x + b.w + 10]).sort((a, b) => a[0] - b[0]);
+  const segs = []; let cur = xa;
+  blocked.forEach(([b0, b1]) => { if (b0 > cur) segs.push([cur, Math.min(b0, xb)]); cur = Math.max(cur, b1); });
+  if (cur < xb) segs.push([cur, xb]);
+  let free = segs.filter(s => s[1] - s[0] > 24); if (!free.length) free = [[xa, xb]];
+  const anchor = col === 'izq' ? xa : col === 'der' ? xb : (ph.x + ph.w/2);
+  const dist = s => anchor < s[0] ? s[0] - anchor : anchor > s[1] ? anchor - s[1] : 0;
+  const seg = free.slice().sort((a, b) => dist(a) - dist(b) || (b[1] - b[0]) - (a[1] - a[0]))[0], maxW = seg[1] - seg[0], w = Math.min(w0, maxW);
+  let x = col === 'izq' ? seg[0] : col === 'der' ? seg[1] : Math.min(Math.max(ph.x + ph.w/2, seg[0] + w/2), seg[1] - w/2);
+  const align = col;
+  /* ajuste fino de quien diseña, siempre dentro de la postal */
+  let ux = +(p.lay && p.lay.tdx) || 0, uy = +(p.lay && p.lay.tdy) || 0;
+  const left = align === 'izq' ? x : align === 'der' ? x - w : x - w/2;
+  ux = Math.min(Math.max(ux, 6 - left), D - 6 - (left + w));
+  uy = Math.min(Math.max(uy, -dy + 6 + size*0.85 - base), H - dy - 8 - (base + (nl - 1)*lh));
+  x += ux; base += uy;
+  const box = {x:align === 'izq' ? x : align === 'der' ? x - w : x - w/2, y:base - size*0.85, w, h:(nl - 1)*lh + size*1.1};
+  let ink = S.ink, shadow = null;
+  if (inside){ ink = photoInk(p, L, box); shadow = ink === '#F6F1E6' ? 'rgba(0,0,0,.5)' : 'rgba(255,255,255,.3)'; }
+  return {lines:ls, family:ft.family, weight:ft.weight, size, lh, x, base, align, maxW:w, box, ink, shadow, row, col};
+}
+/* tinta clara u oscura según lo que haya debajo del texto, para que se lea sobre la foto */
+function photoInk(p, L, b){
+  const ph = L.photo; try {
+    const src = p.prev, u = (b.x - ph.x)/ph.w, v = (b.y - ph.y)/ph.h, x0 = Math.max(0, Math.round(u*src.width)), y0 = Math.max(0, Math.round(v*src.height));
+    const w = Math.max(1, Math.min(src.width - x0, Math.round(b.w/ph.w*src.width))), h = Math.max(1, Math.min(src.height - y0, Math.round(b.h/ph.h*src.height)));
+    const d = src.getContext('2d', {willReadFrequently:true}).getImageData(x0, y0, w, h).data; let l = 0, c = 0;
+    for (let i = 0; i < d.length; i += 16){ l += 0.299*d[i] + 0.587*d[i+1] + 0.114*d[i+2]; c++; }
+    return l/c/255 < 0.52 ? '#F6F1E6' : '#1E1C18';
+  } catch(e){ return '#F6F1E6'; }
+}
+function drawTitle(ctx, T){
+  ctx.save(); ctx.fillStyle = T.ink; ctx.textBaseline = 'alphabetic'; ctx.textAlign = T.align === 'izq' ? 'left' : T.align === 'der' ? 'right' : 'center';
+  if (T.shadow){ ctx.shadowColor = T.shadow; ctx.shadowBlur = 4*devScale(ctx); }
+  T.lines.forEach((t, i) => { fitFont(ctx, t, T.maxW, T.size, T.family, T.weight); ctx.fillText(t, T.x, T.base + i*T.lh); });
+  ctx.restore();
+}
 
 /* ---------- compositions ---------- */
 const dimsOf = size => ({w:size, h:Math.round(size * (FORMATS[state.format] || 1))});
@@ -2400,75 +2539,95 @@ function laySummary(p){
   return (L.pos || L.size || bg || L.stamp ? 'Colores ' : 'Como todas · colores ') + POS_TXT[Lo.swPos] + (L.size ? ', ' + SIZE_TXT[L.size] : '') + (bg ? ' · fondo elegido' : '') + (L.stamp ? (L.stamp === 'auto' ? ' · sello sugerido' : ' · sello propio') : '');
 }
 const PTOP = 50, SW_K = {chicos:0.75, medianos:1, grandes:1.15}, DECO_M = {troquelado:13, paspartu:17, cortes:18};
-function postalLayout(p, n, H, mini){
+const pmTopRight = (p, mini) => !mini && state.pm !== 'ninguno' && pmPosOf(p) === 'arriba-der';
+function postalLayoutBase(p, n, H, mini){
   const P = POSTAL, Lo = layOf(p), k = SW_K[Lo.swSize] || 1, big = Lo.photoSize === 'grande';
   const hexH = !mini && state.show.postal.hex && state.shape !== 'pantone' ? 18 : 0;
   const strip = !mini && stripText(p, n).some(Boolean);
   const kind = state.decoPostal && !mini ? postalDeco() : 'none', m = DECO_M[kind] || 0;
-  const side = big ? 25 : 43.5, top = (big ? PTOP : 55) + m*0.6;
+  const side = big ? 25 : 43.5, top0 = (big ? PTOP : 55) + m*0.6;
   const tall = H > D + 1, ar = p.fw && p.fh ? p.fw/p.fh : 1.5;
   const swW = P.sw.w*k, swH = P.sw.h*k, gap = (P.sw.xs[1] - P.sw.xs[0] - P.sw.w)*k, inset = P.sw.inset*k;
   const lab = {size:P.label.size*(k < 1 ? 0.92 : 1), maxW:P.label.maxW*k};
   const bottom = strip ? 40 : 18, counter = !mini && state.extras.counter;
   const out = {pad:P.pad, strip:{x0:side, x1:D - side, size:P.strip.size}, side, counter:counter ? {xr:D - side - 2, base:H - (strip ? 46 : 24)} : null};
+  /* título: si no entra en el margen de arriba o en el hueco de abajo, se agranda ese lugar en vez de pisar la foto */
+  let extraTop = 0, extraBot = 0;
+  if (!mini && titleShown(p)){
+    const tt = titleHeight(p), row = titlePosOf(p).row;
+    if (row === 'arriba') extraTop = Math.max(0, tt + 16 - (top0 - (state.extras.border ? BORDER : 0) - frameTop() - underPad(kind) - (kind === 'broches' ? 22 : kind === 'cinta-color' ? 12 : 0)));
+    else if (row === 'abajo') extraBot = Math.max(0, tt + 18 - (36 - Math.max(0, frameTop() - 4)));
+  }
+  const top = top0 + extraTop; out.extraBot = extraBot;
 
   if (Lo.swPos === 'costado'){
     const colX = D - side - swW, itemH = swH + 25 + 23.6 + 12 + hexH, colH = 3*itemH - 12;
     const a = Math.min(1.5, Math.max(0.75, ar));
-    const wmax = colX - 22 - side - 2*m, hmax = H - top - bottom - 46 - m*0.8 - (counter ? 30 : 0);
+    const wmax = colX - 22 - side - 2*m, hmax = H - top - bottom - 46 - extraBot - m*0.8 - (counter ? 30 : 0);
     const w = Math.min(wmax, hmax*a), h = w/a, x = side + m;
-    const contentH = Math.max(h + m*0.8 + 46, colH);
+    const contentH = Math.max(h + m*0.8 + 46 + extraBot, colH);
     const dy = Math.max(0, (H - top - bottom - (counter ? 30 : 0) - contentH)/2);
     const colTop = top + Math.max(0, (h - colH)/2);
     const items = [0, 1, 2].map(i => ({x:colX, y:colTop + i*itemH}));
     const pb = top + h + m*0.8, colBot = colTop + colH;
-    const fits = colBot + 70 + 57 + dy < H - (counter ? 64 : 12);
-    const stampAt = fits ? {cx:colX + swW/2, cy:colBot + 70} : {cx:x + w + m - 45.5, cy:pb + 27.3 - m*0.5};
+    /* el sello baja debajo de la columna sólo si no pisa la tira de datos ni la numeración (que se miden desde el pie real de la postal) */
+    const stripTop = strip ? H - Math.max(22, dy*0.5) - 14 : H - 12, counterTop = counter ? (strip ? H - Math.max(22, dy*0.5) - 22 : H - 24) - 32 : 1e9;
+    const fits = colBot + 70 + 57 + dy < Math.min(stripTop, counterTop) - 4;
+    const stampAt = fits ? {cx:colX + swW/2, cy:colBot + 70} : {cx:x + w + m - 45.5, cy:Math.max(pb - 26, Math.min(pb + 27.3 - m*0.5, stripTop - dy - 61))};
     const LW = lineWidthFor();
     const spots = {
       izquierda:{x0:side, x1:side + LW, y0:pb + 20},
       /* debajo del sello: si el sello está al pie de la foto (no debajo de la columna), las líneas van debajo de él, no se pierden */
       sello: fits ? (colBot + 70 + 72 + 30 + dy < H - (strip ? 44 : 14) - (counter ? 60 : 0) ? {x0:D - side - LW, x1:D - side, y0:colBot + 70 + 72} : null)
                   : (stampAt.cy + 72 + 30 + dy < H - (strip ? 44 : 14) - (counter ? 60 : 0) ? {x0:x + w + m - LW, x1:x + w + m, y0:stampAt.cy + 72} : null),
-      arriba: top + dy >= 40 ? {x0:D - side - LW, x1:D - side, y0:top - 34} : null
+      arriba: top + dy >= 40 && !pmTopRight(p, mini) ? {x0:D - side - LW, x1:D - side, y0:top - 34} : null
     };
     return Object.assign(out, {
-      photo:{x, y:top, w, h}, dy, column:{items, w:swW, h:swH, inset, lab},
+      photo:{x, y:top, w, h}, dy, pb, column:{items, w:swW, h:swH, inset, lab},
       lineBox:pickLineSpot(spots, ['izquierda', 'sello', 'arriba']),
       stamp:Object.assign(stampAt, {d:P.stamp.d, rot:P.stamp.rot}),
       pm:(pb + 95 + 45 + dy < H) ? {cx:side + 45, cy:pb + 95} : {cx:side + 50, cy:pb - 50}
     });
   }
 
-  const BLOCK = 42.3 + swH + 25 + 23.6 + hexH;
+  const BLOCK = 42.3 + extraBot + swH + 25 + 23.6 + hexH;
   const a = (tall || Lo.v) ? Math.min(1.5, Math.max(0.75, ar)) : 1.5;
   const maxH = H - bottom - BLOCK - top - m*0.8;
   const w = Math.min(D - 2*side - 2*m, maxH*a), h = w/a, x = (D - w)/2;
-  const pb = top + h + m*0.8, sy = pb + 42.3;
+  const pb = top + h + m*0.8, sy = pb + 42.3 + extraBot;
   const stampCx = Math.max(x + w + m, D - side) - 45.5, stampLeft = stampCx - P.stamp.d/2;
   const T = 3*swW + 2*gap, LW = lineWidthFor(), left = Lo.swPos === 'izquierda';
-  let x0;
+  let x0, leftOK = true;
   if (left) x0 = side;
   else {
     let cx = (P.sw.xs[0] + P.sw.xs[2] + P.sw.w)/2;
     if (cx + T/2 > stampLeft - 8) cx = stampLeft - 8 - T/2;
-    cx = Math.max(cx, side + Math.min(LW, 68) + 18 + T/2);
-    x0 = cx - T/2;
+    /* las líneas de la izquierda piden su ancho entero; si con colores grandes no entran, van a otro lugar en vez de pisarlos */
+    const need = side + LW + 16 + T/2;
+    if (cx < need){ if (need + T/2 <= stampLeft - 8) cx = need; else leftOK = false; }
+    x0 = Math.max(side, cx - T/2);
   }
   const dyc = Math.max(0, (maxH - h)/2), stampCy = pb + 27.3 - m*0.5, botLim = H - dyc - (strip ? 44 : 14);
   const spots = {
-    izquierda: left ? null : {x0:side, x1:side + LW, y0:sy},
+    izquierda: left || !leftOK ? null : {x0:side, x1:side + LW, y0:sy},
     sello: (stampCy + 72 + 30 < botLim && !(counter && stampCy + 72 + 30 > H - dyc - 80)) ? {x0:D - side - LW, x1:D - side, y0:stampCy + 72} : null,
-    arriba: top - m*0.6 + dyc >= 40 ? {x0:D - side - LW, x1:D - side, y0:top - m*0.6 - 34} : null
+    arriba: top - m*0.6 + dyc >= 40 && !pmTopRight(p, mini) ? {x0:D - side - LW, x1:D - side, y0:top - m*0.6 - 34} : null
   };
   return Object.assign(out, {
-    photo:{x, y:top, w, h}, dy:dyc,
+    photo:{x, y:top, w, h}, dy:dyc, pb,
     lineBox:pickLineSpot(spots, left ? ['sello', 'arriba'] : ['izquierda', 'sello', 'arriba']),
     sw:{xs:[0, 1, 2].map(i => x0 + i*(swW + gap)), y:sy, w:swW, h:swH, inset},
     label:{size:lab.size, base:sy + swH + 25, maxW:lab.maxW},
     stamp:{cx:stampCx, cy:pb + 27.3 - m*0.5, d:P.stamp.d, rot:P.stamp.rot},
     pm:{cx:side + 45, cy:pb + 122.3}
   });
+}
+function postalLayout(p, n, H, mini){
+  const L = postalLayoutBase(p, n, H, mini);
+  /* la numeración va siempre arriba de la tira de datos (la tira se corre según el formato, así que se mide desde ella) */
+  if (L.counter) L.counter.base = !mini && stripText(p, n).some(Boolean) ? H - Math.max(22, L.dy*0.5) - 22 : H - 24;
+  if (!mini && titleShown(p)) L.title = titleLayout(p, L, n, H);
+  return L;
 }
 /* «1/4» escrito a mano con microfibra: números cursivos de trazo fino (con apenas variación de grosor), el 4 cerrado y la barra suelta.
    Cada número es un dibujo propio (no una letra), así se controla la forma. Puntos en una caja de 0.6 × 1, de arriba hacia abajo. */
@@ -2536,12 +2695,7 @@ function drawPostal(ctx, p, n, hi, mini, H){
   framedPhoto(ctx, srcOf(p, hi), r, L.pad, p.focus);
   if (state.extras.filmdate && !mini) filmDate(ctx, r, p.date, Math.min(555, L.stamp.cx - 70));
   if (kind !== 'none') decorate(ctx, r, kind, true, p);
-  if (!mini && state.show.postal.title && (p.title || '').trim()){
-    const ft = titleFont(15), top = (state.extras.border ? BORDER : 0) - dy, fTop = r.y - frameTop() - underPad(kind) - (kind === 'broches' ? 22 : kind === 'cinta-color' ? 12 : 0);
-    const ls = splitLines(p.title), lh = ft.size*1.18, base = (top + fTop)/2 + ft.size*0.3 - (ls.length - 1)*lh/2;
-    const maxW = L.lineBox && L.lineBox.y0 < r.y ? 2*(L.lineBox.x0 - 12 - (r.x + r.w/2)) : 560;
-    ctx.fillStyle = S.ink; ls.forEach((t, i) => centerText(ctx, t, r.x + r.w/2, base + i*lh, ft.size, Math.min(560, maxW), ft.family, ft.weight));
-  }
+  if (L.title) drawTitle(ctx, L.title);
   if (L.lineBox) drawLines(ctx, L.lineBox, 11);
   if (L.column){
     const C = L.column;
@@ -3243,6 +3397,8 @@ function renderPhotos(){
             <div class="lay-row lay-bg"><span class="lbl">Fondo</span><div class="chips" data-lay="bg"><button type="button" data-v="" aria-pressed="${!(p.lay && p.lay.bg != null)}">Auto</button>${p.colors.map((c, k) => `<button type="button" class="swb" id="laybg-${id}-${k}" data-v="${k}" aria-pressed="${!!(p.lay && p.lay.bg === String(k))}" title="${esc(c.name || c.hex)}" style="background:${c.hex}"></button>`).join('')}</div></div>
             <div class="lay-row"><span class="lbl">Sello</span><div class="chips" data-lay="stamp"><button type="button" data-v="" aria-pressed="${!(p.lay && p.lay.stamp)}">Como todas</button><button type="button" data-v="auto" aria-pressed="${!!(p.lay && p.lay.stamp === 'auto')}">Sugerido</button>${p.colors.map(c => `<button type="button" class="swb" data-v="${c.hex}" aria-pressed="${!!(p.lay && p.lay.stamp === c.hex)}" title="${esc(c.name || c.hex)}" style="background:${c.hex}"></button>`).join('')}<label class="swpick" title="Otro color"><input type="color" data-laystamp="1" value="${p.lay && p.lay.stamp && p.lay.stamp[0] === '#' ? p.lay.stamp : '#9E1610'}" aria-label="Otro color de sello para esta foto"></label></div></div>
             <div class="lay-row lay-pm"><span class="lbl">Matasellos</span><select class="inp" data-laysel="pm" aria-label="Matasellos de esta postal"><option value="">Como todas</option><option value="no">Sin matasellos</option>${PM_POS.map(([v, l]) => `<option value="${v}"${p.lay && p.lay.pm === v ? ' selected' : ''}>${l}</option>`).join('')}</select></div>
+            <div class="lay-row"><span class="lbl">Título</span><select class="inp" data-laysel="tpos" aria-label="Posición del título de esta postal"><option value="">Como todas</option>${TITLE_POS.map(([v, l]) => `<option value="${v}"${p.lay && p.lay.tpos === v ? ' selected' : ''}>${l}</option>`).join('')}</select></div>
+            <div class="lay-row"><span class="lbl">Ajuste</span><div class="lay-nudge"><label>Horizontal <input type="range" min="-200" max="200" step="2" value="${(p.lay && +p.lay.tdx) || 0}" data-laynum="tdx" aria-label="Mover el título a los costados"></label><label>Vertical <input type="range" min="-120" max="120" step="2" value="${(p.lay && +p.lay.tdy) || 0}" data-laynum="tdy" aria-label="Mover el título arriba o abajo"></label><button type="button" class="btn btn-ghost mini" data-laytreset="1">Centrar</button></div></div>
             <div class="lay-row"><span class="lbl">Tamaño</span><div class="chips" data-lay="size">${[['','Como todas'],['chicos','Chicos'],['medianos','Medianos'],['grandes','Grandes']].map(([v, l]) => `<button type="button" data-v="${v}" aria-pressed="${((p.lay && p.lay.size) || '') === v}">${l}</button>`).join('')}</div></div>
           </div>
         </details>
@@ -3267,7 +3423,10 @@ photoList.addEventListener('input', e => {
   else if (f === 'focus'){ p.focus = +e.target.value; drawThumb(p); }
   else if (nm !== undefined){ const c = p.colors[+nm]; c.name = e.target.value; c.auto = false; }
   else if (e.target.dataset.laysel){
-    p.lay = Object.assign({}, p.lay); const v = e.target.value; if (v) p.lay.pm = v; else delete p.lay.pm; if (!Object.keys(p.lay).length) p.lay = null;
+    const key = e.target.dataset.laysel; p.lay = Object.assign({}, p.lay); const v = e.target.value; if (v) p.lay[key] = v; else delete p.lay[key]; if (!Object.keys(p.lay).length) p.lay = null;
+  }
+  else if (e.target.dataset.laynum){
+    const k = e.target.dataset.laynum, v = +e.target.value; p.lay = Object.assign({}, p.lay); if (v) p.lay[k] = v; else delete p.lay[k]; if (!Object.keys(p.lay).length) p.lay = null;
   }
   else if (e.target.dataset.laystamp){
     p.lay = Object.assign({}, p.lay, {stamp:e.target.value});
@@ -3286,6 +3445,11 @@ photoList.addEventListener('pointerdown', e => { const li = e.target.closest('.p
 $('#gridTitles').addEventListener('focusin', e => { const g = e.target.dataset.g; if (g !== undefined) showOut(o => o.kind === 'grid' && o.g === +g); });
 photoList.addEventListener('click', e => {
   const li = e.target.closest('.pcard'); if (!li) return; const p = photoById(li.dataset.id); if (!p) return;
+  const treset = e.target.closest('[data-laytreset]');
+  if (treset){
+    p.lay = Object.assign({}, p.lay); delete p.lay.tdx; delete p.lay.tdy; if (!Object.keys(p.lay).length) p.lay = null;
+    li.querySelectorAll('[data-laynum]').forEach(r => r.value = 0); scheduleOut(); return;
+  }
   const lay = e.target.closest('[data-lay] button[data-v]');
   if (lay){
     const box = lay.parentElement, key = box.dataset.lay, v = lay.dataset.v;
@@ -3479,7 +3643,7 @@ document.querySelectorAll('.chips[data-cradio]').forEach(box => box.addEventList
 
 /* ---------- mis diseños guardados ---------- */
 const PRESET_KEY = 'postales-ojodecristi-disenos';
-const PRESET_FIELDS = ['style','custom','deco','decoPostal','tilt','extras','shape','frame','format','comp','titleFont','photoSize','stampColor','stampMode','paperTex','swSize','swPos','counterInk','bgEach','bgTone','pm','pmIcon','pmPos','lineStyle','linePos'];
+const PRESET_FIELDS = ['style','custom','deco','decoPostal','tilt','extras','shape','frame','format','comp','titleFont','titlePos','titleSize','titleCaps','photoSize','stampColor','stampMode','paperTex','swSize','swPos','counterInk','bgEach','bgTone','pm','pmIcon','pmPos','lineStyle','linePos'];
 const PRESET_EXAMPLES = [
   {name:'Clásica', d:{style:'archivo', deco:'cintas-clip', decoPostal:false, frame:'fina', format:'1:1', comp:'postal', shape:'cuadrados', photoSize:'normal', paperTex:'textura', swSize:'medianos', swPos:'centro', stampColor:'', extras:{postmark:false, border:false, filmdate:false, counter:false}}},
   {name:'Costa vertical', d:{style:'archivo', deco:'paspartu', decoPostal:true, frame:'fina', format:'4:5', comp:'postal', shape:'cuadrados', photoSize:'grande', paperTex:'liso', swSize:'medianos', swPos:'costado', counterInk:'tinta', extras:{postmark:false, border:false, filmdate:false, counter:true}}, cover:{on:true, look:'sola', bg:'blanco'}}
@@ -3929,7 +4093,7 @@ async function boot(){
   buildDesign(); syncDesign(); syncRecipe(); syncCover(); PRESETS = loadPresets(); syncPresetSel(); lastSnap = snapDesign();
   afterStructure();
 }
-window.__postales = {state, outputs, renderTo, renderBlob, extractPalette, colorName, readExif, STYLES, saveOneByOne};
+window.__postales = {state, outputs, renderTo, renderBlob, extractPalette, colorName, readExif, STYLES, saveOneByOne, postalLayout, postalBoxes, pmSpot, pmPosOf, PM_R, PM_K, D, inter1};
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
 boot();
 })();
