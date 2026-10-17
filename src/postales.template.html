@@ -22,6 +22,8 @@
 @font-face{font-family:"JetBrains Mono";src:url(data:font/woff2;base64,{{JBM500}}) format("woff2");font-weight:500 700;font-style:normal;font-display:block}
 @font-face{font-family:"Fira Sans";src:url(data:font/woff2;base64,{{FIRA400}}) format("woff2");font-weight:400;font-style:normal;font-display:block}
 @font-face{font-family:"Fira Sans";src:url(data:font/woff2;base64,{{FIRA500}}) format("woff2");font-weight:500 700;font-style:normal;font-display:block}
+@font-face{font-family:"EB Garamond Cursiva";src:url(data:font/woff2;base64,{{GARA400}}) format("woff2");font-weight:400;font-style:normal;font-display:block}
+@font-face{font-family:"EB Garamond Cursiva";src:url(data:font/woff2;base64,{{GARA500}}) format("woff2");font-weight:500 700;font-style:normal;font-display:block}
 @font-face{font-family:"Caveat";src:url(data:font/woff2;base64,{{CAVEAT400}}) format("woff2");font-weight:400;font-style:normal;font-display:block}
 @font-face{font-family:"Caveat";src:url(data:font/woff2;base64,{{CAVEAT600}}) format("woff2");font-weight:500 600;font-style:normal;font-display:block}
 @font-face{font-family:"Caveat";src:url(data:font/woff2;base64,{{CAVEAT700}}) format("woff2");font-weight:700;font-style:normal;font-display:block}
@@ -627,6 +629,7 @@ body.bg-cada .lay-bg{display:grid !important}
               <button type="button" role="radio" data-v="mono">Máquina</button>
               <button type="button" role="radio" data-v="hand">A mano</button>
               <button type="button" role="radio" data-v="sans">Moderna</button>
+              <button type="button" role="radio" data-v="gara">Cursiva</button>
             </div>
           </div>
           <div class="opt" data-ifpostal>
@@ -1043,6 +1046,7 @@ const SAMPLE = [
 const D = 706;
 const MONO = '"JetBrains Mono", ui-monospace, Menlo, monospace';
 const SANS = '"Fira Sans", system-ui, sans-serif';
+const GARA = '"EB Garamond Cursiva", "EB Garamond", Georgia, serif';
 const HAND = '"Caveat", "Segoe Print", "Bradley Hand", cursive';
 const POSTAL = {
   photo:{x:43.5, y:55, w:634, h:634/1.5}, pad:3.9,
@@ -2434,8 +2438,9 @@ function fichaText(ctx, p, n){
   let ty = 573;
   for (let i = tech.length-1; i >= 0; i--){ itemText(ctx, tech[i], tx, ty, 12.8, MONO, hasLeft ? 232 : 400); ty -= 18; }
 }
-function titleFont(size){ return state.titleFont === 'hand' ? {family:HAND, weight:600, size:size*1.6} : state.titleFont === 'sans' ? {family:SANS, weight:500, size:size*1.3} : {family:MONO, weight:400, size}; }
+function titleFont(size){ return state.titleFont === 'gara' ? {family:GARA, weight:500, size:size*1.5} : state.titleFont === 'hand' ? {family:HAND, weight:600, size:size*1.6} : state.titleFont === 'sans' ? {family:SANS, weight:500, size:size*1.3} : {family:MONO, weight:400, size}; }
 /* ---------- título de la postal: dónde va, cuánto ocupa y con qué esquiva el resto ---------- */
+const keepCase = () => state.titleFont === 'hand' || state.titleFont === 'gara';
 const TITLE_K = {chico:0.82, medio:1, grande:1.5};
 const TITLE_POS = [['arriba-izq','Arriba, a la izquierda'],['arriba-centro','Arriba, al centro'],['arriba-der','Arriba, a la derecha'],['abajo-izq','Debajo, a la izquierda'],['abajo-centro','Debajo, al centro'],['abajo-der','Debajo, a la derecha'],['sobre-arriba-izq','Sobre la foto: arriba a la izquierda'],['sobre-arriba-centro','Sobre la foto: arriba al centro'],['sobre-arriba-der','Sobre la foto: arriba a la derecha'],['sobre-abajo-izq','Sobre la foto: abajo a la izquierda'],['sobre-abajo-centro','Sobre la foto: abajo al centro'],['sobre-abajo-der','Sobre la foto: abajo a la derecha']];
 function titlePosOf(p){ const m = /^(arriba|abajo|sobre-arriba|sobre-abajo)-(izq|centro|der)$/.exec((p && p.lay && p.lay.tpos) || state.titlePos); return m ? {row:m[1], col:m[2]} : {row:'arriba', col:'centro'}; }
@@ -2771,7 +2776,7 @@ function drawGrid(ctx, g, hi, H){
   const items = state.photos.slice(g*4, g*4 + 4), n = items.length;
   const raw = gridTitle(g);
   if (raw){
-    const ft = titleFont(G.title.size), title = state.titleFont === 'hand' ? raw : raw.toUpperCase();
+    const ft = titleFont(G.title.size), title = keepCase() ? raw : raw.toUpperCase();
     const base = dy > 0 ? dy*0.5 + 30 : G.title.base;
     ctx.fillStyle = S.ink; centerText(ctx, title, G.title.cx, base, ft.size, 600, ft.family, ft.weight);
     const w = Math.min(600, ctx.measureText(title).width);
@@ -2982,7 +2987,7 @@ function drawPortada(ctx, hi, H){
   else { const keepF = state.frame, keepS = S; state.frame = C.frame; if (dark) S = Object.assign({}, S, {frame:'#C9C4B8'}); framedPhoto(ctx, srcOf(p, hi), r, 3.9, 0); state.frame = keepF; S = keepS; }
   ctx.fillStyle = ink;
   if (C.look === 'titulo'){
-    const ft = titleFont(24), lines = TL.map(t => state.titleFont === 'hand' ? t : t.toUpperCase()), lh = ft.size*1.2;
+    const ft = titleFont(24), lines = TL.map(t => keepCase() ? t : t.toUpperCase()), lh = ft.size*1.2;
     const base = r.y - fp - (sub ? 52 + (SL.length - 1)*19 : 30);
     let tw = 0; lines.forEach((t, i) => { centerText(ctx, t, D/2, base - (lines.length - 1 - i)*lh, ft.size, 600, ft.family, ft.weight); tw = Math.max(tw, Math.min(600, ctx.measureText(t).width)); });
     const keep = S; S = Object.assign({}, S, {ink}); underline(ctx, D/2 - tw/2 - 7, D/2 + tw/2 + 7, base + 10, base + 5); S = keep;
@@ -4083,7 +4088,7 @@ async function boot(){
   paperSmallData = IMG.paperSmall.getContext('2d', {willReadFrequently:true}).getImageData(0, 0, IMG.paperSmall.width, IMG.paperSmall.height);
   { const d = paperSmallData.data; let s = 0; for (let i=0;i<d.length;i+=4) s += 0.299*d[i] + 0.587*d[i+1] + 0.114*d[i+2]; paperMean = s / (d.length/4);
     let r = 0, g = 0, b = 0; for (let i=0;i<d.length;i+=4){ r += d[i]; g += d[i+1]; b += d[i+2]; } const N = d.length/4; paperAvg = rgbHex(Math.round(r/N), Math.round(g/N), Math.round(b/N)); }
-  try { await Promise.all([document.fonts.load(`400 20px ${MONO}`), document.fonts.load(`400 20px ${SANS}`), document.fonts.load(`500 20px ${MONO}`), document.fonts.load(`600 24px ${HAND}`), document.fonts.load(`400 24px ${HAND}`), document.fonts.load(`700 24px ${HAND}`)]); } catch(e){}
+  try { await Promise.all([document.fonts.load(`400 20px ${MONO}`), document.fonts.load(`400 20px ${SANS}`), document.fonts.load(`500 20px ${MONO}`), document.fonts.load(`600 24px ${HAND}`), document.fonts.load(`400 24px ${HAND}`), document.fonts.load(`700 24px ${HAND}`), document.fonts.load(`400 24px ${GARA}`), document.fonts.load(`500 24px ${GARA}`)]); } catch(e){}
   const restored = await restoreSession();
   if (restored) toast(`Recuperé tu trabajo: ${restored} ${restored === 1 ? 'foto' : 'fotos'}`);
   else if (state.sample){

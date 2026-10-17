@@ -7,6 +7,8 @@ rep = {
  'JBM500': b64('fonts/jetbrains-mono-latin-500-normal.woff2'),
  'FIRA400': b64('fonts/fira-sans-latin-400-normal.woff2'),
  'FIRA500': b64('fonts/fira-sans-latin-500-normal.woff2'),
+ 'GARA400': b64('fonts/eb-garamond-latin-400-italic.woff2'),
+ 'GARA500': b64('fonts/eb-garamond-latin-500-italic.woff2'),
  'CAVEAT400': b64('fonts/caveat-latin-400-normal.woff2'),
  'CAVEAT600': b64('fonts/caveat-latin-600-normal.woff2'),
  'CAVEAT700': b64('fonts/caveat-latin-700-normal.woff2'),
