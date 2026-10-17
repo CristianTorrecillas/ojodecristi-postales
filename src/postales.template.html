@@ -359,9 +359,17 @@ textarea.inp{height:auto;padding:8px 10px;font-family:var(--mono);font-size:14px
 .design .shapes{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
 .design .shape-card{padding:4px 3px 3px}
 @media (max-width:420px){.design .styles{gap:6px}.opt{grid-template-columns:74px minmax(0,1fr)}}
-.lay-grid{display:flex;flex-direction:column;gap:8px;margin-top:8px}
-.lay-row{display:grid;grid-template-columns:62px minmax(0,1fr);align-items:center;gap:8px}
-.lay-row .chips button{min-height:28px;padding:0 9px;font-size:11.5px}
+.dup{display:none !important}
+.lay-grid{display:flex;flex-direction:column;gap:0;margin-top:10px}
+.lay-sec{display:flex;flex-direction:column;gap:12px;padding:14px 0 16px;border-top:1px solid var(--rule)}
+.lay-sec:first-child{border-top:0;padding-top:4px}
+.lay-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.lay-head h4{margin:0;font-family:var(--mono);font-weight:500;font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink)}
+.lay-all{border:0;background:transparent;padding:4px 0;font-family:var(--mono);font-size:11px;color:var(--stamp);cursor:pointer;text-decoration:underline;text-underline-offset:3px;white-space:nowrap}
+.lay-row{display:flex;flex-direction:column;align-items:stretch;gap:7px}
+.lay-row>.lbl{font-size:10.5px}
+.lay-row .chips{gap:7px}
+.lay-row .chips button{min-height:32px;padding:0 12px;font-size:12px}
 textarea.inp.pc-title,textarea.inp.ttl{height:auto;min-height:34px;padding:6px 10px;font-family:var(--sans);font-size:15px;line-height:1.35;resize:none;overflow:hidden}
 textarea.inp.pc-title{font-style:italic}
 .flash{animation:flash 1.2s ease-out}
@@ -413,11 +421,12 @@ section[aria-labelledby="hPhotos"] .col-head h2::before{background:var(--well)}
 }
 .stage-acts{display:inline-flex;gap:8px}
 .lay-pm{display:none !important}
-body.pm-on .lay-pm{display:grid !important}
-.lay-row select.inp{height:32px;font-size:13.5px;width:auto;max-width:100%}
-.lay-nudge{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px}
-.lay-nudge label{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
-.lay-nudge input[type=range]{width:104px}
+body.pm-on .lay-pm{display:flex !important}
+.lay-row select.inp{height:36px;font-size:13.5px;width:100%}
+.lay-nudge{display:flex;flex-direction:column;align-items:stretch;gap:10px}
+.lay-nudge label{display:grid;grid-template-columns:68px minmax(0,1fr);align-items:center;gap:8px;font-size:12px;color:var(--muted)}
+.lay-nudge input[type=range]{width:100%}
+.lay-nudge .btn{align-self:flex-start}
 .pick-dlg{border:0;border-radius:14px;background:var(--panel);color:var(--ink);padding:14px;max-width:calc(100vw - 16px);max-height:calc(100vh - 16px);box-shadow:0 30px 80px -20px rgba(0,0,0,.6)}
 .pick-dlg::backdrop{background:rgba(15,12,8,.6)}
 .pick-head{display:flex;align-items:center;gap:12px;margin-bottom:10px;flex-wrap:wrap}
@@ -476,8 +485,8 @@ body::before{content:"";position:fixed;top:0;left:0;right:0;height:5px;z-index:5
 .swb{width:30px;height:26px;padding:0 !important;border-radius:6px !important;border:1px solid rgba(0,0,0,.12) !important;min-height:0 !important}
 .swb[aria-pressed="true"]{outline:2px solid var(--ink);outline-offset:2px}
 .lay-bg{display:none !important}
-body.bg-cada .lay-bg{display:grid !important}
-.lay-row .chips button.swb{width:28px;height:24px}
+body.bg-cada .lay-bg{display:flex !important}
+.lay-row .chips button.swb{width:32px;height:28px}
 .swpick{display:inline-flex;align-items:center}
 .swpick input{width:30px;height:26px;padding:0;border:1px solid var(--rule);border-radius:6px;background:var(--paper);cursor:pointer}
 /* la postal elegida, apoyada sobre la mesa */
@@ -613,7 +622,7 @@ body.bg-cada .lay-bg{display:grid !important}
               <button type="button" role="radio" data-v="liso">Liso</button>
             </div>
           </div>
-          <div class="opt">
+          <div class="opt dup">
             <span class="lbl">Sello</span>
             <div class="optrow">
               <div class="chips segc" role="radiogroup" aria-label="Color del sello" data-radio="stampMode">
@@ -624,7 +633,7 @@ body.bg-cada .lay-bg{display:grid !important}
               <label class="colorpick" id="stampPick" for="stampColor"><input type="color" id="stampColor" value="#9E1610" aria-label="Color del sello"></label>
             </div>
           </div>
-          <p class="subhint" id="stampHint">En cada postal elige una tinta al estilo Wes Anderson que contraste con el fondo y repita un tono de la foto. Foto por foto lo podés cambiar en «Diseño de esta postal».</p>
+          <p class="subhint dup" id="stampHint">En cada postal elige una tinta al estilo Wes Anderson que contraste con el fondo y repita un tono de la foto. Foto por foto lo podés cambiar en «Diseño de esta postal».</p>
           <div class="opt">
             <span class="lbl">Títulos</span>
             <div class="chips segc" role="radiogroup" aria-label="Letra de los títulos" data-radio="titleFont">
@@ -647,7 +656,7 @@ body.bg-cada .lay-bg{display:grid !important}
               <button type="button" role="radio" data-v="mayus">ABC</button>
             </div>
           </div>
-          <div class="opt" data-ifpostal>
+          <div class="opt dup" data-ifpostal>
             <span class="lbl">Color</span>
             <div class="chips segc" role="radiogroup" aria-label="Color del título" data-radio="titleColor">
               <button type="button" role="radio" data-v="auto">Auto</button>
@@ -657,7 +666,7 @@ body.bg-cada .lay-bg{display:grid !important}
             </div>
             <label class="colorpick" for="titleColorPick" title="Otro color"><input type="color" id="titleColorPick" value="#F6F1E6" aria-label="Otro color para el título"></label>
           </div>
-          <div class="opt" data-ifpostal>
+          <div class="opt dup" data-ifpostal>
             <label class="lbl" for="titlePosSel">Dónde</label>
             <select id="titlePosSel" class="inp" data-sel="titlePos" aria-label="Posición del título">
               <optgroup label="Arriba de la foto">
@@ -680,7 +689,7 @@ body.bg-cada .lay-bg{display:grid !important}
               </optgroup>
             </select>
           </div>
-          <p class="subhint" data-ifpostal>Foto por foto la podés mover distinto, y ajustar fino, en «Diseño de esta postal».</p>
+          <p class="subhint dup" data-ifpostal>Foto por foto la podés mover distinto, y ajustar fino, en «Diseño de esta postal».</p>
         </div>
 
         <!-- Postal: tamaño y orden de las cosas -->
@@ -712,7 +721,7 @@ body.bg-cada .lay-bg{display:grid !important}
             <span class="lbl">Forma</span>
             <div id="shapes" class="shapes" role="radiogroup" aria-label="Forma de los colores"></div>
           </div>
-          <div class="opt" data-ifpostal>
+          <div class="opt dup" data-ifpostal>
             <span class="lbl">Tamaño</span>
             <div class="chips segc" role="radiogroup" aria-label="Tamaño de los colores" data-radio="swSize">
               <button type="button" role="radio" data-v="chicos">Chicos</button>
@@ -720,7 +729,7 @@ body.bg-cada .lay-bg{display:grid !important}
               <button type="button" role="radio" data-v="grandes">Grandes</button>
             </div>
           </div>
-          <div class="opt" data-ifpostal>
+          <div class="opt dup" data-ifpostal>
             <span class="lbl">Ubicación</span>
             <div class="chips segc" role="radiogroup" aria-label="Ubicación de los colores" data-radio="swPos">
               <button type="button" role="radio" data-v="auto" title="Verticales al costado, horizontales abajo">Auto</button>
@@ -730,7 +739,7 @@ body.bg-cada .lay-bg{display:grid !important}
               <button type="button" role="radio" data-v="costado-izq" title="Columna de colores a la izquierda de la foto">Costado izq.</button>
             </div>
           </div>
-          <p class="subhint" data-ifpostal>Vale para todas las fotos. <b>Auto</b> pone los colores al costado en las verticales y abajo en las horizontales. Para cambiar una sola, abrí «Diseño de esta postal» en su tarjeta.</p>
+          <p class="subhint dup" data-ifpostal>Vale para todas las fotos. <b>Auto</b> pone los colores al costado en las verticales y abajo en las horizontales. Para cambiar una sola, abrí «Diseño de esta postal» en su tarjeta.</p>
         </div>
 
         <!-- Detalles: adornos y extras -->
@@ -798,7 +807,7 @@ body.bg-cada .lay-bg{display:grid !important}
               <option value="ilustrado">Ilustrado según el lugar</option>
             </select>
           </div>
-          <div class="opt" id="pmPosRow">
+          <div class="opt dup" id="pmPosRow">
             <label class="lbl" for="pmPosSel">Dónde</label>
             <select id="pmPosSel" class="inp" data-sel="pmPos">
               <option value="libre">Automático: lugar libre cerca del sello</option>
@@ -2583,6 +2592,7 @@ function layOf(p){
   const L = (p && p.lay) || {}, pos = L.pos || state.swPos, v = isVert(p);
   return {v, photoSize:state.photoSize, swSize:L.size || state.swSize, swPos:pos === 'auto' ? (v ? 'costado' : 'centro') : pos};
 }
+const POS_LABEL = {auto:'Auto (vertical al costado)', centro:'Abajo, al centro', izquierda:'Abajo, a la izquierda', costado:'Costado derecho', 'costado-izq':'Costado izquierdo'};
 const POS_TXT = {centro:'abajo', izquierda:'abajo a la izquierda', costado:'al costado', 'costado-izq':'al costado izquierdo'}, SIZE_TXT = {chicos:'chicos', medianos:'medianos', grandes:'grandes'};
 function laySummary(p){
   const L = (p && p.lay) || {}, Lo = layOf(p), bg = L.bg != null && state.style === 'foto' && state.bgEach === 'cada';
@@ -3452,14 +3462,26 @@ function renderPhotos(){
         <details class="pc-tech" data-layd="${id}"${p.layOpen ? ' open' : ''}>
           <summary><span>Diseño de esta postal</span><span class="pc-tech-sum" id="laysum-${id}">${esc(laySummary(p))}</span></summary>
           <div class="lay-grid">
-            <div class="lay-row"><span class="lbl">Colores</span><div class="chips" data-lay="pos">${[['','Como todas'],['centro','Abajo'],['izquierda','Izquierda'],['costado','Costado der.'],['costado-izq','Costado izq.']].map(([v, l]) => `<button type="button" data-v="${v}" aria-pressed="${((p.lay && p.lay.pos) || '') === v}">${l}</button>`).join('')}</div></div>
-            <div class="lay-row lay-bg"><span class="lbl">Fondo</span><div class="chips" data-lay="bg"><button type="button" data-v="" aria-pressed="${!(p.lay && p.lay.bg != null)}">Auto</button>${p.colors.map((c, k) => `<button type="button" class="swb" id="laybg-${id}-${k}" data-v="${k}" aria-pressed="${!!(p.lay && p.lay.bg === String(k))}" title="${esc(c.name || c.hex)}" style="background:${c.hex}"></button>`).join('')}</div></div>
-            <div class="lay-row"><span class="lbl">Sello</span><div class="chips" data-lay="stamp"><button type="button" data-v="" aria-pressed="${!(p.lay && p.lay.stamp)}">Como todas</button><button type="button" data-v="auto" aria-pressed="${!!(p.lay && p.lay.stamp === 'auto')}">Sugerido</button>${p.colors.map(c => `<button type="button" class="swb" data-v="${c.hex}" aria-pressed="${!!(p.lay && p.lay.stamp === c.hex)}" title="${esc(c.name || c.hex)}" style="background:${c.hex}"></button>`).join('')}<label class="swpick" title="Otro color"><input type="color" data-laystamp="1" value="${p.lay && p.lay.stamp && p.lay.stamp[0] === '#' ? p.lay.stamp : '#9E1610'}" aria-label="Otro color de sello para esta foto"></label></div></div>
-            <div class="lay-row lay-pm"><span class="lbl">Matasellos</span><select class="inp" data-laysel="pm" aria-label="Matasellos de esta postal"><option value="">Como todas</option><option value="no">Sin matasellos</option>${PM_POS.map(([v, l]) => `<option value="${v}"${p.lay && p.lay.pm === v ? ' selected' : ''}>${l}</option>`).join('')}</select></div>
-            <div class="lay-row"><span class="lbl">Color del título</span><div class="chips" data-lay="tcol"><button type="button" data-v="" aria-pressed="${!(p.lay && p.lay.tcol)}">Como todas</button>${[['auto','Auto'],['claro','Claro'],['oscuro','Oscuro'],['sello','Sello']].map(([v, l]) => `<button type="button" data-v="${v}" aria-pressed="${!!(p.lay && p.lay.tcol === v)}">${l}</button>`).join('')}${p.colors.map(c => `<button type="button" class="swb" data-v="${c.hex}" aria-pressed="${!!(p.lay && p.lay.tcol === c.hex)}" title="${esc(c.name || c.hex)}" style="background:${c.hex}"></button>`).join('')}<label class="swpick" title="Otro color"><input type="color" data-laytcol="1" value="${p.lay && p.lay.tcol && p.lay.tcol[0] === '#' ? p.lay.tcol : '#F6F1E6'}" aria-label="Otro color de título para esta foto"></label></div></div>
-            <div class="lay-row"><span class="lbl">Título</span><select class="inp" data-laysel="tpos" aria-label="Posición del título de esta postal"><option value="">Como todas</option>${TITLE_POS.map(([v, l]) => `<option value="${v}"${p.lay && p.lay.tpos === v ? ' selected' : ''}>${l}</option>`).join('')}</select></div>
-            <div class="lay-row"><span class="lbl">Ajuste</span><div class="lay-nudge"><label>Horizontal <input type="range" min="-200" max="200" step="2" value="${(p.lay && +p.lay.tdx) || 0}" data-laynum="tdx" aria-label="Mover el título a los costados"></label><label>Vertical <input type="range" min="-120" max="120" step="2" value="${(p.lay && +p.lay.tdy) || 0}" data-laynum="tdy" aria-label="Mover el título arriba o abajo"></label><button type="button" class="btn btn-ghost mini" data-laytreset="1">Centrar</button></div></div>
-            <div class="lay-row"><span class="lbl">Tamaño</span><div class="chips" data-lay="size">${[['','Como todas'],['chicos','Chicos'],['medianos','Medianos'],['grandes','Grandes']].map(([v, l]) => `<button type="button" data-v="${v}" aria-pressed="${((p.lay && p.lay.size) || '') === v}">${l}</button>`).join('')}</div></div>
+            <section class="lay-sec">
+              <div class="lay-head"><h4>Colores</h4><button type="button" class="lay-all" data-layall="colores" title="Usar esta ubicación y tamaño en todas las fotos">Aplicar a todas</button></div>
+              <div class="lay-row"><label class="lbl" for="lp-${id}">Ubicación</label><select class="inp" id="lp-${id}" data-laysel="pos" aria-label="Ubicación de los colores de esta postal"><option value="">Como todas (${esc(POS_LABEL[state.swPos] || 'Auto')})</option>${Object.entries(POS_LABEL).map(([v, l]) => `<option value="${v}"${p.lay && p.lay.pos === v ? ' selected' : ''}>${l}</option>`).join('')}</select></div>
+              <div class="lay-row"><span class="lbl">Tamaño</span><div class="chips" data-lay="size">${[['','Como todas'],['chicos','Chicos'],['medianos','Medianos'],['grandes','Grandes']].map(([v, l]) => `<button type="button" data-v="${v}" aria-pressed="${((p.lay && p.lay.size) || '') === v}">${l}</button>`).join('')}</div></div>
+              <div class="lay-row lay-bg"><span class="lbl">Fondo</span><div class="chips" data-lay="bg"><button type="button" data-v="" aria-pressed="${!(p.lay && p.lay.bg != null)}">Auto</button>${p.colors.map((c, k) => `<button type="button" class="swb" id="laybg-${id}-${k}" data-v="${k}" aria-pressed="${!!(p.lay && p.lay.bg === String(k))}" title="${esc(c.name || c.hex)}" style="background:${c.hex}"></button>`).join('')}</div></div>
+            </section>
+            <section class="lay-sec">
+              <div class="lay-head"><h4>Sello</h4><button type="button" class="lay-all" data-layall="sello" title="Usar este color de sello en todas las fotos">Aplicar a todas</button></div>
+              <div class="lay-row"><span class="lbl">Color</span><div class="chips" data-lay="stamp"><button type="button" data-v="" aria-pressed="${!(p.lay && p.lay.stamp)}">Como todas</button><button type="button" data-v="auto" aria-pressed="${!!(p.lay && p.lay.stamp === 'auto')}">Sugerido</button>${p.colors.map(c => `<button type="button" class="swb" data-v="${c.hex}" aria-pressed="${!!(p.lay && p.lay.stamp === c.hex)}" title="${esc(c.name || c.hex)}" style="background:${c.hex}"></button>`).join('')}<label class="swpick" title="Otro color"><input type="color" data-laystamp="1" value="${p.lay && p.lay.stamp && p.lay.stamp[0] === '#' ? p.lay.stamp : '#9E1610'}" aria-label="Otro color de sello para esta foto"></label></div></div>
+            </section>
+            <section class="lay-sec">
+              <div class="lay-head"><h4>Título</h4><button type="button" class="lay-all" data-layall="titulo" title="Usar esta posición y color de título en todas las fotos">Aplicar a todas</button></div>
+              <div class="lay-row"><label class="lbl" for="lt-${id}">Posición</label><select class="inp" id="lt-${id}" data-laysel="tpos" aria-label="Posición del título de esta postal"><option value="">Como todas (${esc((TITLE_POS.find(t => t[0] === state.titlePos) || ['', 'Arriba, al centro'])[1])})</option>${TITLE_POS.map(([v, l]) => `<option value="${v}"${p.lay && p.lay.tpos === v ? ' selected' : ''}>${l}</option>`).join('')}</select></div>
+              <div class="lay-row"><span class="lbl">Color</span><div class="chips" data-lay="tcol"><button type="button" data-v="" aria-pressed="${!(p.lay && p.lay.tcol)}">Como todas</button>${[['auto','Auto'],['claro','Claro'],['oscuro','Oscuro'],['sello','Sello']].map(([v, l]) => `<button type="button" data-v="${v}" aria-pressed="${!!(p.lay && p.lay.tcol === v)}">${l}</button>`).join('')}${p.colors.map(c => `<button type="button" class="swb" data-v="${c.hex}" aria-pressed="${!!(p.lay && p.lay.tcol === c.hex)}" title="${esc(c.name || c.hex)}" style="background:${c.hex}"></button>`).join('')}<label class="swpick" title="Otro color"><input type="color" data-laytcol="1" value="${p.lay && p.lay.tcol && p.lay.tcol[0] === '#' ? p.lay.tcol : '#F6F1E6'}" aria-label="Otro color de título para esta foto"></label></div></div>
+              <div class="lay-row"><span class="lbl">Ajuste fino</span><div class="lay-nudge"><label>Horizontal <input type="range" min="-200" max="200" step="2" value="${(p.lay && +p.lay.tdx) || 0}" data-laynum="tdx" aria-label="Mover el título a los costados"></label><label>Vertical <input type="range" min="-120" max="120" step="2" value="${(p.lay && +p.lay.tdy) || 0}" data-laynum="tdy" aria-label="Mover el título arriba o abajo"></label><button type="button" class="btn btn-ghost mini" data-laytreset="1">Centrar</button></div></div>
+            </section>
+            <section class="lay-sec lay-pm">
+              <div class="lay-head"><h4>Matasellos</h4><button type="button" class="lay-all" data-layall="matasellos" title="Usar esta posición de matasellos en todas las fotos">Aplicar a todas</button></div>
+              <div class="lay-row"><label class="lbl" for="lm-${id}">Posición</label><select class="inp" id="lm-${id}" data-laysel="pm" aria-label="Matasellos de esta postal"><option value="">Como todas (${esc((PM_POS.find(t => t[0] === state.pmPos) || ['', 'Automático'])[1])})</option><option value="no">Sin matasellos</option>${PM_POS.map(([v, l]) => `<option value="${v}"${p.lay && p.lay.pm === v ? ' selected' : ''}>${l}</option>`).join('')}</select></div>
+            </section>
           </div>
         </details>
         <details class="pc-tech" data-tech="${id}"${p.techOpen ? ' open' : ''}>
@@ -3474,6 +3496,24 @@ function renderPhotos(){
   state.photos.forEach(drawThumb);
 }
 function photoById(id){ return state.photos.find(p => p.id === id); }
+/* «Aplicar a todas»: lo de esta foto pasa a ser lo general y las demás vuelven a «Como todas» */
+function applyToAll(p, sec){
+  const L = p.lay || {}, keys = {colores:['pos','size'], titulo:['tpos','tcol'], matasellos:['pm'], sello:['stamp']}[sec]; if (!keys) return;
+  const G = {pos:'swPos', size:'swSize', tpos:'titlePos', tcol:'titleColor', pm:'pmPos'};
+  const keepNo = sec === 'matasellos' && L.pm === 'no';
+  keys.forEach(k => {
+    const v = L[k];
+    if (k === 'stamp'){ if (v === 'auto') state.stampMode = 'sugerido'; else if (v){ state.stampMode = 'elegido'; state.stampColor = v; } else state.stampMode = 'papel'; }
+    else if (v && !(k === 'pm' && v === 'no')) state[G[k]] = v;
+    else if (!v && G[k] === 'swPos') state.swPos = 'auto';
+  });
+  state.photos.forEach(q => {
+    if (!q.lay) { if (keepNo) q.lay = {pm:'no'}; return; }
+    q.lay = Object.assign({}, q.lay); keys.forEach(k => { delete q.lay[k]; }); if (keepNo) q.lay.pm = 'no';
+    if (!Object.keys(q.lay).length) q.lay = null;
+  });
+  renderPhotos(); syncDesign(); renderStyleThumbs(); scheduleOut(); toast('Aplicado a todas las fotos');
+}
 photoList.addEventListener('input', e => {
   const li = e.target.closest('.pcard'); if (!li) return; const p = photoById(li.dataset.id); if (!p) return;
   const f = e.target.dataset.f, nm = e.target.dataset.name, tk = e.target.dataset.t;
@@ -3484,6 +3524,7 @@ photoList.addEventListener('input', e => {
   else if (nm !== undefined){ const c = p.colors[+nm]; c.name = e.target.value; c.auto = false; }
   else if (e.target.dataset.laysel){
     const key = e.target.dataset.laysel; p.lay = Object.assign({}, p.lay); const v = e.target.value; if (v) p.lay[key] = v; else delete p.lay[key]; if (!Object.keys(p.lay).length) p.lay = null;
+    const sum = document.getElementById('laysum-' + p.id); if (sum) sum.textContent = laySummary(p);
   }
   else if (e.target.dataset.laynum){
     const k = e.target.dataset.laynum, v = +e.target.value; p.lay = Object.assign({}, p.lay); if (v) p.lay[k] = v; else delete p.lay[k]; if (!Object.keys(p.lay).length) p.lay = null;
@@ -3509,6 +3550,8 @@ photoList.addEventListener('pointerdown', e => { const li = e.target.closest('.p
 $('#gridTitles').addEventListener('focusin', e => { const g = e.target.dataset.g; if (g !== undefined) showOut(o => o.kind === 'grid' && o.g === +g); });
 photoList.addEventListener('click', e => {
   const li = e.target.closest('.pcard'); if (!li) return; const p = photoById(li.dataset.id); if (!p) return;
+  const all = e.target.closest('[data-layall]');
+  if (all){ applyToAll(p, all.dataset.layall); return; }
   const treset = e.target.closest('[data-laytreset]');
   if (treset){
     p.lay = Object.assign({}, p.lay); delete p.lay.tdx; delete p.lay.tdy; if (!Object.keys(p.lay).length) p.lay = null;
