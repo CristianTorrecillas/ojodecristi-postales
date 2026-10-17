@@ -22,8 +22,10 @@
 @font-face{font-family:"JetBrains Mono";src:url(data:font/woff2;base64,{{JBM500}}) format("woff2");font-weight:500 700;font-style:normal;font-display:block}
 @font-face{font-family:"Fira Sans";src:url(data:font/woff2;base64,{{FIRA400}}) format("woff2");font-weight:400;font-style:normal;font-display:block}
 @font-face{font-family:"Fira Sans";src:url(data:font/woff2;base64,{{FIRA500}}) format("woff2");font-weight:500 700;font-style:normal;font-display:block}
-@font-face{font-family:"EB Garamond Cursiva";src:url(data:font/woff2;base64,{{GARA400}}) format("woff2");font-weight:400;font-style:normal;font-display:block}
-@font-face{font-family:"EB Garamond Cursiva";src:url(data:font/woff2;base64,{{GARA500}}) format("woff2");font-weight:500 700;font-style:normal;font-display:block}
+@font-face{font-family:"Jost";src:url(data:font/woff2;base64,{{JOST400}}) format("woff2");font-weight:400;font-style:normal;font-display:block}
+@font-face{font-family:"Jost";src:url(data:font/woff2;base64,{{JOST500}}) format("woff2");font-weight:500 700;font-style:normal;font-display:block}
+@font-face{font-family:"Zilla Slab";src:url(data:font/woff2;base64,{{ZILLA400}}) format("woff2");font-weight:400;font-style:normal;font-display:block}
+@font-face{font-family:"Zilla Slab";src:url(data:font/woff2;base64,{{ZILLA500}}) format("woff2");font-weight:500 700;font-style:normal;font-display:block}
 @font-face{font-family:"Caveat";src:url(data:font/woff2;base64,{{CAVEAT400}}) format("woff2");font-weight:400;font-style:normal;font-display:block}
 @font-face{font-family:"Caveat";src:url(data:font/woff2;base64,{{CAVEAT600}}) format("woff2");font-weight:500 600;font-style:normal;font-display:block}
 @font-face{font-family:"Caveat";src:url(data:font/woff2;base64,{{CAVEAT700}}) format("woff2");font-weight:700;font-style:normal;font-display:block}
@@ -628,8 +630,9 @@ body.bg-cada .lay-bg{display:grid !important}
             <div class="chips segc" role="radiogroup" aria-label="Letra de los títulos" data-radio="titleFont">
               <button type="button" role="radio" data-v="mono">Máquina</button>
               <button type="button" role="radio" data-v="hand">A mano</button>
-              <button type="button" role="radio" data-v="sans">Moderna</button>
-              <button type="button" role="radio" data-v="gara">Cursiva</button>
+              <button type="button" role="radio" data-v="sans">Clásica</button>
+              <button type="button" role="radio" data-v="jost">Geométrica</button>
+              <button type="button" role="radio" data-v="slab">Slab</button>
             </div>
           </div>
           <div class="opt" data-ifpostal>
@@ -643,6 +646,16 @@ body.bg-cada .lay-bg{display:grid !important}
               <button type="button" role="radio" data-v="normal">Abc</button>
               <button type="button" role="radio" data-v="mayus">ABC</button>
             </div>
+          </div>
+          <div class="opt" data-ifpostal>
+            <span class="lbl">Color</span>
+            <div class="chips segc" role="radiogroup" aria-label="Color del título" data-radio="titleColor">
+              <button type="button" role="radio" data-v="auto">Auto</button>
+              <button type="button" role="radio" data-v="claro">Claro</button>
+              <button type="button" role="radio" data-v="oscuro">Oscuro</button>
+              <button type="button" role="radio" data-v="sello">Sello</button>
+            </div>
+            <label class="colorpick" for="titleColorPick" title="Otro color"><input type="color" id="titleColorPick" value="#F6F1E6" aria-label="Otro color para el título"></label>
           </div>
           <div class="opt" data-ifpostal>
             <label class="lbl" for="titlePosSel">Dónde</label>
@@ -1046,7 +1059,8 @@ const SAMPLE = [
 const D = 706;
 const MONO = '"JetBrains Mono", ui-monospace, Menlo, monospace';
 const SANS = '"Fira Sans", system-ui, sans-serif';
-const GARA = '"EB Garamond Cursiva", "EB Garamond", Georgia, serif';
+const JOST = '"Jost", "Futura", "Century Gothic", sans-serif';
+const SLAB = '"Zilla Slab", Rockwell, Georgia, serif';
 const HAND = '"Caveat", "Segoe Print", "Bradley Hand", cursive';
 const POSTAL = {
   photo:{x:43.5, y:55, w:634, h:634/1.5}, pad:3.9,
@@ -1160,7 +1174,7 @@ const state = {
   photos:[], startNum:1, place:'Chubut', titles:['FLORENTINO AMEGHINO'], size:1080, sample:true, picking:null,
   style:'archivo', custom:'#D8C7A6', deco:'cintas-clip', decoPostal:false, tilt:false,
   extras:{postmark:false, border:false, filmdate:false, counter:false, icons:false},
-  shape:'cuadrados', frame:'fina', format:'1:1', comp:'postal', titleFont:'mono', titlePos:'arriba-centro', titleSize:'medio', titleCaps:'normal', lastEnd:0,
+  shape:'cuadrados', frame:'fina', format:'1:1', comp:'postal', titleFont:'mono', titlePos:'arriba-centro', titleSize:'medio', titleCaps:'normal', titleColor:'auto', lastEnd:0,
   photoSize:'grande', stampColor:'', stampMode:'papel', paperTex:'textura', swSize:'medianos', swPos:'auto', counterInk:'tinta',
   bgEach:'cada', bgTone:'suave', bgPick:-1, pm:'ninguno', pmIcon:'auto', pmPos:'libre', lineStyle:'tinta', linePos:'auto',
   show:{
@@ -1181,7 +1195,7 @@ const COVER_DEFAULT = {on:false, photo:0, look:'sola', bg:'blanco', color:'#F3EF
 state.cover = {...COVER_DEFAULT};
 const PENS = {azul:'#1F3A7A', negra:'#1E1D1B', sepia:'#5B3A22'};
 const PREF_KEY = 'postales-ojodecristi-v1';
-const PREF_FIELDS = ['style','custom','deco','decoPostal','tilt','extras','shape','frame','format','comp','titleFont','titlePos','titleSize','titleCaps','size','show','lastEnd','recipe','photoSize','stampColor','stampMode','paperTex','swSize','swPos','counterInk','cover','bgEach','bgTone','bgPick','pm','pmIcon','pmPos','lineStyle','linePos'];
+const PREF_FIELDS = ['style','custom','deco','decoPostal','tilt','extras','shape','frame','format','comp','titleFont','titlePos','titleSize','titleCaps','titleColor','size','show','lastEnd','recipe','photoSize','stampColor','stampMode','paperTex','swSize','swPos','counterInk','cover','bgEach','bgTone','bgPick','pm','pmIcon','pmPos','lineStyle','linePos'];
 function loadPrefs(){
   try{
     const o = JSON.parse(localStorage.getItem(PREF_KEY) || 'null'); if (!o || typeof o !== 'object') return;
@@ -1194,6 +1208,8 @@ function loadPrefs(){
       else state[k] = o[k];
     }
     if (!FORMATS[state.format]) state.format = '1:1';
+    if (!['mono','hand','sans','jost','slab'].includes(state.titleFont)) state.titleFont = 'mono';
+    if (!/^(auto|claro|oscuro|sello|#[0-9a-f]{6})$/i.test(state.titleColor)) state.titleColor = 'auto';
     if (!('stampMode' in o)) state.stampMode = o.stampColor ? 'elegido' : 'papel';
     if (!('pm' in o) && o.extras && o.extras.postmark) state.pm = 'circular';
     if (state.pmPos === 'foto') state.pmPos = 'foto-sd';
@@ -2438,9 +2454,13 @@ function fichaText(ctx, p, n){
   let ty = 573;
   for (let i = tech.length-1; i >= 0; i--){ itemText(ctx, tech[i], tx, ty, 12.8, MONO, hasLeft ? 232 : 400); ty -= 18; }
 }
-function titleFont(size){ return state.titleFont === 'gara' ? {family:GARA, weight:500, size:size*1.5} : state.titleFont === 'hand' ? {family:HAND, weight:600, size:size*1.6} : state.titleFont === 'sans' ? {family:SANS, weight:500, size:size*1.3} : {family:MONO, weight:400, size}; }
+function titleFont(size){
+  const f = state.titleFont;
+  return f === 'hand' ? {family:HAND, weight:600, size:size*1.6} : f === 'sans' ? {family:SANS, weight:400, size:size*1.5}
+    : f === 'jost' ? {family:JOST, weight:500, size:size*1.5} : f === 'slab' ? {family:SLAB, weight:500, size:size*1.5} : {family:MONO, weight:400, size};
+}
 /* ---------- título de la postal: dónde va, cuánto ocupa y con qué esquiva el resto ---------- */
-const keepCase = () => state.titleFont === 'hand' || state.titleFont === 'gara';
+const keepCase = () => state.titleFont === 'hand';
 const TITLE_K = {chico:0.82, medio:1, grande:1.5};
 const TITLE_POS = [['arriba-izq','Arriba, a la izquierda'],['arriba-centro','Arriba, al centro'],['arriba-der','Arriba, a la derecha'],['abajo-izq','Debajo, a la izquierda'],['abajo-centro','Debajo, al centro'],['abajo-der','Debajo, a la derecha'],['sobre-arriba-izq','Sobre la foto: arriba a la izquierda'],['sobre-arriba-centro','Sobre la foto: arriba al centro'],['sobre-arriba-der','Sobre la foto: arriba a la derecha'],['sobre-abajo-izq','Sobre la foto: abajo a la izquierda'],['sobre-abajo-centro','Sobre la foto: abajo al centro'],['sobre-abajo-der','Sobre la foto: abajo a la derecha']];
 function titlePosOf(p){ const m = /^(arriba|abajo|sobre-arriba|sobre-abajo)-(izq|centro|der)$/.exec((p && p.lay && p.lay.tpos) || state.titlePos); return m ? {row:m[1], col:m[2]} : {row:'arriba', col:'centro'}; }
@@ -2508,18 +2528,30 @@ function titleLayout(p, L, n, H){
   x += ux; base += uy;
   const box = {x:align === 'izq' ? x : align === 'der' ? x - w : x - w/2, y:base - size*0.85, w, h:(nl - 1)*lh + size*1.1};
   let ink = S.ink, shadow = null;
-  if (inside){ ink = photoInk(p, L, box); shadow = ink === '#F6F1E6' ? 'rgba(0,0,0,.5)' : 'rgba(255,255,255,.3)'; }
+  const want = (p.lay && p.lay.tcol) || state.titleColor || 'auto';
+  if (want === 'claro') ink = TINT_LIGHT; else if (want === 'oscuro') ink = TINT_DARK;
+  else if (want === 'sello') ink = withPhotoStamp(withStamp(S), p).stamp || S.stamp || '#9E1610'; else if (want[0] === '#') ink = want;
+  else if (inside) ink = photoInk(p, L, box);
+  if (inside){ const lum = hexLum(ink); shadow = lum > 0.45 ? 'rgba(0,0,0,.55)' : 'rgba(255,255,255,.4)'; }
   return {lines:ls, family:ft.family, weight:ft.weight, size, lh, x, base, align, maxW:w, box, ink, shadow, row, col};
 }
 /* tinta clara u oscura según lo que haya debajo del texto, para que se lea sobre la foto */
+const TINT_LIGHT = '#F6F1E6', TINT_DARK = '#1E1C18';
+const hexLum = h => { const c = /^#?([0-9a-f]{6})$/i.exec(h || ''); if (!c) return 0.5; const n = parseInt(c[1], 16), f = v => { v /= 255; return v <= 0.03928 ? v/12.92 : Math.pow((v + 0.055)/1.055, 2.4); }; return 0.2126*f(n >> 16) + 0.7152*f((n >> 8) & 255) + 0.0722*f(n & 255); };
+/* tinta clara u oscura: la que mejor se lee sobre los píxeles que quedan justo debajo del texto */
 function photoInk(p, L, b){
   const ph = L.photo; try {
     const src = p.prev, u = (b.x - ph.x)/ph.w, v = (b.y - ph.y)/ph.h, x0 = Math.max(0, Math.round(u*src.width)), y0 = Math.max(0, Math.round(v*src.height));
     const w = Math.max(1, Math.min(src.width - x0, Math.round(b.w/ph.w*src.width))), h = Math.max(1, Math.min(src.height - y0, Math.round(b.h/ph.h*src.height)));
-    const d = src.getContext('2d', {willReadFrequently:true}).getImageData(x0, y0, w, h).data; let l = 0, c = 0;
-    for (let i = 0; i < d.length; i += 16){ l += 0.299*d[i] + 0.587*d[i+1] + 0.114*d[i+2]; c++; }
-    return l/c/255 < 0.52 ? '#F6F1E6' : '#1E1C18';
-  } catch(e){ return '#F6F1E6'; }
+    const d = src.getContext('2d', {willReadFrequently:true}).getImageData(x0, y0, w, h).data;
+    const lin = v => { v /= 255; return v <= 0.03928 ? v/12.92 : Math.pow((v + 0.055)/1.055, 2.4); };
+    const LL = hexLum(TINT_LIGHT), LD = hexLum(TINT_DARK); let sl = 0, sd = 0, c = 0;
+    for (let i = 0; i < d.length; i += 16){
+      const y = 0.2126*lin(d[i]) + 0.7152*lin(d[i+1]) + 0.0722*lin(d[i+2]);
+      sl += Math.min(7, (LL + 0.05)/(y + 0.05)); sd += Math.min(7, (y + 0.05)/(LD + 0.05)); c++;
+    }
+    return sd > sl*1.12 ? TINT_DARK : TINT_LIGHT;  /* ante la duda, clara con sombra */
+  } catch(e){ return TINT_LIGHT; }
 }
 function drawTitle(ctx, T){
   ctx.save(); ctx.fillStyle = T.ink; ctx.textBaseline = 'alphabetic'; ctx.textAlign = T.align === 'izq' ? 'left' : T.align === 'der' ? 'right' : 'center';
@@ -3402,6 +3434,7 @@ function renderPhotos(){
             <div class="lay-row lay-bg"><span class="lbl">Fondo</span><div class="chips" data-lay="bg"><button type="button" data-v="" aria-pressed="${!(p.lay && p.lay.bg != null)}">Auto</button>${p.colors.map((c, k) => `<button type="button" class="swb" id="laybg-${id}-${k}" data-v="${k}" aria-pressed="${!!(p.lay && p.lay.bg === String(k))}" title="${esc(c.name || c.hex)}" style="background:${c.hex}"></button>`).join('')}</div></div>
             <div class="lay-row"><span class="lbl">Sello</span><div class="chips" data-lay="stamp"><button type="button" data-v="" aria-pressed="${!(p.lay && p.lay.stamp)}">Como todas</button><button type="button" data-v="auto" aria-pressed="${!!(p.lay && p.lay.stamp === 'auto')}">Sugerido</button>${p.colors.map(c => `<button type="button" class="swb" data-v="${c.hex}" aria-pressed="${!!(p.lay && p.lay.stamp === c.hex)}" title="${esc(c.name || c.hex)}" style="background:${c.hex}"></button>`).join('')}<label class="swpick" title="Otro color"><input type="color" data-laystamp="1" value="${p.lay && p.lay.stamp && p.lay.stamp[0] === '#' ? p.lay.stamp : '#9E1610'}" aria-label="Otro color de sello para esta foto"></label></div></div>
             <div class="lay-row lay-pm"><span class="lbl">Matasellos</span><select class="inp" data-laysel="pm" aria-label="Matasellos de esta postal"><option value="">Como todas</option><option value="no">Sin matasellos</option>${PM_POS.map(([v, l]) => `<option value="${v}"${p.lay && p.lay.pm === v ? ' selected' : ''}>${l}</option>`).join('')}</select></div>
+            <div class="lay-row"><span class="lbl">Color del título</span><div class="chips" data-lay="tcol"><button type="button" data-v="" aria-pressed="${!(p.lay && p.lay.tcol)}">Como todas</button>${[['auto','Auto'],['claro','Claro'],['oscuro','Oscuro'],['sello','Sello']].map(([v, l]) => `<button type="button" data-v="${v}" aria-pressed="${!!(p.lay && p.lay.tcol === v)}">${l}</button>`).join('')}${p.colors.map(c => `<button type="button" class="swb" data-v="${c.hex}" aria-pressed="${!!(p.lay && p.lay.tcol === c.hex)}" title="${esc(c.name || c.hex)}" style="background:${c.hex}"></button>`).join('')}<label class="swpick" title="Otro color"><input type="color" data-laytcol="1" value="${p.lay && p.lay.tcol && p.lay.tcol[0] === '#' ? p.lay.tcol : '#F6F1E6'}" aria-label="Otro color de título para esta foto"></label></div></div>
             <div class="lay-row"><span class="lbl">Título</span><select class="inp" data-laysel="tpos" aria-label="Posición del título de esta postal"><option value="">Como todas</option>${TITLE_POS.map(([v, l]) => `<option value="${v}"${p.lay && p.lay.tpos === v ? ' selected' : ''}>${l}</option>`).join('')}</select></div>
             <div class="lay-row"><span class="lbl">Ajuste</span><div class="lay-nudge"><label>Horizontal <input type="range" min="-200" max="200" step="2" value="${(p.lay && +p.lay.tdx) || 0}" data-laynum="tdx" aria-label="Mover el título a los costados"></label><label>Vertical <input type="range" min="-120" max="120" step="2" value="${(p.lay && +p.lay.tdy) || 0}" data-laynum="tdy" aria-label="Mover el título arriba o abajo"></label><button type="button" class="btn btn-ghost mini" data-laytreset="1">Centrar</button></div></div>
             <div class="lay-row"><span class="lbl">Tamaño</span><div class="chips" data-lay="size">${[['','Como todas'],['chicos','Chicos'],['medianos','Medianos'],['grandes','Grandes']].map(([v, l]) => `<button type="button" data-v="${v}" aria-pressed="${((p.lay && p.lay.size) || '') === v}">${l}</button>`).join('')}</div></div>
@@ -3432,6 +3465,10 @@ photoList.addEventListener('input', e => {
   }
   else if (e.target.dataset.laynum){
     const k = e.target.dataset.laynum, v = +e.target.value; p.lay = Object.assign({}, p.lay); if (v) p.lay[k] = v; else delete p.lay[k]; if (!Object.keys(p.lay).length) p.lay = null;
+  }
+  else if (e.target.dataset.laytcol){
+    p.lay = Object.assign({}, p.lay, {tcol:e.target.value});
+    e.target.closest('[data-lay]').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', 'false'));
   }
   else if (e.target.dataset.laystamp){
     p.lay = Object.assign({}, p.lay, {stamp:e.target.value});
@@ -3509,6 +3546,7 @@ function buildDesign(){
   });
 }
 function syncDesign(){
+  { const tp = document.getElementById('titleColorPick'); if (tp && /^#[0-9a-f]{6}$/i.test(state.titleColor)) tp.value = state.titleColor; }
   document.querySelectorAll('.style-card').forEach(b => b.setAttribute('aria-checked', String(b.dataset.style === state.style)));
   document.querySelectorAll('.shape-card').forEach(b => b.setAttribute('aria-checked', String(b.dataset.shape === state.shape)));
   document.querySelectorAll('.chips[data-radio]').forEach(box => box.querySelectorAll('button').forEach(b => b.setAttribute('aria-checked', String(state[box.dataset.radio] === b.dataset.v))));
@@ -3597,6 +3635,7 @@ $('#customColor').addEventListener('input', e => {
 });
 $('#decoSel').addEventListener('change', e => { state.deco = e.target.value; syncDesign(); scheduleOut(); });
 document.querySelectorAll('select[data-sel]').forEach(x => x.addEventListener('change', () => { state[x.dataset.sel] = x.value; syncDesign(); scheduleOut(); }));
+$('#titleColorPick').addEventListener('input', e => { state.titleColor = e.target.value; syncDesign(); scheduleOut(); });
 $('#stampColor').addEventListener('input', e => { state.stampColor = e.target.value; state.stampMode = 'elegido'; syncDesign(); renderStyleThumbs(); scheduleOut(); });
 $('#decoPostal').addEventListener('change', e => { state.decoPostal = e.target.checked; scheduleOut(); });
 $('#tilt').addEventListener('change', e => { state.tilt = e.target.checked; scheduleOut(); });
@@ -3648,7 +3687,7 @@ document.querySelectorAll('.chips[data-cradio]').forEach(box => box.addEventList
 
 /* ---------- mis diseños guardados ---------- */
 const PRESET_KEY = 'postales-ojodecristi-disenos';
-const PRESET_FIELDS = ['style','custom','deco','decoPostal','tilt','extras','shape','frame','format','comp','titleFont','titlePos','titleSize','titleCaps','photoSize','stampColor','stampMode','paperTex','swSize','swPos','counterInk','bgEach','bgTone','pm','pmIcon','pmPos','lineStyle','linePos'];
+const PRESET_FIELDS = ['style','custom','deco','decoPostal','tilt','extras','shape','frame','format','comp','titleFont','titlePos','titleSize','titleCaps','titleColor','photoSize','stampColor','stampMode','paperTex','swSize','swPos','counterInk','bgEach','bgTone','pm','pmIcon','pmPos','lineStyle','linePos'];
 const PRESET_EXAMPLES = [
   {name:'Clásica', d:{style:'archivo', deco:'cintas-clip', decoPostal:false, frame:'fina', format:'1:1', comp:'postal', shape:'cuadrados', photoSize:'normal', paperTex:'textura', swSize:'medianos', swPos:'centro', stampColor:'', extras:{postmark:false, border:false, filmdate:false, counter:false}}},
   {name:'Costa vertical', d:{style:'archivo', deco:'paspartu', decoPostal:true, frame:'fina', format:'4:5', comp:'postal', shape:'cuadrados', photoSize:'grande', paperTex:'liso', swSize:'medianos', swPos:'costado', counterInk:'tinta', extras:{postmark:false, border:false, filmdate:false, counter:true}}, cover:{on:true, look:'sola', bg:'blanco'}}
@@ -4088,7 +4127,7 @@ async function boot(){
   paperSmallData = IMG.paperSmall.getContext('2d', {willReadFrequently:true}).getImageData(0, 0, IMG.paperSmall.width, IMG.paperSmall.height);
   { const d = paperSmallData.data; let s = 0; for (let i=0;i<d.length;i+=4) s += 0.299*d[i] + 0.587*d[i+1] + 0.114*d[i+2]; paperMean = s / (d.length/4);
     let r = 0, g = 0, b = 0; for (let i=0;i<d.length;i+=4){ r += d[i]; g += d[i+1]; b += d[i+2]; } const N = d.length/4; paperAvg = rgbHex(Math.round(r/N), Math.round(g/N), Math.round(b/N)); }
-  try { await Promise.all([document.fonts.load(`400 20px ${MONO}`), document.fonts.load(`400 20px ${SANS}`), document.fonts.load(`500 20px ${MONO}`), document.fonts.load(`600 24px ${HAND}`), document.fonts.load(`400 24px ${HAND}`), document.fonts.load(`700 24px ${HAND}`), document.fonts.load(`400 24px ${GARA}`), document.fonts.load(`500 24px ${GARA}`)]); } catch(e){}
+  try { await Promise.all([document.fonts.load(`400 20px ${MONO}`), document.fonts.load(`400 20px ${SANS}`), document.fonts.load(`500 20px ${MONO}`), document.fonts.load(`600 24px ${HAND}`), document.fonts.load(`400 24px ${HAND}`), document.fonts.load(`700 24px ${HAND}`), document.fonts.load(`400 24px ${JOST}`), document.fonts.load(`500 24px ${JOST}`), document.fonts.load(`400 24px ${SLAB}`), document.fonts.load(`500 24px ${SLAB}`)]); } catch(e){}
   const restored = await restoreSession();
   if (restored) toast(`Recuperé tu trabajo: ${restored} ${restored === 1 ? 'foto' : 'fotos'}`);
   else if (state.sample){
