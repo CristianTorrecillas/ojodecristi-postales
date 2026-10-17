@@ -95,6 +95,10 @@ select.inp{padding-right:28px;cursor:pointer;font-size:15px}
 .btn[disabled]{opacity:.55;cursor:progress}
 .bar .push{margin-left:auto}
 .bar .saves{display:flex;gap:8px;flex-wrap:wrap}
+.top .bar .saves .btn{white-space:nowrap}
+@media (min-width:1100px){.top .bar .saves{flex-wrap:nowrap;flex:none}.top .bar .field{flex:none}.top .bar .field.grow{flex:1 1 90px;min-width:80px}.top .bar .seg{flex:none}.top .bar>.picker{flex:none;white-space:nowrap}}
+@media (min-width:1100px) and (max-width:1340px){#previewBtn{font-size:0;gap:0;padding-inline:10px}.top{gap:16px !important}.top .bar{gap:10px !important}}
+@media (min-width:1100px) and (max-width:1500px){#oneBtn{display:none}#driveBtn{font-size:0;gap:0;padding-inline:10px}#driveBtn svg{margin:0}}
 .mini{height:32px;padding:0 10px;font-size:11px}
 
 .note{margin:0;padding:8px 12px;border-left:3px solid var(--stamp);background:var(--well);font-size:13.5px;color:var(--ink)}
@@ -119,16 +123,65 @@ select.inp{padding-right:28px;cursor:pointer;font-size:15px}
 
 /* photo cards */
 .plist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px}
-.pcard{display:grid;grid-template-columns:190px minmax(0,1fr);gap:14px;padding:12px;background:var(--panel);border:1px solid var(--rule);box-shadow:var(--shadow)}
-@media (max-width:600px){.pcard{grid-template-columns:minmax(0,1fr)}}
+.pcard{display:flex;flex-direction:column;padding:0;background:var(--panel);border:1px solid var(--rule);box-shadow:var(--shadow);transition:box-shadow .2s,border-color .2s}
+.pcard.open{border-color:var(--frame);box-shadow:0 1px 0 rgba(60,45,20,.06),0 14px 30px -18px rgba(60,45,20,.5)}
+.pc-row{display:flex;align-items:center;gap:4px;padding:8px 12px 8px 4px;min-width:0}
+.pc-grip{flex:none;display:flex;align-items:center;justify-content:center;width:30px;height:48px;padding:0;border:0;border-radius:4px;background:transparent;color:var(--muted);cursor:grab;touch-action:none}
+.pc-grip svg{width:15px;height:15px;fill:currentColor}
+.pc-grip:hover,.pc-grip:focus-visible{color:var(--ink);background:var(--well)}
+.pc-head{flex:1;min-width:0;display:flex;align-items:center;gap:12px;padding:0;border:0;background:transparent;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.pc-mini{flex:none;width:52px;height:52px;background:var(--well);outline:1px solid var(--frame);outline-offset:2px}
+.pc-headtxt{display:flex;flex-direction:column;gap:3px;min-width:0;flex:1}
+.pc-headtxt .pc-num{font-size:12.5px;letter-spacing:.04em}
+.pc-ttl{font-size:14.5px;font-style:italic;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pc-ttl i{color:var(--muted)}
+.pc-dots{display:flex;gap:4px;flex:none}
+.pc-dots i{width:14px;height:14px;border-radius:50%;background:var(--c);box-shadow:inset 0 0 0 1px rgba(0,0,0,.14)}
+.pc-chev{flex:none;width:18px;height:18px;fill:var(--muted);transition:transform .2s}
+.pcard.open .pc-chev{transform:rotate(180deg);fill:var(--ink)}
+.pc-open{display:none;padding:2px 16px 8px;border-top:1px solid var(--rule)}
+.pcard.open .pc-open{display:block}
+.pc-main{display:grid;grid-template-columns:190px minmax(0,1fr);gap:16px;padding-top:14px}
+@media (max-width:600px){.pc-main{grid-template-columns:minmax(0,1fr)}}
+.pc-secs{margin-top:14px}
+.pc-sec{border-top:1px solid var(--rule)}
+.pc-sec>summary{display:flex;align-items:center;gap:12px;padding:13px 0;cursor:pointer;list-style:none;min-width:0}
+.pc-sec>summary::-webkit-details-marker{display:none}
+.pc-sec>summary::after{content:"+";flex:none;width:14px;text-align:center;font-family:var(--mono);font-size:15px;color:var(--ink)}
+.pc-sec[open]>summary::after{content:"–"}
+.pc-sec-t{flex:none;font-family:var(--mono);font-weight:500;font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink)}
+.pc-sec-sum{flex:1;min-width:0;text-align:right;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pc-sec-body{display:flex;flex-direction:column;gap:14px;padding:2px 0 18px}
+.pc-sec-body input[type=range]{width:100%;accent-color:var(--ink)}
+.crop-v{font-family:var(--mono);font-weight:500;color:var(--ink);margin-left:6px;letter-spacing:0}
+.pc-secfoot{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px}
+.pc-secfoot .subhint{margin:0;font-size:12px}
+.pc-del{margin-left:auto}
+.chips-col{align-items:center}
+.chip-sep{flex-basis:100%;margin-top:4px;font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.tpos-wrap{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.tpick{position:relative;display:grid;grid-template-columns:repeat(3,52px);grid-template-rows:22px 30px 30px 22px;gap:3px;padding:4px;border:1px solid var(--rule);background:var(--paper)}
+.tp-ph{grid-row:2/4;grid-column:1/4;background:linear-gradient(160deg,#A9C6D6,#D9C7A0 70%);outline:1px solid var(--frame);outline-offset:1px}
+.tp-b{position:relative;z-index:1;display:flex;align-items:center;padding:0 5px;border:0;border-radius:3px;background:transparent;cursor:pointer}
+.tp-b.izq{justify-content:flex-start}.tp-b.centro{justify-content:center}.tp-b.der{justify-content:flex-end}
+.tp-b i{display:block;width:24px;height:5px;border-radius:2px;background:var(--frame);opacity:.55}
+.tp-b:hover i{opacity:1}
+.tp-b[data-inh] i{opacity:1;background:var(--muted)}
+.tp-b[aria-pressed="true"] i{opacity:1;background:var(--stamp);height:6px}
+.tp-b:focus-visible{outline:2px solid var(--focus)}
+.chipb{border:1px solid var(--rule);background:var(--paper);border-radius:15px;padding:6px 12px;font-family:var(--mono);font-size:11.5px;line-height:1.3;color:var(--muted);cursor:pointer;text-align:left}
+.chipb small{font-size:10.5px}
+.chipb[aria-pressed="true"]{background:var(--stamp);color:var(--on-stamp);border-color:var(--stamp)}
+.plist.sorting{user-select:none}
+.pcard.dragging{position:relative;z-index:5;cursor:grabbing;box-shadow:0 22px 40px -16px rgba(40,30,15,.55);border-color:var(--ink)}
+.pcard.dragging .pc-grip{cursor:grabbing}
 .pc-media{position:relative;align-self:start}
 .pc-thumb{display:block;width:100%;height:auto;aspect-ratio:3/2;max-width:100%;background:var(--well);outline:1px solid var(--frame);outline-offset:3px;touch-action:manipulation}
 .pcard.picking .pc-thumb{cursor:crosshair;outline:2px solid var(--stamp)}
 .pc-hint{display:none;margin:9px 0 0;font-family:var(--mono);font-size:11px;color:var(--stamp);letter-spacing:.03em}
 .pcard.picking .pc-hint{display:block}
 .pc-body{display:flex;flex-direction:column;gap:10px;min-width:0}
-.pc-top{display:grid;grid-template-columns:auto 124px minmax(0,1fr);gap:8px;align-items:center}
-@media (max-width:420px){.pc-top{grid-template-columns:auto minmax(0,1fr)}.pc-top .pc-place{grid-column:1/-1}}
+.pc-top{display:grid;grid-template-columns:124px minmax(0,1fr);gap:8px;align-items:center}
 .pc-num{font-family:var(--mono);font-size:15px;font-weight:500;font-variant-numeric:tabular-nums;white-space:nowrap;padding-right:4px}
 .pc-top .inp,.pc-titlebox .inp{height:34px;font-size:15px}
 .pc-date{font-family:var(--mono);font-variant-numeric:tabular-nums}
@@ -283,13 +336,26 @@ body.lb-open .mbar{display:none}
   .cols{grid-template-columns:minmax(360px,440px) minmax(0,1fr) minmax(330px,390px);gap:28px}
   .side{display:contents}
   .peek{display:none}
-  .pcard{grid-template-columns:150px minmax(0,1fr)}
-  .out{grid-column:2;grid-row:1;position:sticky;top:calc(var(--topH,64px) + 16px);display:flex;flex-direction:column;gap:12px;min-width:0}
+  .pc-main{grid-template-columns:150px minmax(0,1fr)}
+  .out{grid-column:2;grid-row:1;position:sticky;top:calc(var(--topH,64px) + 16px);display:flex;flex-direction:column;gap:12px;min-width:0;height:calc(100vh - var(--topH,64px) - 32px);min-height:460px}
   .out .col-head{margin-bottom:0}
   .design{grid-column:3;grid-row:1;position:sticky;top:calc(var(--topH,64px) + 16px);max-height:calc(100vh - var(--topH,64px) - 32px);overflow:auto;padding:0 8px 20px 0;scrollbar-width:thin}
   .tabs{display:flex}
-  .stage{display:flex;flex-direction:column;gap:10px}
-  .olist{display:flex;overflow-x:auto;gap:12px;padding:4px 3px 10px;scroll-snap-type:x proximity;scrollbar-width:thin}
+  .stage{display:flex;flex-direction:column;gap:10px;flex:1 1 auto;min-height:0}
+  .stage-box{position:relative;flex:1 1 auto;min-height:0;display:flex}
+  .stage-view{height:auto !important;min-height:0 !important;flex:1 1 auto}
+  .stage-nav{position:absolute;top:50%;transform:translateY(-50%);width:40px;height:40px;border-radius:50%;border:1px solid var(--rule);background:var(--panel);color:var(--ink);font-size:24px;line-height:1;cursor:pointer;box-shadow:var(--shadow);opacity:.0;transition:opacity .15s}
+  .stage-box:hover .stage-nav,.stage-nav:focus-visible{opacity:.92}
+  .stage-nav.prev{left:6px}.stage-nav.next{right:6px}
+  .stage-tip{position:absolute;left:50%;bottom:6px;transform:translateX(-50%);margin:0;max-width:92%;padding:5px 10px;border-radius:12px;background:rgba(30,28,24,.78);color:#F6F1E6;font-family:var(--mono);font-size:10.5px;letter-spacing:.02em;text-align:center;pointer-events:none;opacity:0;transition:opacity .2s}
+  .stage-box.can-edit:hover .stage-tip{opacity:1}
+  .stage-box.dragging .stage-tip{opacity:0}
+  .strip{position:relative;flex:none;display:flex;align-items:center;gap:6px;min-width:0}
+  .strip-btn{flex:none;width:30px;height:64px;border:1px solid var(--rule);background:var(--panel);color:var(--ink);font-size:22px;cursor:pointer;border-radius:3px}
+  .strip-btn:disabled{opacity:.3;cursor:default}
+  .olist{flex:1;min-width:0;display:flex;overflow-x:auto;gap:12px;padding:4px 3px 10px;scroll-snap-type:x proximity;scrollbar-width:thin;overscroll-behavior-x:contain}
+  .olist.grabbing{cursor:grabbing;scroll-snap-type:none}
+  .olist.grabbing .o-open{cursor:grabbing}
   .olist .ocard{flex:0 0 108px;scroll-snap-align:start}
   .olist .o-save{display:none}
   .olist .o-open{cursor:pointer}
@@ -299,7 +365,53 @@ body.lb-open .mbar{display:none}
   section[aria-labelledby="hPhotos"] .gt label{grid-column:1/-1}
   .out .hint{display:none}
 }
+.strip-btn{display:none}
+@media (min-width:1100px){.strip-btn{display:block}}
+.stage-box{position:relative}
+.stage-nav,.stage-tip{display:none}
+@media (min-width:1100px){.stage-nav,.stage-tip{display:block}}
 .design .pane-off{display:none !important}
+/* ---------- vista previa estilo Instagram ---------- */
+#previewBtn svg,#mPreview svg{width:18px;height:18px;fill:currentColor}
+.igv{position:fixed;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(24,22,18,.72);backdrop-filter:blur(3px)}
+.igv[hidden]{display:none}
+.igv-panel{display:flex;flex-direction:column;gap:14px;width:min(1180px,100%);max-height:100%;padding:16px 18px;background:var(--paper);border:1px solid var(--rule);box-shadow:0 30px 60px -20px rgba(0,0,0,.6)}
+.igv-head{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.igv-head h2{margin:0 auto 0 0;font-family:var(--mono);font-weight:500;font-size:13px;letter-spacing:.14em;text-transform:uppercase}
+.igv-body{flex:1;min-height:0;display:flex;justify-content:center;overflow:auto}
+.ig-phone{width:min(400px,100%);background:#fff;color:#111;border:1px solid #dbdbdb;border-radius:14px;overflow:hidden;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;box-shadow:0 18px 40px -22px rgba(0,0,0,.55);align-self:flex-start}
+.ig-phone[hidden]{display:none}
+.ig-top{display:flex;align-items:center;gap:10px;padding:10px 12px}
+.ig-av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#A62520;background:#F3EAD3;box-shadow:0 0 0 2px #fff,0 0 0 4px #E4A04B}
+.ig-user{display:flex;flex-direction:column;line-height:1.2;font-size:13.5px;flex:1;min-width:0}
+.ig-user small{font-size:11.5px;color:#555}
+.ig-more{font-weight:700;letter-spacing:1px}
+.ig-media{position:relative;background:#f2f2f2}
+.ig-track{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain}
+.ig-track::-webkit-scrollbar{display:none}
+.ig-track img{flex:0 0 100%;width:100%;height:auto;display:block;scroll-snap-align:start;user-select:none;-webkit-user-drag:none}
+.ig-count{position:absolute;top:10px;right:10px;padding:3px 8px;border-radius:12px;background:rgba(20,20,20,.68);color:#fff;font-size:12px}
+.ig-nav{position:absolute;top:50%;transform:translateY(-50%);width:28px;height:28px;border-radius:50%;border:0;background:rgba(255,255,255,.88);color:#222;font-size:20px;line-height:1;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.ig-nav.prev{left:8px}.ig-nav.next{right:8px}
+.ig-nav[disabled]{display:none}
+.ig-acts{display:flex;align-items:center;gap:14px;padding:10px 12px 4px}
+.ig-acts svg{width:24px;height:24px;fill:none;stroke:#111;stroke-width:1.8;stroke-linejoin:round;stroke-linecap:round}
+.ig-acts svg:last-child{margin-left:auto}
+.ig-dots{position:absolute;left:50%;transform:translateX(-50%);display:flex;gap:4px}
+.ig-acts{position:relative}
+.ig-dots i{width:6px;height:6px;border-radius:50%;background:#c7c7c7}
+.ig-dots i.on{background:#0095f6}
+.ig-cap{margin:4px 12px 14px;font-size:13.5px;line-height:1.4}
+.ig-strip{display:flex;overflow-x:auto;align-self:center;max-width:100%;box-shadow:0 18px 40px -22px rgba(0,0,0,.55);scrollbar-width:thin}
+.ig-strip[hidden]{display:none}
+.ig-strip img{height:min(60vh,520px);width:auto;display:block;flex:none}
+.igv-foot{display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:space-between;border-top:1px solid var(--rule);padding-top:12px}
+.igv-info{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.igv-acts{display:flex;gap:10px;flex-wrap:wrap}
+body.igv-open{overflow:hidden}
+body.igv-open .mbar{display:none}
+@media (max-width:700px){.igv{padding:0}.igv-panel{height:100%;padding:12px}.igv-head .seg{order:3;width:100%}.igv-head .seg button{flex:1}.ig-nav{display:none}.igv-acts{width:100%}.igv-acts .btn{flex:1}}
+@media (max-width:700px){.mbar #mPreview{flex:0 0 52px;padding:0}}
 .design .dgroup{border-top:0;padding-top:2px}
 .views{display:none}
 @media (max-width:1099px){
@@ -535,8 +647,9 @@ body.bg-cada .lay-bg{display:flex !important}
     <div class="saves push">
       <button type="button" id="driveBtn" class="btn btn-ghost" title="Subir todas las imágenes a tu carpeta de Google Drive"><svg viewBox="0 0 256 256" aria-hidden="true"><path d="M178.34,165.66,160,147.31V208a8,8,0,0,1-16,0V147.31l-18.34,18.35a8,8,0,0,1-11.32-11.32l32-32a8,8,0,0,1,11.32,0l32,32a8,8,0,0,1-11.32,11.32ZM160,40A88.08,88.08,0,0,0,81.29,88.68,64,64,0,1,0,72,216h40a8,8,0,0,0,0-16H72a48,48,0,0,1,0-96c1.1,0,2.2,0,3.29.12A88,88,0,0,0,72,128a8,8,0,0,0,16,0,72,72,0,1,1,100.8,66,8,8,0,0,0,3.2,15.34,7.9,7.9,0,0,0,3.2-.68A88,88,0,0,0,160,40Z"/></svg>Drive</button>
       <button type="button" id="driveCfgBtn" class="ico" title="Conexión con Google Drive" aria-label="Conexión con Google Drive"><svg viewBox="0 0 256 256" aria-hidden="true"><path d="M216,72H130.67L102.93,51.2a16.12,16.12,0,0,0-9.6-3.2H40A16,16,0,0,0,24,64V200a16,16,0,0,0,16,16H216.89A15.13,15.13,0,0,0,232,200.89V88A16,16,0,0,0,216,72Zm0,128H40V64H93.33L123.2,86.4A8,8,0,0,0,128,88h88Z"/></svg></button>
+      <button type="button" id="previewBtn" class="btn btn-ghost" title="Ver el carrusel como se verá en Instagram"><svg viewBox="0 0 256 256" aria-hidden="true"><path d="M247.31,124.76c-.35-.79-8.82-19.58-27.65-38.41C194.57,61.26,162.88,48,128,48S61.43,61.26,36.34,86.35C17.51,105.18,9,124,8.69,124.76a8,8,0,0,0,0,6.5c.35.79,8.82,19.57,27.65,38.4C61.43,194.74,93.12,208,128,208s66.57-13.26,91.66-38.34c18.83-18.83,27.3-37.61,27.65-38.4A8,8,0,0,0,247.31,124.76ZM128,192c-30.78,0-57.67-11.19-79.93-33.25A133.47,133.47,0,0,1,25,128,133.33,133.33,0,0,1,48.07,97.25C70.33,75.19,97.22,64,128,64s57.67,11.19,79.93,33.25A133.46,133.46,0,0,1,231.05,128C223.84,141.46,192.43,192,128,192Zm0-112a48,48,0,1,0,48,48A48.05,48.05,0,0,0,128,80Zm0,80a32,32,0,1,1,32-32A32,32,0,0,1,128,160Z"/></svg>Vista previa</button>
       <button type="button" id="oneBtn" class="btn btn-ghost" title="Guardar las imágenes una por una">Una por una</button>
-      <button type="button" id="zipBtn" class="btn btn-stamp"><svg viewBox="0 0 256 256" aria-hidden="true"><path d="M224,144v64a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V144a8,8,0,0,1,16,0v56H208V144a8,8,0,0,1,16,0Zm-101.66,5.66a8,8,0,0,0,11.32,0l40-40a8,8,0,0,0-11.32-11.32L136,124.69V32a8,8,0,0,0-16,0v92.69L93.66,98.34a8,8,0,0,0-11.32,11.32Z"/></svg>Descargar todo (.zip)</button>
+      <button type="button" id="zipBtn" class="btn btn-stamp" title="Descargar todas las imágenes en un .zip, listas para Instagram"><svg viewBox="0 0 256 256" aria-hidden="true"><path d="M224,144v64a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V144a8,8,0,0,1,16,0v56H208V144a8,8,0,0,1,16,0Zm-101.66,5.66a8,8,0,0,0,11.32,0l40-40a8,8,0,0,0-11.32-11.32L136,124.69V32a8,8,0,0,0-16,0v92.69L93.66,98.34a8,8,0,0,0-11.32,11.32Z"/></svg>Exportar</button>
     </div>
   </section>
   </div>
@@ -999,11 +1112,20 @@ body.bg-cada .lay-bg{display:flex !important}
       <section class="out" aria-labelledby="hOut">
         <div class="col-head"><h2 id="hOut">Carrusel</h2><span id="outCount" class="count"></span></div>
         <div class="stage" id="stage">
-          <button type="button" class="stage-view" id="stageView" aria-label="Ver en tamaño real"><canvas id="stageC" width="900" height="900"></canvas></button>
+          <div class="stage-box">
+            <button type="button" class="stage-view" id="stageView" aria-label="Vista grande. Arrastrá la foto para reencuadrar o el título para moverlo; tocá para verla en tamaño real"><canvas id="stageC" width="900" height="900"></canvas></button>
+            <button type="button" class="stage-nav prev" id="stagePrev" aria-label="Imagen anterior">‹</button>
+            <button type="button" class="stage-nav next" id="stageNext" aria-label="Imagen siguiente">›</button>
+            <p class="stage-tip" id="stageTip">Arrastrá la foto o el título · rueda para zoom · doble clic restablece</p>
+          </div>
           <div class="stage-bar"><span id="stageCap" class="stage-cap"></span><span class="stage-acts"><button type="button" class="btn btn-ghost mini" id="stageEdit">Editar</button><button type="button" class="btn btn-ghost mini" id="stageSave"><svg viewBox="0 0 256 256" aria-hidden="true"><path d="M224,144v64a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V144a8,8,0,0,1,16,0v56H208V144a8,8,0,0,1,16,0Zm-101.66,5.66a8,8,0,0,0,11.32,0l40-40a8,8,0,0,0-11.32-11.32L136,124.69V32a8,8,0,0,0-16,0v92.69L93.66,98.34a8,8,0,0,0-11.32,11.32Z"/></svg>Guardar esta</button></span></div>
         </div>
         <div id="gridTitles" class="gtitles"></div>
-        <ol id="outList" class="olist"></ol>
+        <div class="strip">
+          <button type="button" class="strip-btn prev" id="stripPrev" aria-label="Ver las anteriores">‹</button>
+          <ol id="outList" class="olist"></ol>
+          <button type="button" class="strip-btn next" id="stripNext" aria-label="Ver las siguientes">›</button>
+        </div>
         <p class="hint">Tocá una imagen para verla grande y guardarla.</p>
       </section>
     </div>
@@ -1014,9 +1136,46 @@ body.bg-cada .lay-bg{display:flex !important}
 <div class="mbar" aria-label="Acciones rápidas">
   <span class="picker btn btn-ghost"><svg viewBox="0 0 256 256" aria-hidden="true"><path d="M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z"/></svg>Fotos<input type="file" class="pick" accept="image/*" multiple aria-label="Agregar fotos"></span>
   <button type="button" id="mDrive" class="btn btn-ghost" aria-label="Subir a Drive" title="Subir a Drive"><svg viewBox="0 0 256 256" aria-hidden="true"><path d="M178.34,165.66,160,147.31V208a8,8,0,0,1-16,0V147.31l-18.34,18.35a8,8,0,0,1-11.32-11.32l32-32a8,8,0,0,1,11.32,0l32,32a8,8,0,0,1-11.32,11.32ZM160,40A88.08,88.08,0,0,0,81.29,88.68,64,64,0,1,0,72,216h40a8,8,0,0,0,0-16H72a48,48,0,0,1,0-96c1.1,0,2.2,0,3.29.12A88,88,0,0,0,72,128a8,8,0,0,0,16,0,72,72,0,1,1,100.8,66,8,8,0,0,0,3.2,15.34,7.9,7.9,0,0,0,3.2-.68A88,88,0,0,0,160,40Z"/></svg></button>
+  <button type="button" id="mPreview" class="btn btn-ghost" aria-label="Vista previa del carrusel" title="Vista previa"><svg viewBox="0 0 256 256" aria-hidden="true"><path d="M247.31,124.76c-.35-.79-8.82-19.58-27.65-38.41C194.57,61.26,162.88,48,128,48S61.43,61.26,36.34,86.35C17.51,105.18,9,124,8.69,124.76a8,8,0,0,0,0,6.5c.35.79,8.82,19.57,27.65,38.4C61.43,194.74,93.12,208,128,208s66.57-13.26,91.66-38.34c18.83-18.83,27.3-37.61,27.65-38.4A8,8,0,0,0,247.31,124.76ZM128,192c-30.78,0-57.67-11.19-79.93-33.25A133.47,133.47,0,0,1,25,128,133.33,133.33,0,0,1,48.07,97.25C70.33,75.19,97.22,64,128,64s57.67,11.19,79.93,33.25A133.46,133.46,0,0,1,231.05,128C223.84,141.46,192.43,192,128,192Zm0-112a48,48,0,1,0,48,48A48.05,48.05,0,0,0,128,80Zm0,80a32,32,0,1,1,32-32A32,32,0,0,1,128,160Z"/></svg></button>
   <button type="button" id="mSave" class="btn btn-stamp">Guardar imágenes</button>
 </div>
 
+<div id="igv" class="igv" hidden role="dialog" aria-modal="true" aria-labelledby="igvTitle">
+  <div class="igv-panel">
+    <div class="igv-head">
+      <h2 id="igvTitle">Vista previa</h2>
+      <div class="seg" role="radiogroup" aria-label="Modo de vista">
+        <button type="button" role="radio" data-igmode="phone" aria-checked="true">Como en Instagram</button>
+        <button type="button" role="radio" data-igmode="strip" aria-checked="false">Tira continua</button>
+      </div>
+      <button type="button" class="btn btn-ghost mini" id="igvClose">Cerrar</button>
+    </div>
+    <div class="igv-body">
+      <div class="ig-phone" id="igPhone">
+        <div class="ig-top"><span class="ig-av" aria-hidden="true">CT</span><span class="ig-user"><b>ojodecristi</b><small id="igPlace"></small></span><span class="ig-more" aria-hidden="true">···</span></div>
+        <div class="ig-media" id="igMedia">
+          <div class="ig-track" id="igTrack" tabindex="0" aria-label="Imágenes del carrusel; deslizá o usá las flechas"></div>
+          <span class="ig-count" id="igCount"></span>
+          <button type="button" class="ig-nav prev" id="igPrev" aria-label="Anterior">‹</button>
+          <button type="button" class="ig-nav next" id="igNext" aria-label="Siguiente">›</button>
+        </div>
+        <div class="ig-acts" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M12 20.5s-7.5-4.6-9.3-9.2C1.4 8 3.4 4.5 6.9 4.5c2 0 3.6 1.1 5.1 3 1.5-1.9 3.1-3 5.1-3 3.5 0 5.5 3.5 4.2 6.8-1.8 4.6-9.3 9.2-9.3 9.2z"/></svg>
+          <svg viewBox="0 0 24 24"><path d="M20.5 11.5a8.5 8.5 0 0 1-12.6 7.4L3.5 20.5l1.6-4.4A8.5 8.5 0 1 1 20.5 11.5z"/></svg>
+          <svg viewBox="0 0 24 24"><path d="M21.5 3.5 10.6 13.4M21.5 3.5l-6.9 17-4-7.1-7.1-4z"/></svg>
+          <span class="ig-dots" id="igDots"></span>
+          <svg viewBox="0 0 24 24"><path d="M18.5 20.5 12 15l-6.5 5.5v-17h13z"/></svg>
+        </div>
+        <p class="ig-cap"><b>ojodecristi</b> <span id="igCap"></span></p>
+      </div>
+      <div class="ig-strip" id="igStrip" hidden tabindex="0" aria-label="Todas las imágenes una al lado de la otra"></div>
+    </div>
+    <div class="igv-foot">
+      <span class="igv-info" id="igvInfo"></span>
+      <span class="igv-acts"><button type="button" class="btn btn-ghost" id="igvOne">Una por una</button><button type="button" class="btn btn-stamp" id="igvZip">Exportar todo (.zip)</button></span>
+    </div>
+  </div>
+</div>
 <div id="lightbox" class="lb" hidden role="dialog" aria-modal="true" aria-labelledby="lbCap">
   <div class="lb-stage"><span id="lbWait" class="lb-wait">Armando la imagen…</span><img id="lbImg" alt=""></div>
   <div class="lb-bar">
@@ -1588,7 +1747,9 @@ async function getFull(p){
 }
 function dropFull(p){ const b = FULL.get(p.id); if (b){ FULL.delete(p.id); if (b.close) b.close(); } }
 let HIRES = null;
-const srcOf = (p, hi) => (hi && HIRES && HIRES.get(p.id)) || p.prev;
+/* en pantalla usa la foto chica, salvo que esté muy ampliada: ahí usa la grande si ya está cargada */
+const srcOf = (p, hi) => (hi && HIRES && HIRES.get(p.id)) || (p.crop && p.crop.z > 1.25 && FULL.get(p.id)) || p.prev;
+function wantFull(p){ if (p && p.crop && p.crop.z > 1.25 && !FULL.has(p.id) && !p._fullLoading){ p._fullLoading = true; getFull(p).then(() => { p._fullLoading = false; stageRedraw(); scheduleOut(); }).catch(() => { p._fullLoading = false; }); } }
 
 /* ---------- paper, tinted assets ---------- */
 let paperSmallData = null, paperBigData = null, paperMean = 0;
@@ -1637,11 +1798,22 @@ function paper(ctx, hi, H){
 }
 
 /* ---------- drawing primitives ---------- */
-function drawCover(ctx, src, r, focus){
-  const iw = src.width, ih = src.height, ar = r.w/r.h; let sx=0, sy=0, sw=iw, sh=ih; const f = (focus||0)/100;
-  if (iw/ih > ar){ sw = ih*ar; sx = (iw-sw)*(0.5+f/2); } else { sh = iw/ar; sy = (ih-sh)*(0.5+f/2); }
-  ctx.drawImage(src, sx, sy, sw, sh, r.x, r.y, r.w, r.h);
+/* Reencuadre: qué parte de la foto entra en el marco. «focus» es el ajuste viejo (-100..100 sobre el lado que sobra);
+   el nuevo es {z: zoom 1..5, x, y: -1..1 de punta a punta de lo que sobra}. */
+function coverWin(iw, ih, ar, f){
+  let sw = iw, sh = ih; const wide = iw/ih > ar; if (wide) sw = ih*ar; else sh = iw/ar;
+  let z = 1, px = 0, py = 0;
+  if (f && typeof f === 'object'){ z = Math.max(1, Math.min(5, +f.z || 1)); px = Math.max(-1, Math.min(1, +f.x || 0)); py = Math.max(-1, Math.min(1, +f.y || 0)); }
+  else { const v = (f || 0)/100; if (wide) px = v; else py = v; }
+  sw /= z; sh /= z;
+  return {sx:(iw - sw)*(0.5 + px/2), sy:(ih - sh)*(0.5 + py/2), sw, sh};
 }
+function drawCover(ctx, src, r, focus){
+  const w = coverWin(src.width, src.height, r.w/r.h, focus);
+  ctx.drawImage(src, w.sx, w.sy, w.sw, w.sh, r.x, r.y, r.w, r.h);
+}
+const framing = p => (p && p.crop) || (p && p.focus) || 0;
+function cropOf(p, ar){ if (p.crop) return Object.assign({z:1, x:0, y:0}, p.crop); const v = (p.focus || 0)/100, wide = p.fw/p.fh > ar; return {z:1, x:wide ? v : 0, y:wide ? 0 : v}; }
 function overflow(p){ const ar = 1.5, iar = p.fw/p.fh; return Math.abs(iar-ar)/ar; }
 function filmStrip(ctx, r){
   const m = 8, band = 26, x0 = r.x - m, x1 = r.x + r.w + m, y0 = r.y - band, y1 = r.y + r.h + band;
@@ -2488,7 +2660,8 @@ const TITLE_POS = [['arriba-izq','Arriba, a la izquierda'],['arriba-centro','Arr
 function titlePosOf(p){ const m = /^(arriba|abajo|sobre-arriba|sobre-abajo)-(izq|centro|der)$/.exec((p && p.lay && p.lay.tpos) || state.titlePos); return m ? {row:m[1], col:m[2]} : {row:'arriba', col:'centro'}; }
 function titleShown(p){ return !!(state.show.postal.title && p && (p.title || '').trim()); }
 function titleLines(p){ const ls = splitLines(p.title); return state.titleCaps === 'mayus' ? ls.map(t => t.toUpperCase()) : ls; }
-function titleHeight(p){ const ft = titleFont(15*(TITLE_K[state.titleSize] || 1)); return (titleLines(p).length - 1)*ft.size*1.18 + ft.size; }
+const titleK = p => (TITLE_K[state.titleSize] || 1) * Math.max(0.4, Math.min(3, (p && p.lay && +p.lay.tk) || 1));
+function titleHeight(p){ const ft = titleFont(15*titleK(p)); return (titleLines(p).length - 1)*ft.size*1.18 + ft.size; }
 const MCTX = document.createElement('canvas').getContext('2d');
 const inter1 = (a, b) => Math.max(0, Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x)) * Math.max(0, Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y));
 /* todo lo que ocupa lugar en la postal (coordenadas de la postal, sin el corrimiento vertical dy) */
@@ -2513,7 +2686,7 @@ function pmCornerBox(p, L, H){
 }
 function titleLayout(p, L, n, H){
   const {row, col} = titlePosOf(p), dy = L.dy, ph = L.photo, kind = state.decoPostal ? postalDeco() : 'none', inside = row.startsWith('sobre');
-  const ft = titleFont(15*(TITLE_K[state.titleSize] || 1)), ls = titleLines(p), lh = ft.size*1.18, nl = ls.length, size = ft.size;
+  const ft = titleFont(15*titleK(p)), ls = titleLines(p), lh = ft.size*1.18, nl = ls.length, size = ft.size;
   const boxes = postalBoxes(p, n, L, H), photoBox = boxes.photo; delete boxes.photo;
   { const pc = pmCornerBox(p, L, H); if (pc) boxes.pm = pc; }
   const w0 = (MCTX.font = `${ft.weight} ${size}px ${ft.family}`, Math.max(...ls.map(t => MCTX.measureText(t).width)));
@@ -2761,7 +2934,7 @@ function drawPostal(ctx, p, n, hi, mini, H){
   ctx.save(); ctx.translate(0, dy);
   if (kind === 'broches') hangLine(ctx, r.y - frameTop()*0.5 - 2, 0, D, 1.3);
   decorUnder(ctx, r, kind);
-  framedPhoto(ctx, srcOf(p, hi), r, L.pad, p.focus);
+  framedPhoto(ctx, srcOf(p, hi), r, L.pad, framing(p));
   if (state.extras.filmdate && !mini) filmDate(ctx, r, p.date, Math.min(555, L.stamp.cx - 70));
   if (kind !== 'none') decorate(ctx, r, kind, true, p);
   if (L.title) drawTitle(ctx, L.title);
@@ -2794,7 +2967,7 @@ function drawFichaTall(ctx, p, n, cell, hi, single, extra){
   ctx.save();
   if (tilt){ const cx = r.x + r.w/2, cy = r.y + r.h/2; ctx.translate(cx, cy); ctx.rotate(tilt*Math.PI/180); ctx.translate(-cx, -cy); }
   decorUnder(ctx, r, kind);
-  framedPhoto(ctx, srcOf(p, hi), r, FICHA.pad, p.focus);
+  framedPhoto(ctx, srcOf(p, hi), r, FICHA.pad, framing(p));
   if (state.extras.filmdate) filmDate(ctx, r, p.date);
   decorate(ctx, r, kind, false, p);
   ctx.restore();
@@ -2829,7 +3002,7 @@ function drawFicha(ctx, p, n, cell, hi, single, extra){
   if (tilt){ const cx = r.x + r.w/2, cy = r.y + r.h/2; ctx.translate(cx, cy); ctx.rotate(tilt*Math.PI/180); ctx.translate(-cx, -cy); }
   const kind = cellDeco(cell);
   decorUnder(ctx, r, kind);
-  framedPhoto(ctx, srcOf(p, hi), r, F.pad, p.focus);
+  framedPhoto(ctx, srcOf(p, hi), r, F.pad, framing(p));
   if (state.extras.filmdate) filmDate(ctx, r, p.date);
   decorate(ctx, r, kind, false, p);
   ctx.restore();
@@ -2975,7 +3148,7 @@ function drawRecipe(ctx, hi, H){
     if (UNDER[rk]) decorUnder(ctx, rr, rk);
     else { const b = 7; ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.3)'; ctx.shadowBlur = 6*ds; ctx.shadowOffsetY = 2*ds;
       ctx.fillStyle = '#FBFAF6'; ctx.fillRect(-ph.w/2 - b, -ph.h/2 - b, ph.w + 2*b, ph.h + 2*b); ctx.restore(); }
-    drawCover(ctx, srcOf(p, hi), rr, p.focus);
+    drawCover(ctx, srcOf(p, hi), rr, framing(p));
     if (rk === 'clip'){ ctx.globalAlpha = 0.98; ctx.drawImage(tinted('clip', S.clip), -ph.w/2 + 22, -ph.h/2 - 34, CLIP.w*1.05, CLIP.h*1.05); }
     else if (rk !== 'none' && !UNDER[rk]){ const keepF = state.frame; state.frame = 'blanca'; decorate(ctx, rr, rk, true, p); state.frame = keepF; }
     ctx.restore();
@@ -3427,87 +3600,173 @@ const photoList = $('#photoList'), outList = $('#outList');
 const CYCLE = '<svg viewBox="0 0 256 256" aria-hidden="true"><path d="M224,48V96a8,8,0,0,1-8,8H168a8,8,0,0,1,0-16h28.69L182.06,73.37a79.56,79.56,0,0,0-56.13-23.43h-.45A79.52,79.52,0,0,0,69.59,72.71,8,8,0,0,1,58.41,61.27a96,96,0,0,1,135,.79L208,76.69V48a8,8,0,0,1,16,0ZM186.41,183.29a80,80,0,0,1-112.47-.66L59.31,168H88a8,8,0,0,0,0-16H40a8,8,0,0,0-8,8v48a8,8,0,0,0,16,0V179.31l14.63,14.63A95.43,95.43,0,0,0,130,222.06h.53a95.36,95.36,0,0,0,67.07-27.33,8,8,0,0,0-11.18-11.44Z"/></svg>';
 const STAR = '<svg viewBox="0 0 256 256" aria-hidden="true"><path d="M197.58,129.06,146,110l-19-51.62a15.92,15.92,0,0,0-29.88,0L78,110l-51.62,19a15.92,15.92,0,0,0,0,29.88L78,178l19,51.62a15.92,15.92,0,0,0,29.88,0L146,178l51.62-19a15.92,15.92,0,0,0,0-29.88ZM137,164.22a8,8,0,0,0-4.74,4.74L112,223.85,91.78,169A8,8,0,0,0,87,164.22L32.15,144,87,123.78A8,8,0,0,0,91.78,119L112,64.15,132.22,119a8,8,0,0,0,4.74,4.74L191.85,144ZM144,40a8,8,0,0,1,8-8h16V16a8,8,0,0,1,16,0V32h16a8,8,0,0,1,0,16H184V64a8,8,0,0,1-16,0V48H152A8,8,0,0,1,144,40ZM248,88a8,8,0,0,1-8,8h-8v8a8,8,0,0,1-16,0V96h-8a8,8,0,0,1,0-16h8V72a8,8,0,0,1,16,0v8h8A8,8,0,0,1,248,88Z"/></svg>';
 function drawThumb(p){
-  const c = document.getElementById('thumb-' + p.id); if (!c) return;
-  c.width = 480; c.height = 320; const x = c.getContext('2d'); x.imageSmoothingQuality = 'high';
-  drawCover(x, p.prev, {x:0, y:0, w:480, h:320}, p.focus);
+  const c = document.getElementById('thumb-' + p.id);
+  if (c){ c.width = 480; c.height = 320; const x = c.getContext('2d'); x.imageSmoothingQuality = 'high'; drawCover(x, p.prev, {x:0, y:0, w:480, h:320}, p.focus); }
+  const m = document.getElementById('mini-' + p.id);
+  if (m){ m.width = 112; m.height = 112; const x = m.getContext('2d'); x.imageSmoothingQuality = 'high'; drawCover(x, p.prev, {x:0, y:0, w:112, h:112}, 0); }
 }
 function techSummary(p){ const t = p.tech || {}; const parts = TECH_KEYS.map(k => t[k]).filter(Boolean); return parts.length ? parts.join(' · ') : 'la foto no trae datos'; }
+/* ---------- tarjetas: todas como fila compacta, una sola abierta (acordeón) con secciones plegables ---------- */
+const GRIP = '<svg viewBox="0 0 256 256" aria-hidden="true"><circle cx="92" cy="60" r="16"/><circle cx="164" cy="60" r="16"/><circle cx="92" cy="128" r="16"/><circle cx="164" cy="128" r="16"/><circle cx="92" cy="196" r="16"/><circle cx="164" cy="196" r="16"/></svg>';
+const CHEV = '<svg class="pc-chev" viewBox="0 0 256 256" aria-hidden="true"><path d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z"/></svg>';
+/* tintas al estilo Wes Anderson para los títulos (las del Espectro Anderson y las del correo) */
+const WA_INKS = [['#1E1C18','Tinta'],['#F6F1E6','Crema'],['#9E1610','Rojo sello'],['#C4452F','Coral'],['#B8404F','Frambuesa'],['#F0A493','Coral de faro'],['#F2D488','Amarillo lancha'],['#E9C873','Miel'],['#A8D8CF','Verde escollera'],['#2E6F77','Petróleo'],['#CFE3EC','Bruma'],['#24448E','Azul correo']];
+const SEC_OPEN = {encuadre:false, titulo:true, diseno:false, camara:false};
+let openId = null, openClosed = false;
+const firstLine = t => String(t || '').split('\n').map(x => x.trim()).filter(Boolean).join(' / ');
+function frameArOf(p){
+  try {
+    const H = D * (FORMATS[state.format] || 1);
+    if (state.comp === 'ficha') return fichaIsTall(p) ? p.fw/p.fh : FICHA.photo.w/FICHA.photo.h;
+    const L = postalLayout(p, state.startNum + state.photos.indexOf(p), H, false); return L.photo.w/L.photo.h;
+  } catch(e){ return 1.5; }
+}
+const tposLabel = v => (TITLE_POS.find(t => t[0] === v) || ['', 'Arriba, al centro'])[1];
+function cropSummary(p){ const c = p.crop; if (!c || (c.z <= 1.001 && !c.x && !c.y)) return p.focus ? 'movida' : 'original'; return Math.round(c.z*100) + ' %' + (c.x || c.y ? ' · movida' : ''); }
+function titleSummary(p){ const L = p.lay || {}; return (L.tpos ? tposLabel(L.tpos) : 'como todas') + (L.tk && L.tk !== 1 ? ' · ' + Math.round(L.tk*100) + ' %' : ''); }
+function setSum(p, sec, txt){ const el = document.getElementById(`sum-${sec}-${p.id}`); if (el) el.textContent = txt; }
 function renderPhotos(){
   const n = state.photos.length;
   $('#photoCount').textContent = `${n} / ${MAX_PHOTOS}`;
+  if (openId && !state.photos.some(p => p.id === openId)) openId = null;
+  if (openId === null && state.photos.length && !openClosed) openId = state.photos[0].id;
   photoList.innerHTML = state.photos.map((p, i) => {
-    const id = p.id, ov = overflow(p) > 0.02, picking = state.picking && state.picking.id === id;
-    return `<li class="pcard${picking ? ' picking' : ''}" data-id="${id}">
-      <div class="pc-media">
-        <canvas class="pc-thumb" id="thumb-${id}" width="480" height="320" aria-label="Foto ${i+1}"></canvas>
-        <p class="pc-hint">Tocá la foto donde está el color</p>
+    const id = p.id, picking = state.picking && state.picking.id === id, open = openId === id, L = p.lay || {};
+    const c = cropOf(p, frameArOf(p)), tk = Math.round(((+L.tk) || 1)*100), effPos = L.tpos || state.titlePos;
+    const sec = (k, title, sum, body) => `<details class="pc-sec" data-sec="${k}"${SEC_OPEN[k] ? ' open' : ''}><summary><span class="pc-sec-t">${title}</span><span class="pc-sec-sum" id="sum-${k}-${id}">${esc(sum)}</span></summary><div class="pc-sec-body">${body}</div></details>`;
+    return `<li class="pcard${open ? ' open' : ''}${picking ? ' picking' : ''}" data-id="${id}">
+      <div class="pc-row">
+        <button type="button" class="pc-grip" data-grip="1" aria-label="Ordenar la foto ${i+1}: arrastrá, o usá las flechas arriba y abajo" title="Arrastrá para cambiar el orden">${GRIP}</button>
+        <button type="button" class="pc-head" data-toggle="1" aria-expanded="${open}" aria-controls="pcb-${id}">
+          <canvas class="pc-mini" id="mini-${id}" width="112" height="112" aria-hidden="true"></canvas>
+          <span class="pc-headtxt"><span class="pc-num">N.° ${pad3(state.startNum + i)}</span><span class="pc-ttl" id="ttl-${id}">${p.title && p.title.trim() ? esc(firstLine(p.title)) : '<i>Sin título</i>'}</span></span>
+          <span class="pc-dots" id="dots-${id}">${p.colors.map(c => `<i style="--c:${c.hex}"></i>`).join('')}</span>
+          ${CHEV}
+        </button>
       </div>
-      <div class="pc-body">
-        <div class="pc-top">
-          <span class="pc-num">N.° ${pad3(state.startNum + i)}</span>
-          <input class="inp pc-date" id="date-${id}" data-f="date" value="${esc(p.date)}" placeholder="DD-MM-AAAA" aria-label="Fecha de la foto ${i+1}" autocomplete="off" inputmode="numeric">
-          <input class="inp pc-place" id="place-${id}" data-f="place" value="${esc(p.place)}" placeholder="${esc(state.place || 'Lugar')}" aria-label="Lugar de la foto ${i+1} (vacío usa el general)" autocomplete="off">
-        </div>
-        <div class="pc-titlebox">
-          <textarea class="inp pc-title" id="title-${id}" data-f="title" rows="${Math.min(3, Math.max(1, String(p.title || '').split('\n').length))}" placeholder="Título (opcional). Enter = otro renglón" aria-label="Título de la foto ${i+1}" autocomplete="off">${esc(p.title)}</textarea>
-          <button type="button" class="sw-ai" data-aititle="1" title="Sugerir un título con Claude (tocá de nuevo para otra opción)" aria-label="Sugerir título para la foto ${i+1} con Claude">${STAR}</button>
-        </div>
-        <div class="sws">
-          ${p.colors.map((c, k) => `<div class="sw">
-            <button type="button" class="sw-chip" id="chip-${id}-${k}" data-chip="${k}" style="--c:${c.hex}" aria-pressed="${!!(picking && state.picking.k === k)}" title="${c.hex} · tocá y después tocá la foto para cambiarlo" aria-label="Color ${k+1}, ${c.hex}. Tocá y después tocá la foto para cambiarlo"><i></i></button>
-            <div class="sw-namebox">
-              <input class="sw-name" id="name-${id}-${k}" data-name="${k}" value="${esc(c.name)}" aria-label="Nombre del color ${k+1}" autocomplete="off">
-              <button type="button" class="sw-alt" data-alt="${k}" title="Otro nombre (tocá varias veces para ver opciones)" aria-label="Otro nombre para el color ${k+1}">${CYCLE}</button>
-              <button type="button" class="sw-ai" data-ai="${k}" title="Sugerir un nombre con Claude según lo que hay en la foto (tocá de nuevo para otra opción)" aria-label="Sugerir nombre para el color ${k+1} con Claude">${STAR}</button>
+      <div class="pc-open" id="pcb-${id}">
+        <div class="pc-main">
+          <div class="pc-media">
+            <canvas class="pc-thumb" id="thumb-${id}" width="480" height="320" aria-label="Foto ${i+1}"></canvas>
+            <p class="pc-hint">Tocá la foto donde está el color</p>
+          </div>
+          <div class="pc-body">
+            <div class="pc-top">
+              <input class="inp pc-date" id="date-${id}" data-f="date" value="${esc(p.date)}" placeholder="DD-MM-AAAA" aria-label="Fecha de la foto ${i+1}" autocomplete="off" inputmode="numeric">
+              <input class="inp pc-place" id="place-${id}" data-f="place" value="${esc(p.place)}" placeholder="${esc(state.place || 'Lugar')}" aria-label="Lugar de la foto ${i+1} (vacío usa el general)" autocomplete="off">
             </div>
-          </div>`).join('')}
-        </div>
-        <div class="pc-foot">
-          <label class="pc-focus"${ov ? '' : ' hidden'}>Encuadre <input type="range" id="focus-${id}" data-f="focus" min="-100" max="100" value="${p.focus}"></label>
-          <div class="tools">
-            <button type="button" class="btn btn-ghost mini" data-act="auto" title="Volver a sacar la paleta automática de la foto">Paleta auto</button>
-            <button type="button" class="ico" data-act="up" aria-label="Subir foto ${i+1}"${i === 0 ? ' disabled' : ''}><svg viewBox="0 0 256 256" aria-hidden="true"><path d="M205.66,117.66a8,8,0,0,1-11.32,0L136,59.31V216a8,8,0,0,1-16,0V59.31L61.66,117.66a8,8,0,0,1-11.32-11.32l72-72a8,8,0,0,1,11.32,0l72,72A8,8,0,0,1,205.66,117.66Z"/></svg></button>
-            <button type="button" class="ico" data-act="down" aria-label="Bajar foto ${i+1}"${i === n-1 ? ' disabled' : ''}><svg viewBox="0 0 256 256" aria-hidden="true"><path d="M205.66,149.66l-72,72a8,8,0,0,1-11.32,0l-72-72a8,8,0,0,1,11.32-11.32L120,196.69V40a8,8,0,0,1,16,0V196.69l58.34-58.35a8,8,0,0,1,11.32,11.32Z"/></svg></button>
-            <button type="button" class="ico" data-act="del" aria-label="Quitar foto ${i+1}"><svg viewBox="0 0 256 256" aria-hidden="true"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg></button>
+            <div class="pc-titlebox">
+              <textarea class="inp pc-title" id="title-${id}" data-f="title" rows="${Math.min(3, Math.max(1, String(p.title || '').split('\n').length))}" placeholder="Título (opcional). Enter = otro renglón" aria-label="Título de la foto ${i+1}" autocomplete="off">${esc(p.title)}</textarea>
+              <button type="button" class="sw-ai" data-aititle="1" title="Sugerir un título con Claude (tocá de nuevo para otra opción)" aria-label="Sugerir título para la foto ${i+1} con Claude">${STAR}</button>
+            </div>
+            <div class="sws">
+              ${p.colors.map((c, k) => `<div class="sw">
+                <button type="button" class="sw-chip" id="chip-${id}-${k}" data-chip="${k}" style="--c:${c.hex}" aria-pressed="${!!(picking && state.picking.k === k)}" title="${c.hex} · tocá y después tocá la foto para cambiarlo" aria-label="Color ${k+1}, ${c.hex}. Tocá y después tocá la foto para cambiarlo"><i></i></button>
+                <div class="sw-namebox">
+                  <input class="sw-name" id="name-${id}-${k}" data-name="${k}" value="${esc(c.name)}" aria-label="Nombre del color ${k+1}" autocomplete="off">
+                  <button type="button" class="sw-alt" data-alt="${k}" title="Otro nombre (tocá varias veces para ver opciones)" aria-label="Otro nombre para el color ${k+1}">${CYCLE}</button>
+                  <button type="button" class="sw-ai" data-ai="${k}" title="Sugerir un nombre con Claude según lo que hay en la foto (tocá de nuevo para otra opción)" aria-label="Sugerir nombre para el color ${k+1} con Claude">${STAR}</button>
+                </div>
+              </div>`).join('')}
+            </div>
+            <div class="pc-foot">
+              <button type="button" class="btn btn-ghost mini" data-act="auto" title="Volver a sacar la paleta automática de la foto">Paleta auto</button>
+              <button type="button" class="linkbtn pc-del" data-act="del">Quitar foto</button>
+            </div>
           </div>
         </div>
-        <details class="pc-tech" data-layd="${id}"${p.layOpen ? ' open' : ''}>
-          <summary><span>Diseño de esta postal</span><span class="pc-tech-sum" id="laysum-${id}">${esc(laySummary(p))}</span></summary>
-          <div class="lay-grid">
+        <div class="pc-secs">
+          ${sec('encuadre', 'Encuadre', cropSummary(p), `
+            <div class="lay-row"><label class="lbl" for="crop-z-${id}">Zoom <b class="crop-v" id="cropv-${id}">${Math.round(c.z*100)} %</b></label><input type="range" min="100" max="500" step="1" id="crop-z-${id}" data-crop="z" value="${Math.round(c.z*100)}"></div>
+            <div class="lay-row"><label class="lbl" for="crop-x-${id}">Mover a los costados</label><input type="range" min="-100" max="100" step="1" id="crop-x-${id}" data-crop="x" value="${Math.round(c.x*100)}"></div>
+            <div class="lay-row"><label class="lbl" for="crop-y-${id}">Mover arriba / abajo</label><input type="range" min="-100" max="100" step="1" id="crop-y-${id}" data-crop="y" value="${Math.round(c.y*100)}"></div>
+            <div class="pc-secfoot"><button type="button" class="btn btn-ghost mini" data-act="cropreset">Restablecer</button><span class="subhint">En la vista grande también podés arrastrar la foto y hacer zoom con la rueda.</span></div>`)}
+          ${sec('titulo', 'Título', titleSummary(p), `
+            <div class="lay-row"><label class="lbl" for="tk-${id}">Tamaño <b class="crop-v" id="tkv-${id}">${tk} %</b></label><input type="range" min="50" max="250" step="5" id="tk-${id}" data-tsize="1" value="${tk}"></div>
+            <div class="lay-row"><span class="lbl">Posición</span>
+              <div class="tpos-wrap">
+                <div class="tpick" role="group" aria-label="Posición del título">
+                  <span class="tp-ph" aria-hidden="true"></span>
+                  ${['arriba','sobre-arriba','sobre-abajo','abajo'].map((r, ri) => ['izq','centro','der'].map((cc, ci) => { const v = r + '-' + cc; return `<button type="button" class="tp-b ${cc}" data-tpos="${v}" style="grid-row:${ri+1};grid-column:${ci+1}" aria-pressed="${L.tpos === v}" title="${esc(tposLabel(v))}" aria-label="${esc(tposLabel(v))}"${!L.tpos && effPos === v ? ' data-inh="1"' : ''}><i></i></button>`; }).join('')).join('')}
+                </div>
+                <button type="button" class="chipb" data-tpos="" aria-pressed="${!L.tpos}">Como todas<br><small>${esc(tposLabel(state.titlePos))}</small></button>
+              </div>
+            </div>
+            <div class="lay-row"><span class="lbl">Color</span><div class="chips chips-col" data-lay="tcol"><button type="button" data-v="" aria-pressed="${!L.tcol}">Como todas</button>${[['auto','Auto'],['claro','Claro'],['oscuro','Oscuro'],['sello','Sello']].map(([v, l]) => `<button type="button" data-v="${v}" aria-pressed="${L.tcol === v}">${l}</button>`).join('')}<span class="chip-sep">Wes Anderson</span>${WA_INKS.map(([h, nm]) => `<button type="button" class="swb" data-v="${h}" aria-pressed="${L.tcol === h}" title="${esc(nm)}" aria-label="${esc(nm)}" style="background:${h}"></button>`).join('')}<span class="chip-sep">De la foto</span>${p.colors.map(c => `<button type="button" class="swb" data-v="${c.hex}" aria-pressed="${L.tcol === c.hex}" title="${esc(c.name || c.hex)}" style="background:${c.hex}"></button>`).join('')}<label class="swpick" title="Otro color"><input type="color" data-laytcol="1" value="${L.tcol && L.tcol[0] === '#' ? L.tcol : '#F6F1E6'}" aria-label="Otro color de título para esta foto"></label></div></div>
+            <div class="lay-row"><span class="lbl">Ajuste fino</span><div class="lay-nudge"><label>Horizontal <input type="range" min="-300" max="300" step="2" value="${(+L.tdx) || 0}" data-laynum="tdx" aria-label="Mover el título a los costados"></label><label>Vertical <input type="range" min="-200" max="200" step="2" value="${(+L.tdy) || 0}" data-laynum="tdy" aria-label="Mover el título arriba o abajo"></label><button type="button" class="btn btn-ghost mini" data-laytreset="1">Centrar</button></div></div>
+            <div class="pc-secfoot"><button type="button" class="lay-all" data-layall="titulo">Aplicar posición, color y tamaño a todas</button><span class="subhint">En la vista grande podés arrastrar el título.</span></div>`)}
+          ${sec('diseno', 'Colores, sello y matasellos', laySummary(p), `
             <section class="lay-sec">
               <div class="lay-head"><h4>Colores</h4><button type="button" class="lay-all" data-layall="colores" title="Usar esta ubicación y tamaño en todas las fotos">Aplicar a todas</button></div>
-              <div class="lay-row"><label class="lbl" for="lp-${id}">Ubicación</label><select class="inp" id="lp-${id}" data-laysel="pos" aria-label="Ubicación de los colores de esta postal"><option value="">Como todas (${esc(POS_LABEL[state.swPos] || 'Auto')})</option>${Object.entries(POS_LABEL).map(([v, l]) => `<option value="${v}"${p.lay && p.lay.pos === v ? ' selected' : ''}>${l}</option>`).join('')}</select></div>
-              <div class="lay-row"><span class="lbl">Tamaño</span><div class="chips" data-lay="size">${[['','Como todas'],['chicos','Chicos'],['medianos','Medianos'],['grandes','Grandes']].map(([v, l]) => `<button type="button" data-v="${v}" aria-pressed="${((p.lay && p.lay.size) || '') === v}">${l}</button>`).join('')}</div></div>
-              <div class="lay-row lay-bg"><span class="lbl">Fondo</span><div class="chips" data-lay="bg"><button type="button" data-v="" aria-pressed="${!(p.lay && p.lay.bg != null)}">Auto</button>${p.colors.map((c, k) => `<button type="button" class="swb" id="laybg-${id}-${k}" data-v="${k}" aria-pressed="${!!(p.lay && p.lay.bg === String(k))}" title="${esc(c.name || c.hex)}" style="background:${c.hex}"></button>`).join('')}</div></div>
+              <div class="lay-row"><label class="lbl" for="lp-${id}">Ubicación</label><select class="inp" id="lp-${id}" data-laysel="pos" aria-label="Ubicación de los colores de esta postal"><option value="">Como todas (${esc(POS_LABEL[state.swPos] || 'Auto')})</option>${Object.entries(POS_LABEL).map(([v, l]) => `<option value="${v}"${L.pos === v ? ' selected' : ''}>${l}</option>`).join('')}</select></div>
+              <div class="lay-row"><span class="lbl">Tamaño</span><div class="chips" data-lay="size">${[['','Como todas'],['chicos','Chicos'],['medianos','Medianos'],['grandes','Grandes']].map(([v, l]) => `<button type="button" data-v="${v}" aria-pressed="${(L.size || '') === v}">${l}</button>`).join('')}</div></div>
+              <div class="lay-row lay-bg"><span class="lbl">Fondo</span><div class="chips" data-lay="bg"><button type="button" data-v="" aria-pressed="${L.bg == null}">Auto</button>${p.colors.map((c, k) => `<button type="button" class="swb" id="laybg-${id}-${k}" data-v="${k}" aria-pressed="${L.bg === String(k)}" title="${esc(c.name || c.hex)}" style="background:${c.hex}"></button>`).join('')}</div></div>
             </section>
             <section class="lay-sec">
               <div class="lay-head"><h4>Sello</h4><button type="button" class="lay-all" data-layall="sello" title="Usar este color de sello en todas las fotos">Aplicar a todas</button></div>
-              <div class="lay-row"><span class="lbl">Color</span><div class="chips" data-lay="stamp"><button type="button" data-v="" aria-pressed="${!(p.lay && p.lay.stamp)}">Como todas</button><button type="button" data-v="auto" aria-pressed="${!!(p.lay && p.lay.stamp === 'auto')}">Sugerido</button>${p.colors.map(c => `<button type="button" class="swb" data-v="${c.hex}" aria-pressed="${!!(p.lay && p.lay.stamp === c.hex)}" title="${esc(c.name || c.hex)}" style="background:${c.hex}"></button>`).join('')}<label class="swpick" title="Otro color"><input type="color" data-laystamp="1" value="${p.lay && p.lay.stamp && p.lay.stamp[0] === '#' ? p.lay.stamp : '#9E1610'}" aria-label="Otro color de sello para esta foto"></label></div></div>
-            </section>
-            <section class="lay-sec">
-              <div class="lay-head"><h4>Título</h4><button type="button" class="lay-all" data-layall="titulo" title="Usar esta posición y color de título en todas las fotos">Aplicar a todas</button></div>
-              <div class="lay-row"><label class="lbl" for="lt-${id}">Posición</label><select class="inp" id="lt-${id}" data-laysel="tpos" aria-label="Posición del título de esta postal"><option value="">Como todas (${esc((TITLE_POS.find(t => t[0] === state.titlePos) || ['', 'Arriba, al centro'])[1])})</option>${TITLE_POS.map(([v, l]) => `<option value="${v}"${p.lay && p.lay.tpos === v ? ' selected' : ''}>${l}</option>`).join('')}</select></div>
-              <div class="lay-row"><span class="lbl">Color</span><div class="chips" data-lay="tcol"><button type="button" data-v="" aria-pressed="${!(p.lay && p.lay.tcol)}">Como todas</button>${[['auto','Auto'],['claro','Claro'],['oscuro','Oscuro'],['sello','Sello']].map(([v, l]) => `<button type="button" data-v="${v}" aria-pressed="${!!(p.lay && p.lay.tcol === v)}">${l}</button>`).join('')}${p.colors.map(c => `<button type="button" class="swb" data-v="${c.hex}" aria-pressed="${!!(p.lay && p.lay.tcol === c.hex)}" title="${esc(c.name || c.hex)}" style="background:${c.hex}"></button>`).join('')}<label class="swpick" title="Otro color"><input type="color" data-laytcol="1" value="${p.lay && p.lay.tcol && p.lay.tcol[0] === '#' ? p.lay.tcol : '#F6F1E6'}" aria-label="Otro color de título para esta foto"></label></div></div>
-              <div class="lay-row"><span class="lbl">Ajuste fino</span><div class="lay-nudge"><label>Horizontal <input type="range" min="-200" max="200" step="2" value="${(p.lay && +p.lay.tdx) || 0}" data-laynum="tdx" aria-label="Mover el título a los costados"></label><label>Vertical <input type="range" min="-120" max="120" step="2" value="${(p.lay && +p.lay.tdy) || 0}" data-laynum="tdy" aria-label="Mover el título arriba o abajo"></label><button type="button" class="btn btn-ghost mini" data-laytreset="1">Centrar</button></div></div>
+              <div class="lay-row"><span class="lbl">Color</span><div class="chips" data-lay="stamp"><button type="button" data-v="" aria-pressed="${!L.stamp}">Como todas</button><button type="button" data-v="auto" aria-pressed="${L.stamp === 'auto'}">Sugerido</button>${p.colors.map(c => `<button type="button" class="swb" data-v="${c.hex}" aria-pressed="${L.stamp === c.hex}" title="${esc(c.name || c.hex)}" style="background:${c.hex}"></button>`).join('')}<label class="swpick" title="Otro color"><input type="color" data-laystamp="1" value="${L.stamp && L.stamp[0] === '#' ? L.stamp : '#9E1610'}" aria-label="Otro color de sello para esta foto"></label></div></div>
             </section>
             <section class="lay-sec lay-pm">
               <div class="lay-head"><h4>Matasellos</h4><button type="button" class="lay-all" data-layall="matasellos" title="Usar esta posición de matasellos en todas las fotos">Aplicar a todas</button></div>
-              <div class="lay-row"><label class="lbl" for="lm-${id}">Posición</label><select class="inp" id="lm-${id}" data-laysel="pm" aria-label="Matasellos de esta postal"><option value="">Como todas (${esc((PM_POS.find(t => t[0] === state.pmPos) || ['', 'Automático'])[1])})</option><option value="no">Sin matasellos</option>${PM_POS.map(([v, l]) => `<option value="${v}"${p.lay && p.lay.pm === v ? ' selected' : ''}>${l}</option>`).join('')}</select></div>
-            </section>
-          </div>
-        </details>
-        <details class="pc-tech" data-tech="${id}"${p.techOpen ? ' open' : ''}>
-          <summary><span>Datos de cámara</span><span class="pc-tech-sum" id="techsum-${id}">${esc(techSummary(p))}</span></summary>
-          <div class="tech-grid">
+              <div class="lay-row"><label class="lbl" for="lm-${id}">Posición</label><select class="inp" id="lm-${id}" data-laysel="pm" aria-label="Matasellos de esta postal"><option value="">Como todas (${esc((PM_POS.find(t => t[0] === state.pmPos) || ['', 'Automático'])[1])})</option><option value="no">Sin matasellos</option>${PM_POS.map(([v, l]) => `<option value="${v}"${L.pm === v ? ' selected' : ''}>${l}</option>`).join('')}</select></div>
+            </section>`).replace('id="sum-diseno-' + id + '"', 'id="laysum-' + id + '"')}
+          ${sec('camara', 'Datos de cámara', techSummary(p), `<div class="tech-grid">
             ${TECH_KEYS.map(k => `<label for="t-${k}-${id}">${TECH_LABELS[k]}<input class="inp" id="t-${k}-${id}" data-t="${k}" value="${esc(p.tech[k])}" autocomplete="off"></label>`).join('')}
-          </div>
-        </details>
+          </div>`).replace('id="sum-camara-' + id + '"', 'id="techsum-' + id + '"')}
+        </div>
       </div>
     </li>`;
   }).join('');
   state.photos.forEach(drawThumb);
 }
+/* abrir una tarjeta (y cerrar las otras) sin volver a dibujar la lista */
+function openCard(id, scroll){
+  openId = id;
+  document.querySelectorAll('#photoList .pcard').forEach(li => { const on = li.dataset.id === id; li.classList.toggle('open', on); const h = li.querySelector('[data-toggle]'); if (h) h.setAttribute('aria-expanded', String(on)); });
+  const li = id && document.querySelector(`.pcard[data-id="${id}"]`);
+  if (li && scroll) li.scrollIntoView({block:'nearest', behavior:'smooth'});
+}
 function photoById(id){ return state.photos.find(p => p.id === id); }
+/* ordenar arrastrando (mouse y dedo) desde el agarre ⠿; con teclado, flechas arriba/abajo sobre el agarre */
+function movePhoto(from, to){
+  if (to < 0 || to >= state.photos.length || to === from) return false;
+  const [p] = state.photos.splice(from, 1); state.photos.splice(to, 0, p); afterStructure(); return true;
+}
+{
+  let dr = null;
+  const autoScroll = () => { if (!dr) return; const y = dr.lastY, m = 70; let v = 0; if (y < m) v = -(m - y)/4; else if (y > innerHeight - m) v = (y - innerHeight + m)/4; if (v){ window.scrollBy(0, v); dr.base -= v; place(); } dr.raf = requestAnimationFrame(autoScroll); };
+  const place = () => {
+    const li = dr.li; li.style.transform = `translateY(${dr.lastY - dr.base}px)`;
+    const r = li.getBoundingClientRect(), mid = r.top + r.height/2;
+    const prev = li.previousElementSibling, next = li.nextElementSibling;
+    if (next && mid > next.getBoundingClientRect().top + next.offsetHeight/2){ const h = next.offsetHeight + 8; photoList.insertBefore(next, li); dr.base += h; li.style.transform = `translateY(${dr.lastY - dr.base}px)`; }
+    else if (prev && mid < prev.getBoundingClientRect().top + prev.offsetHeight/2){ const h = prev.offsetHeight + 8; photoList.insertBefore(li, prev); dr.base -= h; li.style.transform = `translateY(${dr.lastY - dr.base}px)`; }
+  };
+  photoList.addEventListener('pointerdown', e => {
+    const g = e.target.closest('[data-grip]'); if (!g || (e.pointerType === 'mouse' && e.button !== 0)) return;
+    const li = g.closest('.pcard'); e.preventDefault();
+    dr = {li, id:li.dataset.id, base:e.clientY, lastY:e.clientY, from:[...photoList.children].indexOf(li), started:false, pid:e.pointerId, g};
+    try { g.setPointerCapture(e.pointerId); } catch(_){}
+  });
+  photoList.addEventListener('pointermove', e => {
+    if (!dr || e.pointerId !== dr.pid) return; dr.lastY = e.clientY;
+    if (!dr.started){ if (Math.abs(e.clientY - dr.base) < 4) return; dr.started = true; dr.li.classList.add('dragging'); photoList.classList.add('sorting'); dr.raf = requestAnimationFrame(autoScroll); }
+    place();
+  });
+  const end = e => {
+    if (!dr || (e && e.pointerId !== dr.pid)) return; const d = dr; dr = null; cancelAnimationFrame(d.raf);
+    d.li.style.transform = ''; d.li.classList.remove('dragging'); photoList.classList.remove('sorting');
+    if (!d.started) return;
+    const order = [...photoList.children].map(li => li.dataset.id), to = order.indexOf(d.id);
+    if (to !== d.from){ state.photos = order.map(id => photoById(id)).filter(Boolean); afterStructure(); toast(`Foto movida al lugar ${to + 1}`); const ng = document.querySelector(`.pcard[data-id="${d.id}"] [data-grip]`); if (ng) ng.focus({preventScroll:true}); }
+  };
+  photoList.addEventListener('pointerup', end); photoList.addEventListener('pointercancel', end);
+  photoList.addEventListener('keydown', e => {
+    const g = e.target.closest && e.target.closest('[data-grip]'); if (!g || (e.key !== 'ArrowUp' && e.key !== 'ArrowDown')) return;
+    e.preventDefault(); const id = g.closest('.pcard').dataset.id, i = state.photos.findIndex(p => p.id === id);
+    if (movePhoto(i, i + (e.key === 'ArrowUp' ? -1 : 1))){ const ng = document.querySelector(`.pcard[data-id="${id}"] [data-grip]`); if (ng) ng.focus(); toast(`Foto en el lugar ${state.photos.findIndex(p => p.id === id) + 1}`); }
+  });
+}
 /* «Aplicar a todas»: lo de esta foto pasa a ser lo general y las demás vuelven a «Como todas» */
 function applyToAll(p, sec){
   const L = p.lay || {}, keys = {colores:['pos','size'], titulo:['tpos','tcol'], matasellos:['pm'], sello:['stamp']}[sec]; if (!keys) return;
@@ -3519,6 +3778,7 @@ function applyToAll(p, sec){
     else if (v && !(k === 'pm' && v === 'no')) state[G[k]] = v;
     else if (!v && G[k] === 'swPos') state.swPos = 'auto';
   });
+  if (sec === 'titulo') state.photos.forEach(q => { if (q === p) return; q.lay = Object.assign({}, q.lay); if (L.tk) q.lay.tk = L.tk; else delete q.lay.tk; });
   state.photos.forEach(q => {
     if (!q.lay) { if (keepNo) q.lay = {pm:'no'}; return; }
     q.lay = Object.assign({}, q.lay); keys.forEach(k => { delete q.lay[k]; }); if (keepNo) q.lay.pm = 'no';
@@ -3531,12 +3791,21 @@ photoList.addEventListener('input', e => {
   const f = e.target.dataset.f, nm = e.target.dataset.name, tk = e.target.dataset.t;
   if (f === 'date') p.date = e.target.value;
   else if (f === 'place') p.place = e.target.value;
-  else if (f === 'title'){ p.title = e.target.value; e.target.rows = Math.min(3, Math.max(1, e.target.value.split('\n').length)); }
+  else if (f === 'title'){ p.title = e.target.value; e.target.rows = Math.min(3, Math.max(1, e.target.value.split('\n').length)); const t = document.getElementById('ttl-' + p.id); if (t) t.innerHTML = p.title.trim() ? esc(firstLine(p.title)) : '<i>Sin título</i>'; }
   else if (f === 'focus'){ p.focus = +e.target.value; drawThumb(p); }
   else if (nm !== undefined){ const c = p.colors[+nm]; c.name = e.target.value; c.auto = false; }
   else if (e.target.dataset.laysel){
     const key = e.target.dataset.laysel; p.lay = Object.assign({}, p.lay); const v = e.target.value; if (v) p.lay[key] = v; else delete p.lay[key]; if (!Object.keys(p.lay).length) p.lay = null;
     const sum = document.getElementById('laysum-' + p.id); if (sum) sum.textContent = laySummary(p);
+  }
+  else if (e.target.dataset.crop){
+    const k = e.target.dataset.crop, c = cropOf(p, frameArOf(p)); c[k] = +e.target.value/100; p.crop = c;
+    const v = document.getElementById('cropv-' + p.id); if (v) v.textContent = Math.round(c.z*100) + ' %';
+    setSum(p, 'encuadre', cropSummary(p)); wantFull(p); stageRedraw();
+  }
+  else if (e.target.dataset.tsize){
+    const v = +e.target.value; p.lay = Object.assign({}, p.lay); if (v === 100) delete p.lay.tk; else p.lay.tk = v/100; if (!Object.keys(p.lay).length) p.lay = null;
+    const t = document.getElementById('tkv-' + p.id); if (t) t.textContent = v + ' %'; setSum(p, 'titulo', titleSummary(p)); stageRedraw();
   }
   else if (e.target.dataset.laynum){
     const k = e.target.dataset.laynum, v = +e.target.value; p.lay = Object.assign({}, p.lay); if (v) p.lay[k] = v; else delete p.lay[k]; if (!Object.keys(p.lay).length) p.lay = null;
@@ -3554,14 +3823,24 @@ photoList.addEventListener('input', e => {
   scheduleOut();
 });
 photoList.addEventListener('toggle', e => {
-  const l = e.target.closest && e.target.closest('[data-layd]'); if (l){ const p = photoById(l.dataset.layd); if (p) p.layOpen = l.open; return; }
-  const d = e.target.closest && e.target.closest('[data-tech]'); if (!d) return; const p = photoById(d.dataset.tech); if (p) p.techOpen = d.open;
+  const d = e.target.closest && e.target.closest('[data-sec]'); if (!d || e.target !== d) return; SEC_OPEN[d.dataset.sec] = d.open;
+  /* el mismo apartado queda abierto o cerrado en todas las tarjetas */
+  document.querySelectorAll(`#photoList [data-sec="${d.dataset.sec}"]`).forEach(x => { if (x !== d && x.open !== d.open) x.open = d.open; });
 }, true);
 photoList.addEventListener('focusin', e => { const li = e.target.closest('.pcard'); if (li) showOut(o => o.kind === 'postal' && state.photos[o.i] && state.photos[o.i].id === li.dataset.id); });
 photoList.addEventListener('pointerdown', e => { const li = e.target.closest('.pcard'); if (li && !e.target.closest('[data-act]')) showOut(o => o.kind === 'postal' && state.photos[o.i] && state.photos[o.i].id === li.dataset.id); });
 $('#gridTitles').addEventListener('focusin', e => { const g = e.target.dataset.g; if (g !== undefined) showOut(o => o.kind === 'grid' && o.g === +g); });
 photoList.addEventListener('click', e => {
   const li = e.target.closest('.pcard'); if (!li) return; const p = photoById(li.dataset.id); if (!p) return;
+  const tg = e.target.closest('[data-toggle]');
+  if (tg){ const on = openId !== p.id; openClosed = !on; openCard(on ? p.id : null, on); if (on) showOut(o => o.kind === 'postal' && state.photos[o.i] === p); return; }
+  if (e.target.closest('[data-grip]')) return;
+  const tp = e.target.closest('[data-tpos]');
+  if (tp){
+    const v = tp.dataset.tpos; p.lay = Object.assign({}, p.lay); if (v) p.lay.tpos = v; else delete p.lay.tpos; if (!Object.keys(p.lay).length) p.lay = null;
+    li.querySelectorAll('[data-tpos]').forEach(b => { b.setAttribute('aria-pressed', String(b.dataset.tpos === v)); b.toggleAttribute('data-inh', !v && b.dataset.tpos === state.titlePos); });
+    setSum(p, 'titulo', titleSummary(p)); scheduleOut(); return;
+  }
   const all = e.target.closest('[data-layall]');
   if (all){ applyToAll(p, all.dataset.layall); return; }
   const treset = e.target.closest('[data-laytreset]');
@@ -3594,11 +3873,13 @@ photoList.addEventListener('click', e => {
     const nameEl = document.getElementById(`name-${p.id}-${k}`); if (nameEl) nameEl.value = col.name;
     const chipEl = document.getElementById(`chip-${p.id}-${k}`); if (chipEl){ chipEl.style.setProperty('--c', col.hex); chipEl.title = col.hex; }
     const lbg = document.getElementById(`laybg-${p.id}-${k}`); if (lbg) lbg.style.background = col.hex;
+    const dots = document.getElementById('dots-' + p.id); if (dots && dots.children[k]) dots.children[k].style.setProperty('--c', col.hex);
     state.picking = null; syncPicking(); scheduleOut();
     return;
   }
   if (!act) return;
   const i = state.photos.indexOf(p);
+  if (act.dataset.act === 'cropreset'){ p.crop = null; p.focus = 0; syncCropUI(p); const v = document.getElementById('cropv-' + p.id); if (v) v.textContent = '100 %'; setSum(p, 'encuadre', cropSummary(p)); scheduleOut(); return; }
   if (act.dataset.act === 'auto'){ p.colors = extractPalette(p.prev); renderPhotos(); scheduleOut(); toast('Paleta recalculada'); }
   else if (act.dataset.act === 'up' && i > 0){ state.photos.splice(i, 1); state.photos.splice(i-1, 0, p); afterStructure(); }
   else if (act.dataset.act === 'down' && i < state.photos.length-1){ state.photos.splice(i, 1); state.photos.splice(i+1, 0, p); afterStructure(); }
@@ -3908,6 +4189,7 @@ function renderOutputs(){
     const nm = document.getElementById('oname-' + k); if (nm) nm.textContent = outName(o, k).label;
   });
   renderPeek(); renderStage();
+  if (window.__stripUpd) requestAnimationFrame(window.__stripUpd);
   $('#outCount').textContent = outs.length ? `${outs.length} ${outs.length === 1 ? 'imagen' : 'imágenes'}` : 'vacío';
 }
 let outT = 0;
@@ -3918,7 +4200,7 @@ function renderShapeThumbsSoon(){
   if (sig === lastShapeSig) return; lastShapeSig = sig; clearTimeout(shapeT); shapeT = setTimeout(renderShapeThumbs, 60);
 }
 function afterStructure(){ resetShare(); saveSessionSoon(); $('#clearAll').hidden = state.sample || !state.photos.length; state.picking = null; renderPhotos(); renderGridTitles(); renderRecipePhotos(); renderOutputs(); renderStyleThumbs(); renderShapeThumbsSoon(); updateEmpty(); }
-function updateEmpty(){ const none = !state.photos.length; $('#zipBtn').disabled = none; $('#driveBtn').disabled = none; $('#oneBtn').disabled = none; $('#mSave').disabled = none; }
+function updateEmpty(){ const none = !state.photos.length; $('#previewBtn').disabled = none; $('#mPreview').disabled = none; $('#zipBtn').disabled = none; $('#driveBtn').disabled = none; $('#oneBtn').disabled = none; $('#mSave').disabled = none; }
 
 outList.addEventListener('click', async e => {
   const open = e.target.closest('[data-k]'), sv = e.target.closest('[data-save]');
@@ -3941,7 +4223,7 @@ function showOut(pred){ const k = outputs().findIndex(pred); if (k >= 0 && k !==
 function flash(el){ if (!el) return; el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 1300); }
 function revealEditor(o){
   if (!o) return;
-  if (o.kind === 'postal'){ const p = state.photos[o.i], card = p && document.querySelector(`.pcard[data-id="${p.id}"]`); if (card){ card.scrollIntoView({block:'center', behavior:'smooth'}); flash(card); } }
+  if (o.kind === 'postal'){ const p = state.photos[o.i]; if (p) openCard(p.id); const card = p && document.querySelector(`.pcard[data-id="${p.id}"]`); if (card){ card.scrollIntoView({block:'nearest', behavior:'smooth'}); flash(card); } }
   else if (o.kind === 'grid'){ const inp = document.getElementById('gtitle-' + o.g); if (inp){ inp.scrollIntoView({block:'center', behavior:'smooth'}); flash(inp.closest('.gt')); } }
   else if (o.kind === 'cover'){ setTab('portada'); flash($('#coverBox')); }
   else if (o.kind === 'recipe'){ setTab('receta'); flash($('#recipeBox')); }
@@ -3954,10 +4236,97 @@ function renderStage(){
   if (selK >= outs.length) selK = outs.length - 1;
   const c = $('#stageC'), view = $('#stageView'), dpr = Math.min(2, window.devicePixelRatio || 1);
   const box = (isWide() ? Math.min(view.clientWidth, view.clientHeight / (FORMATS[state.format] || 1)) : view.clientWidth) || 600;
+  if (outs[selK].kind === 'postal') wantFull(state.photos[outs[selK].i]);
   renderTo(c, outs[selK], Math.max(480, Math.min(1600, Math.round(box * dpr))), false);
   $('#stageCap').textContent = `${String(selK+1).padStart(2,'0')} / ${String(outs.length).padStart(2,'0')} · ${outName(outs[selK], selK).label}`;
 }
-$('#stageView').addEventListener('click', () => openLB(selK));
+/* tira del carrusel: rueda vertical = desplazamiento horizontal, flechas, y arrastre con el mouse */
+{
+  const ol = outList, upd = () => { const max = ol.scrollWidth - ol.clientWidth - 2; $('#stripPrev').disabled = ol.scrollLeft <= 2; $('#stripNext').disabled = ol.scrollLeft >= max; };
+  ol.addEventListener('wheel', e => { if (!isWide()) return; if (Math.abs(e.deltaY) > Math.abs(e.deltaX)){ ol.scrollLeft += e.deltaY; e.preventDefault(); } }, {passive:false});
+  ol.addEventListener('scroll', upd, {passive:true}); window.addEventListener('resize', upd);
+  $('#stripPrev').addEventListener('click', () => ol.scrollBy({left:-ol.clientWidth*0.8, behavior:'smooth'}));
+  $('#stripNext').addEventListener('click', () => ol.scrollBy({left:ol.clientWidth*0.8, behavior:'smooth'}));
+  let g = null;
+  ol.addEventListener('pointerdown', e => { if (e.pointerType !== 'mouse' || e.button !== 0 || !isWide()) return; g = {x:e.clientX, s:ol.scrollLeft, moved:false, id:e.pointerId}; });
+  ol.addEventListener('pointermove', e => { if (!g) return; const dx = e.clientX - g.x; if (!g.moved && Math.abs(dx) > 5){ g.moved = true; ol.classList.add('grabbing'); try { ol.setPointerCapture(g.id); } catch(_){} } if (g.moved) ol.scrollLeft = g.s - dx; });
+  const end = () => { if (!g) return; const moved = g.moved; g = null; ol.classList.remove('grabbing'); if (moved){ const stop = ev => { ev.stopPropagation(); ev.preventDefault(); }; ol.addEventListener('click', stop, {capture:true, once:true}); setTimeout(() => ol.removeEventListener('click', stop, {capture:true}), 0); } };
+  ol.addEventListener('pointerup', end); ol.addEventListener('pointercancel', end);
+  window.__stripUpd = upd; setTimeout(upd, 300);
+}
+/* ---------- edición directa en la vista grande: mover/zoom de la foto y mover el título ---------- */
+function stageGeom(){
+  const o = outputs()[selK]; if (!o || o.kind !== 'postal') return null; const p = state.photos[o.i]; if (!p) return null;
+  const H = D * (FORMATS[state.format] || 1);
+  if (state.comp === 'ficha'){
+    const dy = (H - D)/2; let r;
+    if (fichaIsTall(p)){ const ar = p.fw/p.fh, w = Math.min(TALL_W, 640*ar); r = {x:TALL_X, y:36.5 + dy, w, h:w/ar}; }
+    else r = {x:FICHA.photo.x, y:FICHA.photo.y + dy, w:FICHA.photo.w, h:FICHA.photo.h};
+    return {p, photo:r, title:null};
+  }
+  const L = postalLayout(p, state.startNum + o.i, H, false), dy = L.dy;
+  return {p, photo:{x:L.photo.x, y:L.photo.y + dy, w:L.photo.w, h:L.photo.h}, title:L.title ? {x:L.title.box.x - 6, y:L.title.box.y + dy - 6, w:L.title.box.w + 12, h:L.title.box.h + 12} : null};
+}
+const inR = (r, x, y) => r && x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h;
+function stagePt(e){ const c = $('#stageC'), b = c.getBoundingClientRect(); return {x:(e.clientX - b.left)*D/b.width, y:(e.clientY - b.top)*D/b.width}; }
+let stageDrag = null, stageDragged = false, stageRaf = 0;
+function stageRedraw(){ if (stageRaf) return; stageRaf = requestAnimationFrame(() => { stageRaf = 0; renderStage(); }); }
+function syncCropUI(p){
+  const c = p.crop || {z:1, x:0, y:0};
+  [['z', c.z*100], ['x', c.x*100], ['y', c.y*100]].forEach(([k, v]) => { const el = document.getElementById(`crop-${k}-${p.id}`); if (el) el.value = Math.round(v); });
+  const z = document.getElementById(`cropv-${p.id}`); if (z) z.textContent = Math.round(c.z*100) + ' %';
+  ['tdx', 'tdy'].forEach(k => { const el = document.querySelector(`.pcard[data-id="${p.id}"] [data-laynum="${k}"]`); if (el) el.value = (p.lay && +p.lay[k]) || 0; });
+}
+function zoomCrop(p, r, f){ const c = cropOf(p, r.w/r.h); c.z = Math.max(1, Math.min(5, c.z*f)); p.crop = c; }
+{
+  const view = $('#stageView'), box = view.parentElement, pts = new Map();
+  view.addEventListener('click', e => {
+    if (stageDragged){ stageDragged = false; e.preventDefault(); return; }
+    const g = isWide() && stageGeom(), q = g && stagePt(e);
+    /* sobre la foto espera un instante por si es doble clic (volver al encuadre original) */
+    if (g && e.detail && inR(g.photo, q.x, q.y)){ clearTimeout(view._ct); view._ct = setTimeout(() => openLB(selK), 260); } else openLB(selK);
+  });
+  view.addEventListener('pointermove', e => {
+    if (!stageDrag){ const g = isWide() && stageGeom(); box.classList.toggle('can-edit', !!g); if (!g){ view.style.cursor = ''; return; } const q = stagePt(e); view.style.cursor = inR(g.title, q.x, q.y) ? 'move' : inR(g.photo, q.x, q.y) ? 'grab' : 'zoom-in'; return; }
+    if (pts.has(e.pointerId)) pts.set(e.pointerId, {x:e.clientX, y:e.clientY});
+    const d = stageDrag, q = stagePt(e), dx = q.x - d.q.x, dy = q.y - d.q.y;
+    if (!d.moved && Math.hypot(e.clientX - d.cx, e.clientY - d.cy) < 4) return;
+    d.moved = true; box.classList.add('dragging');
+    if (d.mode === 'pinch' && pts.size === 2){ const [a, b] = [...pts.values()], dist = Math.hypot(a.x - b.x, a.y - b.y); const c = Object.assign({}, d.c0); c.z = Math.max(1, Math.min(5, d.c0.z*dist/d.dist)); d.p.crop = c; }
+    else if (d.mode === 'title'){ d.p.lay = Object.assign({}, d.p.lay, {tdx:Math.round(d.t0.x + dx), tdy:Math.round(d.t0.y + dy)}); }
+    else if (d.mode === 'photo'){
+      const r = d.r, c = Object.assign({}, d.c0), w = coverWin(d.p.fw, d.p.fh, r.w/r.h, c), ex = (d.p.fw - w.sw)/2, ey = (d.p.fh - w.sh)/2;
+      if (ex > 0.5) c.x = Math.max(-1, Math.min(1, d.c0.x - dx*(w.sw/r.w)/ex));
+      if (ey > 0.5) c.y = Math.max(-1, Math.min(1, d.c0.y - dy*(w.sh/r.h)/ey));
+      d.p.crop = c;
+    }
+    syncCropUI(d.p); wantFull(d.p); stageRedraw();
+  });
+  view.addEventListener('pointerdown', e => {
+    if (!isWide() || (e.pointerType === 'mouse' && e.button !== 0)) return;
+    const g = stageGeom(); if (!g) return; const q = stagePt(e);
+    pts.set(e.pointerId, {x:e.clientX, y:e.clientY});
+    if (pts.size === 2 && stageDrag && stageDrag.mode === 'photo'){ const [a, b] = [...pts.values()]; Object.assign(stageDrag, {mode:'pinch', dist:Math.hypot(a.x - b.x, a.y - b.y) || 1, c0:cropOf(g.p, g.photo.w/g.photo.h), moved:true}); return; }
+    const mode = inR(g.title, q.x, q.y) ? 'title' : inR(g.photo, q.x, q.y) ? 'photo' : null; if (!mode) return;
+    stageDrag = {mode, p:g.p, r:g.photo, q, cx:e.clientX, cy:e.clientY, moved:false, c0:cropOf(g.p, g.photo.w/g.photo.h), t0:{x:(g.p.lay && +g.p.lay.tdx) || 0, y:(g.p.lay && +g.p.lay.tdy) || 0}};
+    try { view.setPointerCapture(e.pointerId); } catch(_){}
+    if (mode === 'photo') view.style.cursor = 'grabbing';
+  });
+  const end = e => {
+    pts.delete(e.pointerId); if (!stageDrag || pts.size) return;
+    const d = stageDrag; stageDrag = null; box.classList.remove('dragging');
+    if (d.moved){ stageDragged = true; setTimeout(() => { stageDragged = false; }, 350); scheduleOut(); }
+  };
+  view.addEventListener('pointerup', end); view.addEventListener('pointercancel', end);
+  view.addEventListener('pointerleave', () => { if (!stageDrag) box.classList.remove('can-edit'); });
+  view.addEventListener('wheel', e => {
+    if (!isWide()) return; const g = stageGeom(); if (!g) return; const q = stagePt(e); if (!inR(g.photo, q.x, q.y)) return;
+    e.preventDefault(); zoomCrop(g.p, g.photo, Math.exp(-e.deltaY*0.0015)); syncCropUI(g.p); wantFull(g.p); stageRedraw(); clearTimeout(view._wt); view._wt = setTimeout(scheduleOut, 250);
+  }, {passive:false});
+  view.addEventListener('dblclick', e => { clearTimeout(view._ct); const g = stageGeom(); if (!g) return; const q = stagePt(e); if (inR(g.photo, q.x, q.y)){ g.p.crop = null; g.p.focus = 0; syncCropUI(g.p); scheduleOut(); stageDragged = true; setTimeout(() => { stageDragged = false; }, 350); } });
+}
+$('#stagePrev').addEventListener('click', () => { const n = outputs().length; if (n){ selectOut((selK - 1 + n) % n); scrollStrip(selK); } });
+$('#stageNext').addEventListener('click', () => { const n = outputs().length; if (n){ selectOut((selK + 1) % n); scrollStrip(selK); } });
 $('#mini').addEventListener('click', () => openLB(selK));
 $('#stageEdit').addEventListener('click', () => {
   const o = outputs()[selK]; if (!o) return;
@@ -3969,10 +4338,10 @@ $('#stageSave').addEventListener('click', async e => {
   try { await shareOrSave(outName(o, selK).file, await renderBlob(o, state.size)); } finally { b.innerHTML = t; }
 });
 document.addEventListener('keydown', e => {
-  if (!isWide() || !lb.hidden || /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement && document.activeElement.tagName)) return;
+  if (!isWide() || !lb.hidden || !$('#igv').hidden || /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement && document.activeElement.tagName)) return;
   const n = outputs().length; if (!n) return;
-  if (e.key === 'ArrowRight'){ selectOut((selK + 1) % n); e.preventDefault(); }
-  else if (e.key === 'ArrowLeft'){ selectOut((selK - 1 + n) % n); e.preventDefault(); }
+  if (e.key === 'ArrowRight'){ selectOut((selK + 1) % n); scrollStrip(selK); e.preventDefault(); }
+  else if (e.key === 'ArrowLeft'){ selectOut((selK - 1 + n) % n); scrollStrip(selK); e.preventDefault(); }
 });
 const TAB_KEY = 'postales-ojodecristi-tab';
 function setTab(t){
@@ -4052,6 +4421,53 @@ $('#place').addEventListener('input', e => {
 });
 document.querySelectorAll('.seg button').forEach(b => b.addEventListener('click', () => { state.size = +b.dataset.size; syncDesign(); savePrefs(); }));
 $('#zipBtn').addEventListener('click', saveZip);
+/* ---------- vista previa: el carrusel como en Instagram, o todas seguidas en una tira ---------- */
+{
+  const igv = $('#igv'), track = $('#igTrack'), strip = $('#igStrip'); let igLast = null, igK = 0, igN = 0, igSeq = 0;
+  const igMode = m => { document.querySelectorAll('[data-igmode]').forEach(b => b.setAttribute('aria-checked', String(b.dataset.igmode === m))); $('#igPhone').hidden = m !== 'phone'; strip.hidden = m !== 'strip'; };
+  const igSync = () => {
+    igK = Math.round(track.scrollLeft / Math.max(1, track.clientWidth)); $('#igCount').textContent = igN ? `${igK + 1}/${igN}` : '';
+    [...$('#igDots').children].forEach((d, i) => d.classList.toggle('on', i === igK));
+    $('#igPrev').disabled = igK <= 0; $('#igNext').disabled = igK >= igN - 1;
+  };
+  const igGo = k => { k = Math.max(0, Math.min(igN - 1, k)); track.scrollTo({left:k*track.clientWidth, behavior:'smooth'}); };
+  async function openIG(){
+    const outs = outputs(); if (!outs.length) return; const seq = ++igSeq;
+    igLast = document.activeElement; igv.hidden = false; document.body.classList.add('igv-open'); $('#igvClose').focus();
+    const {w, h} = dimsOf(state.size), fmt = state.format;
+    $('#igvInfo').textContent = `${outs.length} ${outs.length === 1 ? 'imagen' : 'imágenes'} · ${w} × ${h} px · formato ${fmt}${state.size === 1080 ? ' · el tamaño exacto de Instagram' : ' · alta resolución (Instagram la achica a 1080)'}`;
+    $('#igPlace').textContent = state.place || ''; $('#igCap').textContent = (state.titles[0] || '').trim() || 'Postales ojodecristi';
+    $('#igMedia').style.aspectRatio = `${w} / ${h}`;
+    track.innerHTML = ''; strip.innerHTML = ''; igN = outs.length; $('#igDots').innerHTML = outs.map(() => '<i></i>').join('');
+    const c = document.createElement('canvas');
+    for (let k = 0; k < outs.length; k++){
+      if (seq !== igSeq) return;
+      renderTo(c, outs[k], 720, false); const url = c.toDataURL('image/jpeg', 0.9), nm = outName(outs[k], k).label;
+      const a = new Image(); a.src = url; a.alt = nm; a.draggable = false; track.appendChild(a);
+      const b = new Image(); b.src = url; b.alt = nm; b.draggable = false; strip.appendChild(b);
+      if (k === 0) igSync();
+      await new Promise(r => setTimeout(r, 0));
+    }
+    releaseCanvas(c); track.scrollLeft = 0; igSync();
+  }
+  function closeIG(){ igSeq++; igv.hidden = true; document.body.classList.remove('igv-open'); track.innerHTML = ''; strip.innerHTML = ''; if (igLast && igLast.focus) igLast.focus(); }
+  $('#previewBtn').addEventListener('click', openIG); $('#mPreview').addEventListener('click', openIG);
+  $('#igvClose').addEventListener('click', closeIG);
+  igv.addEventListener('click', e => { if (e.target === igv) closeIG(); });
+  document.querySelectorAll('[data-igmode]').forEach(b => b.addEventListener('click', () => igMode(b.dataset.igmode)));
+  track.addEventListener('scroll', () => requestAnimationFrame(igSync), {passive:true});
+  $('#igPrev').addEventListener('click', () => igGo(igK - 1)); $('#igNext').addEventListener('click', () => igGo(igK + 1));
+  strip.addEventListener('wheel', e => { if (Math.abs(e.deltaY) > Math.abs(e.deltaX)){ strip.scrollLeft += e.deltaY; e.preventDefault(); } }, {passive:false});
+  document.addEventListener('keydown', e => {
+    if (igv.hidden) return;
+    if (e.key === 'Escape'){ closeIG(); e.preventDefault(); }
+    else if (e.key === 'ArrowRight' && !$('#igPhone').hidden){ igGo(igK + 1); e.preventDefault(); }
+    else if (e.key === 'ArrowLeft' && !$('#igPhone').hidden){ igGo(igK - 1); e.preventDefault(); }
+  });
+  $('#igvZip').addEventListener('click', () => { closeIG(); saveZip(); });
+  $('#igvOne').addEventListener('click', e => { closeIG(); saveOneByOne($('#oneBtn')); });
+  window.__openIG = openIG;
+}
 $('#oneBtn').addEventListener('click', e => saveOneByOne(e.currentTarget));
 $('#mSave').addEventListener('click', e => (useShare() ? shareAll(e.currentTarget) : isPhone() ? saveOneByOne(e.currentTarget) : saveZip()));
 $('#mSave').textContent = MSAVE_LABEL();
@@ -4158,7 +4574,7 @@ async function saveSession(){
     const fresh = state.photos.filter(p => !SAVED.has(p.id)), gone = [...SAVED].filter(id => !ids.has(id));
     if (fresh.length || gone.length) await idbDo('blobs', 'readwrite', st => { fresh.forEach(p => st.put(p.fullBlob, p.id)); gone.forEach(id => st.delete(id)); });
     fresh.forEach(p => SAVED.add(p.id)); gone.forEach(id => SAVED.delete(id));
-    const meta = state.photos.map(p => ({id:p.id, fw:p.fw, fh:p.fh, place:p.place, focus:p.focus, date:p.date, title:p.title, file:p.file || '', lay:p.lay || null,
+    const meta = state.photos.map(p => ({id:p.id, fw:p.fw, fh:p.fh, place:p.place, focus:p.focus, crop:p.crop || null, date:p.date, title:p.title, file:p.file || '', lay:p.lay || null,
       tech:p.tech, colors:p.colors.map(c => ({hex:c.hex, name:c.name, auto:!!c.auto, pt:c.pt || null}))}));
     await idbDo('kv', 'readwrite', st => st.put({v:1, at:Date.now(), startNum:state.startNum, place:state.place, titles:state.titles, photos:meta}, 'session'));
   })();
