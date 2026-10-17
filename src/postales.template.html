@@ -834,6 +834,7 @@ body.bg-cada .lay-bg{display:grid !important}
                 <button type="button" role="radio" data-v="tinta">Tinta</button>
                 <button type="button" role="radio" data-v="sello">Color del sello</button>
               </div>
+              <label class="colorpick" for="counterColorPick" title="Otro color"><input type="color" id="counterColorPick" value="#1E4595" aria-label="Otro color para la numeración"></label>
             </div>
             <label class="check"><input type="checkbox" id="exFilmdate"> Fecha de rollo sobre la foto</label>
             <label class="check"><input type="checkbox" id="exIcons"> Íconos en los datos (lugar, fecha, cámara…)</label>
@@ -1287,7 +1288,12 @@ const NAMES = [
   // rojos y rosas
   ['#D63A2F','Rojo'],['#B22222','Rojo Fuego'],['#8E1B1E','Carmín'],['#6E1A26','Bordó'],['#4F1A24','Vino'],
   ['#F4B9C3','Rosa'],['#E79AAA','Rosa Chicle'],['#C98B8B','Rosa Viejo'],['#C2456B','Frambuesa'],['#B7246A','Fucsia'],
-  ['#6B2F4E','Ciruela'],['#E8C4B8','Rosa Arena'],
+  ['#6B2F4E','Ciruela'],['#E8C4B8','Rosa Arena'],['#EBCFCB','Rosa Pálido'],['#D8B4AC','Rosa Empolvado'],['#D9B8A0','Nude'],['#B87A5E','Arcilla'],
+  ['#A9794F','Cuero Claro'],['#B08E70','Café con Leche'],['#7E6350','Barro'],['#6B4A3A','Cacao'],['#5C4033','Nogal'],['#9E4A3A','Rojo Teja'],
+  // neutros cálidos y fríos apagados (los más comunes en cielos, rocas y arena)
+  ['#CFC8B8','Gris Arena'],['#D8CDB8','Lino'],['#BDB5A5','Piedra'],['#C9C0A8','Caqui Claro'],['#E3DCCB','Hueso'],['#B9B2A8','Gris Cálido'],
+  ['#C5CBB5','Salvia Clara'],['#C8CCA8','Verde Té'],['#8E9A86','Verde Grisáceo'],['#5E6B4A','Verde Alga'],['#4C7A72','Verde Lago'],
+  ['#B9C3CC','Cielo Gris'],['#D6E4EE','Azul Hielo'],['#9AA7B4','Azul Humo'],['#A89B94','Gris Malva'],
   // violetas
   ['#D9C9E8','Lila'],['#B7A4D6','Lavanda'],['#8E6BB5','Violeta'],['#5B3F8C','Morado'],['#3E2A5E','Uva'],
   // azules
@@ -1301,12 +1307,18 @@ const NAMES = [
   ['#A8D8B9','Verde Menta'],['#6B7B3A','Verde Oliva'],['#4F5A2A','Verde Musgo'],['#4B5320','Verde Militar'],['#9CAF88','Verde Salvia'],
   ['#BFC97E','Pistacho'],['#7FA35E','Verde Hoja'],['#2E8B57','Esmeralda']
 ];
+/* un nombre no puede ser de otro tono: «Rosa Arena» para un beige verdoso. Penaliza la diferencia de matiz cuando los dos tienen color */
+function huePenalty(o, r){
+  const c1 = Math.hypot(o[1], o[2]), c2 = Math.hypot(r[1], r[2]); if (c1 < 0.02 || c2 < 0.02) return 0;
+  let dh = Math.abs(Math.atan2(o[2], o[1]) - Math.atan2(r[2], r[1]))*180/Math.PI; if (dh > 180) dh = 360 - dh;
+  return Math.max(0, dh - 20)/180 * 0.2 * Math.min(1, Math.min(c1, c2)/0.05);
+}
 let NAME_REFS = null;
 function nameCands(hex, k, pt){
   if (!NAME_REFS) NAME_REFS = NAMES.map(([h, n]) => ({n, o: hex2ok(h)}));
   const o = hex2ok(hex), sky = !pt || pt.y < 0.5;
   return NAME_REFS.filter(r => sky || !/Cielo/.test(r.n))
-    .map(r => ({n: r.n, d: Math.hypot(r.o[0]-o[0], (r.o[1]-o[1])*1.2, (r.o[2]-o[2])*1.2)})).sort((a, b) => a.d - b.d).slice(0, k || 8);
+    .map(r => ({n: r.n, d: Math.hypot(r.o[0]-o[0], (r.o[1]-o[1])*1.2, (r.o[2]-o[2])*1.2) + huePenalty(o, r.o)})).sort((a, b) => a.d - b.d).slice(0, k || 8);
 }
 function colorName(hex){ return nameCands(hex, 1)[0].n; }
 const headWord = n => n.trim().split(/\s+/)[0].toLowerCase();
@@ -2610,13 +2622,13 @@ function postalLayoutBase(p, n, H, mini){
     /* el sello baja debajo de la columna sólo si no pisa la tira de datos ni la numeración (que se miden desde el pie real de la postal) */
     const stripTop = strip ? H - Math.max(22, dy*0.5) - 14 : H - 12, counterTop = counter ? (strip ? H - Math.max(22, dy*0.5) - 22 : H - 24) - 32 : 1e9;
     const fits = colBot + 70 + 57 + dy < Math.min(stripTop, counterTop) - 4;
-    const stampAt = fits ? {cx:colX + swW/2, cy:colBot + 70} : {cx:x + w + m - 45.5, cy:Math.max(pb - 26, Math.min(pb + 27.3 - m*0.5, stripTop - dy - 61))};
+    /* el sello se apoya en la esquina de la foto, igual que en las horizontales */
+    const stampAt = {cx:x + w - 49, cy:Math.max(pb - 26, Math.min(pb + 27.3 - m*0.5, stripTop - dy - 61))};
     const LW = lineWidthFor();
     const spots = {
       izquierda:{x0:side, x1:side + LW, y0:pb + 20},
       /* debajo del sello: si el sello está al pie de la foto (no debajo de la columna), las líneas van debajo de él, no se pierden */
-      sello: fits ? (colBot + 70 + 72 + 30 + dy < H - (strip ? 44 : 14) - (counter ? 60 : 0) ? {x0:D - side - LW, x1:D - side, y0:colBot + 70 + 72} : null)
-                  : (stampAt.cy + 72 + 30 + dy < H - (strip ? 44 : 14) - (counter ? 60 : 0) ? {x0:x + w + m - LW, x1:x + w + m, y0:stampAt.cy + 72} : null),
+      sello: stampAt.cy + 72 + 30 + dy < H - (strip ? 44 : 14) - (counter ? 60 : 0) ? {x0:x + w + m - LW, x1:x + w + m, y0:stampAt.cy + 72} : null,
       arriba: top + dy >= 40 && !pmTopRight(p, mini) ? {x0:D - side - LW, x1:D - side, y0:top - 34} : null
     };
     return Object.assign(out, {
@@ -2692,7 +2704,7 @@ function handStroke(ctx, pts, ox, oy, h, r){
   ctx.beginPath(); out.forEach((q, i) => i ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])); ctx.stroke();
 }
 function markerFraction(ctx, a, b, xr, base){
-  const h = 25, col = state.counterInk === 'sello' && S.stamp ? S.stamp : state.counterInk === 'sello' ? '#9E1610' : S.ink;
+  const h = 25, ci = state.counterInk, col = /^#[0-9a-f]{6}$/i.test(ci) ? ci : ci === 'sello' && S.stamp ? S.stamp : ci === 'sello' ? '#9E1610' : S.ink;
   const ds = devScale(ctx), r = rng(a*31 + b*7), adv = h*0.74;
   const A = String(a), B = String(b), gap = h*0.62, total = (A.length + B.length)*adv + gap - h*0.12;
   ctx.save(); ctx.translate(xr, base); ctx.rotate(-4*Math.PI/180); ctx.transform(1, 0, -0.17, 1, 0, 0);
@@ -3546,6 +3558,7 @@ function buildDesign(){
   });
 }
 function syncDesign(){
+  { const cp = document.getElementById('counterColorPick'); if (cp && /^#[0-9a-f]{6}$/i.test(state.counterInk)) cp.value = state.counterInk; }
   { const tp = document.getElementById('titleColorPick'); if (tp && /^#[0-9a-f]{6}$/i.test(state.titleColor)) tp.value = state.titleColor; }
   document.querySelectorAll('.style-card').forEach(b => b.setAttribute('aria-checked', String(b.dataset.style === state.style)));
   document.querySelectorAll('.shape-card').forEach(b => b.setAttribute('aria-checked', String(b.dataset.shape === state.shape)));
@@ -3635,6 +3648,7 @@ $('#customColor').addEventListener('input', e => {
 });
 $('#decoSel').addEventListener('change', e => { state.deco = e.target.value; syncDesign(); scheduleOut(); });
 document.querySelectorAll('select[data-sel]').forEach(x => x.addEventListener('change', () => { state[x.dataset.sel] = x.value; syncDesign(); scheduleOut(); }));
+$('#counterColorPick').addEventListener('input', e => { state.counterInk = e.target.value; syncDesign(); scheduleOut(); });
 $('#titleColorPick').addEventListener('input', e => { state.titleColor = e.target.value; syncDesign(); scheduleOut(); });
 $('#stampColor').addEventListener('input', e => { state.stampColor = e.target.value; state.stampMode = 'elegido'; syncDesign(); renderStyleThumbs(); scheduleOut(); });
 $('#decoPostal').addEventListener('change', e => { state.decoPostal = e.target.checked; scheduleOut(); });
@@ -4137,7 +4151,7 @@ async function boot(){
   buildDesign(); syncDesign(); syncRecipe(); syncCover(); PRESETS = loadPresets(); syncPresetSel(); lastSnap = snapDesign();
   afterStructure();
 }
-window.__postales = {state, outputs, renderTo, renderBlob, extractPalette, colorName, readExif, STYLES, saveOneByOne, postalLayout, postalBoxes, pmSpot, pmPosOf, PM_R, PM_K, D, inter1};
+window.__postales = {state, outputs, renderTo, renderBlob, extractPalette, colorName, readExif, STYLES, saveOneByOne, postalLayout, postalBoxes, pmSpot, pmPosOf, PM_R, PM_K, D, inter1, nameCands, colorName, nameSet, hex2ok};
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
 boot();
 })();
