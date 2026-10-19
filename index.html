@@ -1333,7 +1333,7 @@ function bgHexFor(p){
 }
 function fotoStyle(hex){ return Object.assign(customStyle(hex), {id:'foto', name:'De la foto'}); }
 let S = STYLES[0];
-const SHAPES = [['cuadrados','Cuadrados'],['circulos','Círculos'],['pincel','Pincelada'],['acuarela','Acuarela'],['pastilla','Pastilla'],['espatula','Espátula'],['pantone','Muestra'],['franja','Franja']];
+const SHAPES = [['cuadrados','Cuadrados'],['circulos','Círculos'],['pincel','Pincelada'],['espatula','Espátula'],['acuarela','Acuarela'],['gota','Gota'],['brocha','Brocha'],['lapiz','Lápiz']];
 
 const FIELDS = [['title','Título'],['num','N.°'],['place','Lugar'],['date','Fecha'],['time','Hora'],['gps','Coordenadas'],['cam','Cámara'],['lens','Lente'],['focal','Focal'],['ap','Apertura'],['sh','Velocidad'],['iso','ISO'],['hex','Códigos de color']];
 const TECH_KEYS = ['cam','lens','focal','ap','sh','iso','time','gps'];
@@ -1377,6 +1377,7 @@ function loadPrefs(){
       else if (k === 'show'){ for (const sc of ['postal','grid']) if (o.show && o.show[sc]) for (const f in state.show[sc]) if (typeof o.show[sc][f] === 'boolean') state.show[sc][f] = o.show[sc][f]; }
       else state[k] = o[k];
     }
+    if (!SHAPES.some(x => x[0] === state.shape)) state.shape = 'acuarela';
     if (!FORMATS[state.format]) state.format = '1:1';
     if (!['mono','hand','sans','jost','slab'].includes(state.titleFont)) state.titleFont = 'mono';
     if (!/^(auto|claro|oscuro|sello|#[0-9a-f]{6})$/i.test(state.titleColor)) state.titleColor = 'auto';
@@ -2363,99 +2364,159 @@ function swMix(hex, to, t){ const a = swRgb(hex), b = swRgb(to); return 'rgb(' +
 function swRgba(hex, a){ const c = swRgb(hex); return `rgba(${c[0]},${c[1]},${c[2]},${a})`; }
 function swDev(ctx){ const t = ctx.getTransform(); return Math.hypot(t.a, t.b); }
 function swLight(hex){ const [r,g,b] = swRgb(hex); return (0.299*r + 0.587*g + 0.114*b)/255; }
-/* contorno irregular: un rectángulo redondeado (superelipse) con bordes que tiemblan */
-function swWashPath(ctx, cx, cy, rw, rh, r, rag){
-  const N = 140, p1 = r()*6.3, p2 = r()*6.3, p3 = r()*6.3, pts = [];
-  for (let i = 0; i < N; i++){
-    const a = i/N*Math.PI*2, ca = Math.cos(a), sa = Math.sin(a);
-    const se = Math.pow(Math.pow(Math.abs(ca), 4.2) + Math.pow(Math.abs(sa), 4.2), -1/4.2);
-    let k = 1 + 0.025*Math.sin(a*3 + p1) + 0.02*Math.sin(a*7 + p2) + 0.01*Math.sin(a*19 + p3);
-    k *= 1 + (r() - 0.5)*rag;
-    pts.push([cx + ca*se*rw*k, cy + sa*se*rh*k]);
-  }
-  ctx.beginPath(); ctx.moveTo((pts[0][0]+pts[1][0])/2, (pts[0][1]+pts[1][1])/2);
-  for (let i = 1; i <= N; i++){ const p = pts[i % N], q = pts[(i+1) % N]; ctx.quadraticCurveTo(p[0], p[1], (p[0]+q[0])/2, (p[1]+q[1])/2); }
-  ctx.closePath();
+/* ---------- muestras de pintura (19/10/2026): acuarela, brocha, lápiz y gota ----------
+   Se calculan píxel por píxel (ruido + grano del papel) y quedan guardadas en un caché. */
+function swNoise(seed){
+  const s = Math.imul(Math.floor(seed) + 7, 2654435761) | 0;
+  const hash = (x, y) => { let n = (Math.imul(x, 374761393) + Math.imul(y, 668265263) + s) | 0; n = Math.imul(n ^ (n >>> 13), 1274126177); n ^= n >>> 16; return (n >>> 0)/4294967296; };
+  const val = (x, y) => {
+    const xi = Math.floor(x), yi = Math.floor(y), fx = x - xi, fy = y - yi, u = fx*fx*(3 - 2*fx), v = fy*fy*(3 - 2*fy);
+    const a = hash(xi, yi), b = hash(xi + 1, yi), c = hash(xi, yi + 1), d = hash(xi + 1, yi + 1);
+    return a + (b - a)*u + (c - a)*v + (a - b - c + d)*u*v;
+  };
+  const fbm = (x, y, o) => { let t = 0, amp = 0.5, f = 1, n = 0; for (let i = 0; i < o; i++){ t += amp*val(x*f + i*17.3, y*f + i*9.1); n += amp; amp *= 0.5; f *= 2.03; } return t/n; };
+  return {val, fbm};
 }
-/* Acuarela: transparente (se multiplica con el papel), borde con pigmento acumulado, se diluye hacia un lado, granula y a veces florece */
-function watercolorWash(ctx, x, y, w, h, hex, seed, darkPaper){
-  const ds = swDev(ctx), pad = 8, W = Math.ceil((w + 2*pad)*ds), H = Math.ceil((h + 2*pad)*ds);
-  const c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d');
-  g.scale(ds, ds); g.translate(pad, pad);
-  const r = swRng(seed*131 + 7), cx = w/2, cy = h/2, rw = w*0.47, rh = h*0.45;
-  const dark = swMix(hex, '#000000', 0.38), deep = swMix(hex, '#000000', 0.2), light = swMix(hex, '#FFFFFF', 0.35);
-  const path = () => swWashPath(g, cx, cy, rw, rh, swRng(seed*131 + 7), 0.006);
-  g.save(); path(); g.clip();
-  // lavado base: denso de un lado, diluido del otro
-  const ang = (r() - 0.5)*0.6, gx = Math.cos(ang)*w*0.5, gy = Math.sin(ang)*h*0.5;
-  const lg = g.createLinearGradient(cx - gx, cy - gy, cx + gx, cy + gy);
-  lg.addColorStop(0, swRgba(hex, 0.92)); lg.addColorStop(0.55, swRgba(hex, 0.78)); lg.addColorStop(1, swRgba(hex, 0.5));
-  g.fillStyle = lg; g.fillRect(-pad, -pad, w + 2*pad, h + 2*pad);
-  // manchas suaves de pigmento (moteado)
-  for (let i = 0; i < 26; i++){
-    const px = r()*w, py = r()*h, rad = (0.12 + r()*0.28)*Math.min(w, h), rg = g.createRadialGradient(px, py, 0, px, py, rad);
-    const col = r() < 0.55 ? deep : light; rg.addColorStop(0, col.replace('rgb', 'rgba').replace(')', `,${0.10 + r()*0.12})`)); rg.addColorStop(1, col.replace('rgb', 'rgba').replace(')', ',0)'));
-    g.fillStyle = rg; g.fillRect(px - rad, py - rad, 2*rad, 2*rad);
+const swClamp = (v, a, b) => v < a ? a : v > b ? b : v;
+const swStep = (a, b, v) => { const t = swClamp((v - a)/(b - a), 0, 1); return t*t*(3 - 2*t); };
+const swDark = () => hex2ok(S.paper ? rgbHex(...S.paper) : '#EEE6CD')[0] < 0.5;
+/* color del pigmento para que, multiplicado con una densidad a0 sobre papel blanco, dé justo el color de la paleta */
+function swPig(hex, a0){ return swRgb(hex).map(v => swClamp((v/255 - (1 - a0))/a0, 0, 1)*255); }
+const SW_CACHE = new Map();
+function swCached(key, make){
+  let c = SW_CACHE.get(key); if (c){ SW_CACHE.delete(key); SW_CACHE.set(key, c); return c; }
+  c = make(); SW_CACHE.set(key, c);
+  if (SW_CACHE.size > 60){ const k = SW_CACHE.keys().next().value; releaseCanvas(SW_CACHE.get(k)); SW_CACHE.delete(k); }
+  return c;
+}
+function swCanvas(w, h, ds, pad){
+  const c = document.createElement('canvas'); c.width = Math.max(8, Math.round((w + 2*pad)*ds)); c.height = Math.max(8, Math.round((h + 2*pad)*ds));
+  const g = c.getContext('2d'); return {c, g, W:c.width, H:c.height, id:g.createImageData(c.width, c.height)};
+}
+
+/* Acuarela y gota: pigmento transparente que se multiplica con el papel. Más denso de un lado, manchas de pigmento,
+   flores (backruns) con su línea de secado, borde donde el pigmento se junta y granulación en el grano del papel. */
+function wcBuild(kind, w, h, hex, seed, dark, ds, pad){
+  const {c, g, W, H, id} = swCanvas(w, h, ds, pad), d = id.data;
+  const r = swRng(seed*131 + 7), N = swNoise(seed*3 + 1), P = swNoise(seed*5 + 2), G = swNoise(77);
+  const A0 = 0.86, [pr, pg, pb] = swPig(hex, A0), [hr, hg, hb] = swRgb(hex);
+  const cx = w/2, cy = h/2, drop = kind === 'drop';
+  const gang = r()*6.283, gx = Math.cos(gang), gy = Math.sin(gang);
+  const R0 = Math.min(w, h)*0.44, hw = w*0.47, hh = h*0.45, cor = Math.min(w, h)*(0.06 + r()*0.05);
+  const dots = [];
+  if (drop) for (let k = 0; k < 3; k++){ const a = r()*6.283, rad = 1 + r()*1.2, dist = R0 + rad + 1.5 + r()*2.5; dots.push([cx + Math.cos(a)*dist, cy + Math.sin(a)*dist, rad]); }
+  for (let j = 0; j < H; j++){
+    const y = j/ds - pad;
+    for (let i = 0; i < W; i++){
+      const x = i/ds - pad;
+      let sd, rr = 0;
+      if (drop){
+        const dx = x - cx, dy = y - cy, rad = Math.hypot(dx, dy), th = Math.atan2(dy, dx);
+        sd = rad - R0*(1 + 0.16*(N.fbm(Math.cos(th)*1.3 + 7, Math.sin(th)*1.3 + 7, 3) - 0.5)); rr = rad/R0;
+      } else {
+        const qx = Math.abs(x - cx) - (hw - cor), qy = Math.abs(y - cy) - (hh - cor);
+        sd = Math.hypot(Math.max(qx, 0), Math.max(qy, 0)) + Math.min(Math.max(qx, qy), 0) - cor;
+      }
+      sd += (N.fbm(x*0.05 + 20, y*0.05 + 3, 3) - 0.5)*(drop ? 2.2 : 4.2) + (N.val(x*0.55, y*0.55) - 0.5)*0.8;
+      for (let k = 0; k < dots.length; k++){ const s2 = Math.hypot(x - dots[k][0], y - dots[k][1]) - dots[k][2]; if (s2 < sd) sd = s2; }
+      const m = swClamp(0.5 - sd*ds, 0, 1); if (m <= 0) continue;
+      const depth = Math.max(0, -sd);
+      let rel = 1 - 0.40*(((x - cx)*gx + (y - cy)*gy)/w);
+      rel += (P.fbm(x*0.055, y*0.055, 4) - 0.5)*0.55;
+      if (drop) rel += 0.30*Math.pow(Math.min(1, rr), 2.4) - 0.12;
+      const bn = N.fbm(x*0.03 + 40, y*0.03 + 11, 3);
+      rel *= 1 - 0.13*swStep(0.60, 0.65, bn);
+      rel += 0.16*Math.exp(-Math.pow((bn - 0.625)/0.016, 2));
+      rel += 0.42*(0.55 + 0.9*N.val(x*0.14 + 5, y*0.14))*Math.exp(-depth/1.25);
+      rel *= 0.80 + 0.40*(G.val(x*1.2, y*1.2)*0.55 + G.val(x*3.1 + 9, y*3.1)*0.45);
+      const a = swClamp(A0*rel, 0.04, 1), edge = Math.exp(-depth/1.6);
+      const k = 1 - 0.22*swClamp(rel - 1, 0, 0.6)/0.6 - 0.12*edge, o = (j*W + i)*4;
+      if (dark){ d[o] = hr; d[o + 1] = hg; d[o + 2] = hb; d[o + 3] = 235*a*m; }
+      else { d[o] = pr*k; d[o + 1] = pg*k; d[o + 2] = pb*k; d[o + 3] = 255*a*m; }
+    }
   }
-  // flor (backrun): el agua empuja el pigmento y deja una zona clara con un borde festoneado más oscuro
-  if (r() < 0.55){
-    const bx = cx + Math.cos(ang)*rw*(0.45 + r()*0.25), by = cy + Math.sin(ang)*rh*0.4 + (r() - 0.5)*rh*0.6, br = Math.min(w, h)*(0.13 + r()*0.1), lobes = 7 + Math.floor(r()*4), ph = r()*6.3;
-    const bloom = () => { g.beginPath(); for (let i = 0; i <= 90; i++){ const a = i/90*Math.PI*2, k = 1 + 0.16*Math.abs(Math.sin(a*lobes/2 + ph)) + 0.05*Math.sin(a*13 + ph); const px = bx + Math.cos(a)*br*k, py = by + Math.sin(a)*br*k*0.85; i ? g.lineTo(px, py) : g.moveTo(px, py); } g.closePath(); };
-    const bg = g.createRadialGradient(bx, by, 0, bx, by, br*1.1); bg.addColorStop(0, 'rgba(255,255,255,.16)'); bg.addColorStop(0.8, 'rgba(255,255,255,.08)'); bg.addColorStop(1, 'rgba(255,255,255,0)');
-    bloom(); g.fillStyle = bg; g.fill();
-    bloom(); g.lineWidth = 1.1; g.strokeStyle = dark.replace('rgb', 'rgba').replace(')', ',0.15)'); g.shadowColor = dark; g.shadowBlur = 1.5*ds; g.stroke(); g.shadowBlur = 0;
-  }
-  // granulación: puntitos de pigmento que se asientan en el grano del papel
-  const q = (px, py) => 0.5 + 0.5*Math.sin(px*0.21 + seed)*Math.cos(py*0.17 + seed*0.7);
-  const dots = Math.round(w*h*0.55);
-  for (let i = 0; i < dots; i++){
-    const px = r()*w, py = r()*h; if (r() > q(px, py)*0.9 + 0.1) continue;
-    g.globalAlpha = 0.10 + r()*0.22; g.fillStyle = r() < 0.8 ? dark : deep;
-    g.fillRect(px, py, 0.35 + r()*0.9, 0.35 + r()*0.9);
-  }
-  g.globalAlpha = 1;
-  // borde oscuro: el pigmento se va al borde al secarse
-  path(); g.lineWidth = 2.2; g.strokeStyle = dark.replace('rgb', 'rgba').replace(')', ',0.55)'); g.shadowColor = dark; g.shadowBlur = 3.5*ds; g.stroke();
-  path(); g.lineWidth = 0.8; g.shadowBlur = 0; g.strokeStyle = dark.replace('rgb', 'rgba').replace(')', ',0.5)'); g.stroke();
-  g.restore();
-  ctx.save(); ctx.globalCompositeOperation = darkPaper ? 'source-over' : 'multiply'; ctx.globalAlpha = darkPaper ? 0.9 : 1;
+  g.putImageData(id, 0, 0); return c;
+}
+function wcSwatch(ctx, kind, x, y, w, h, hex, seed){
+  const ds = swDev(ctx), dark = swDark(), pad = 6;
+  const c = swCached(['wc', kind, hex, seed, Math.round(w*10), Math.round(h*10), Math.round(ds*100), dark ? 1 : 0].join('|'), () => wcBuild(kind, w, h, hex, seed, dark, ds, pad));
+  ctx.save(); ctx.globalCompositeOperation = dark ? 'source-over' : 'multiply';
   ctx.drawImage(c, x - pad, y - pad, w + 2*pad, h + 2*pad); ctx.restore();
 }
-/* Pastilla de acuarela: el godet de cerámica con la pintura, gastada al centro por el pincel */
-function swRR(ctx, x, y, w, h, r){ ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
-function panSwatch(ctx, x, y, w, h, hex, seed){
-  const ds = swDev(ctx), r = swRng(seed*53 + 3), R = Math.min(w, h)*0.14;
-  // el godet
-  ctx.save(); ctx.shadowColor = 'rgba(40,30,15,.35)'; ctx.shadowBlur = 5*ds; ctx.shadowOffsetY = 2*ds;
-  const pg = ctx.createLinearGradient(x, y, x, y + h); pg.addColorStop(0, '#FBFAF6'); pg.addColorStop(1, '#E3DFD6');
-  ctx.fillStyle = pg; swRR(ctx, x, y, w, h, R); ctx.fill(); ctx.restore();
-  ctx.save(); swRR(ctx, x + 0.5, y + 0.5, w - 1, h - 1, R); ctx.strokeStyle = 'rgba(255,255,255,.9)'; ctx.lineWidth = 1; ctx.stroke(); ctx.restore();
-  // la pintura
-  const m = Math.min(w, h)*0.13, ix = x + m, iy = y + m, iw = w - 2*m, ih = h - 2*m, iR = R*0.6;
-  ctx.save(); swRR(ctx, ix, iy, iw, ih, iR); ctx.clip();
-  ctx.fillStyle = hex; ctx.fillRect(ix, iy, iw, ih);
-  const vg = ctx.createLinearGradient(ix, iy, ix, iy + ih); vg.addColorStop(0, 'rgba(255,255,255,.10)'); vg.addColorStop(0.5, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,.16)');
-  ctx.fillStyle = vg; ctx.fillRect(ix, iy, iw, ih);
-  // hueco gastado por el pincel: más claro y liso, con un borde de pintura más oscuro
-  const ex = ix + iw*(0.45 + (r() - 0.5)*0.15), ey = iy + ih*(0.55 + (r() - 0.5)*0.15), erx = iw*0.33, ery = ih*0.27;
-  const wg = ctx.createRadialGradient(ex, ey, 0, ex, ey, Math.max(erx, ery));
-  wg.addColorStop(0, swMix(hex, '#FFFFFF', 0.10)); wg.addColorStop(0.7, swMix(hex, '#FFFFFF', 0.03)); wg.addColorStop(1, hex);
-  ctx.save(); ctx.translate(ex, ey); ctx.scale(1, ery/erx); ctx.beginPath(); ctx.arc(0, 0, erx, 0, Math.PI*2); ctx.restore(); ctx.fillStyle = wg; ctx.fill();
-  // grietas finas de la pintura seca
-  ctx.strokeStyle = swMix(hex, '#000000', 0.35); ctx.globalAlpha = 0.35; ctx.lineWidth = 0.6;
-  for (let k = 0; k < 3; k++){
-    let px = ix + r()*iw, py = iy + (r() < 0.5 ? r()*ih*0.25 : ih*(0.75 + r()*0.25)); ctx.beginPath(); ctx.moveTo(px, py);
-    for (let s = 0; s < 5; s++){ px += (r() - 0.5)*iw*0.18; py += (r() - 0.5)*ih*0.18; ctx.lineTo(px, py); } ctx.stroke();
+
+/* Brocha: un solo golpe de pincel plano con pintura espesa. Cada cerda tiene su largo y su tono; al final del golpe
+   la pintura se corta en vetas (pincel seco) y las cerdas de los bordes quedan más cortas. */
+function brochaBuild(w, h, hex, seed, ds, pad){
+  const {c, g, W, H, id} = swCanvas(w, h, ds, pad), d = id.data;
+  const r = swRng(seed*59 + 17), N = swNoise(seed*11 + 4), G = swNoise(31), [cr, cg, cb] = swRgb(hex);
+  const nB = 30, bs = [];
+  for (let k = 0; k < nB; k++){
+    const e = Math.abs(2*(k + 0.5)/nB - 1);
+    bs.push({st:0.012 + r()*0.05 + 0.04*Math.pow(e, 3), en:(0.80 + r()*0.2)*(1 - 0.16*Math.pow(e, 3)), dry:0.30 + r()*0.5, tone:(r() - 0.5)*0.15, gap:0.04 + r()*0.12});
   }
-  ctx.globalAlpha = 1;
-  // brillo húmedo
-  ctx.save(); ctx.translate(ex - erx*0.35, ey - ery*0.45); ctx.rotate(-0.35); ctx.scale(1, 0.32);
-  const hg = ctx.createRadialGradient(0, 0, 0, 0, 0, erx*0.38); hg.addColorStop(0, 'rgba(255,255,255,.38)'); hg.addColorStop(1, 'rgba(255,255,255,0)');
-  ctx.fillStyle = hg; ctx.beginPath(); ctx.arc(0, 0, erx*0.45, 0, Math.PI*2); ctx.fill(); ctx.restore();
-  // sombra interior del godet sobre la pintura
-  swRR(ctx, ix, iy, iw, ih, iR); ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(0,0,0,.28)'; ctx.shadowColor = 'rgba(0,0,0,.45)'; ctx.shadowBlur = 4*ds; ctx.stroke();
-  ctx.restore();
-  ctx.save(); swRR(ctx, ix, iy, iw, ih, iR); ctx.strokeStyle = 'rgba(0,0,0,.18)'; ctx.lineWidth = 0.8; ctx.stroke(); ctx.restore();
+  const tilt = (r()-0.5)*0.12, x0 = w*0.04, x1 = w*0.96, hy = h*0.40, cy = h/2 + (r() - 0.5)*h*0.06, len = x1 - x0;
+  for (let j = 0; j < H; j++){
+    const y = j/ds - pad;
+    for (let i = 0; i < W; i++){
+      const x = i/ds - pad, u = (x - x0)/len, v = (y - cy - (x - w/2)*tilt)/hy;
+      if (v <= -1 || v >= 1 || u < -0.02 || u > 1.02) continue;
+      const kf = (v + 1)/2*nB, k = Math.min(nB - 1, Math.floor(kf)), f = kf - k, b = bs[k];
+      const ends = swClamp((u - b.st)*len*ds + 0.5, 0, 1)*swClamp((b.en - u)*len*ds + 0.5, 0, 1); if (ends <= 0) continue;
+      const dryT = swClamp((u - b.dry)/(b.en - b.dry), 0, 1);
+      const streak = N.fbm(u*14 + k*3.1, k*1.9, 2)*0.7 + G.val(u*70, kf*1.3)*0.3;
+      const cov = dryT > 0 ? swStep(dryT*0.95 - 0.06, dryT*0.95 + 0.06, streak) : 1;
+      const gw = b.gap*1.2*swStep(0.05, 0.9, dryT), aa = 1/(ds*hy*2/nB), raw = swClamp((f - gw)/aa, 0, 1)*swClamp((1 - f - gw)/aa, 0, 1), cross = 1 - (0.10 + 0.90*swStep(0.1, 0.8, dryT))*(1 - raw);
+      const a = cov*cross*ends; if (a <= 0.01) continue;
+      const lum = 1 + b.tone*0.8 + (N.fbm(u*5 + k*7, k*0.8, 2) - 0.5)*0.12 + 0.05*Math.sin(kf*0.9 + seed) - 0.06*(1 - swStep(0, 0.3, u)) + 0.05*swStep(0.55, 1, u);
+      const o = (j*W + i)*4;
+      d[o] = swClamp(cr*lum, 0, 255); d[o + 1] = swClamp(cg*lum, 0, 255); d[o + 2] = swClamp(cb*lum, 0, 255); d[o + 3] = 255*a;
+    }
+  }
+  g.putImageData(id, 0, 0); return c;
+}
+function brochaSwatch(ctx, x, y, w, h, hex, seed){
+  const ds = swDev(ctx), pad = 6;
+  const c = swCached(['br', hex, seed, Math.round(w*10), Math.round(h*10), Math.round(ds*100)].join('|'), () => brochaBuild(w, h, hex, seed, ds, pad));
+  ctx.save(); ctx.shadowColor = 'rgba(30,20,10,.26)'; ctx.shadowBlur = 2*ds; ctx.shadowOffsetX = 0.5*ds; ctx.shadowOffsetY = 1.1*ds;
+  ctx.drawImage(c, x - pad, y - pad, w + 2*pad, h + 2*pad); ctx.restore();
+}
+
+/* Lápiz de color: dos capas de rayado cruzado que solo agarran en el grano del papel, con los trazos cortándose a distinto largo. */
+function lapizBuild(w, h, hex, seed, ds, pad, dark){
+  const {c, g, W, H, id} = swCanvas(w, h, ds, pad), d = id.data;
+  const r = swRng(seed*43 + 9), G = swNoise(53), N = swNoise(seed*7 + 3), A0 = 0.84, [pr, pg, pb] = swPig(hex, A0), [hr, hg, hb] = swRgb(hex);
+  const th = [-0.95 + (r() - 0.5)*0.2, 0], sp = [1.0, 1.35]; th[1] = th[0] + 0.42 + r()*0.1;
+  const cs = th.map(Math.cos), sn = th.map(Math.sin), K = 512, I = [new Float32Array(K), new Float32Array(K)], J = [new Float32Array(K), new Float32Array(K)], PH = [new Float32Array(K), new Float32Array(K)];
+  for (let L = 0; L < 2; L++) for (let k = 0; k < K; k++){ I[L][k] = 0.55 + 0.45*r(); J[L][k] = r()*3.4; PH[L][k] = r()*6.3; }
+  const cx = w/2, cy = h/2, hw = w*0.46, hh = h*0.44, cor = 1.6, tl = (r() - 0.5)*0.05, ct = Math.cos(tl), st = Math.sin(tl);
+  for (let j = 0; j < H; j++){
+    const y = j/ds - pad;
+    for (let i = 0; i < W; i++){
+      const x = i/ds - pad, rx = (x - cx)*ct - (y - cy)*st, ry = (x - cx)*st + (y - cy)*ct;
+      const qx = Math.abs(rx) - (hw - cor), qy = Math.abs(ry) - (hh - cor);
+      const sd = Math.hypot(Math.max(qx, 0), Math.max(qy, 0)) + Math.min(Math.max(qx, qy), 0) - cor + (N.fbm(x*0.08, y*0.08, 2) - 0.5)*2.2;
+      if (sd > 1.5) continue;
+      let keep = 1;
+      for (let L = 0; L < 2; L++){
+        const along = -x*sn[L] + y*cs[L], t0 = (x*cs[L] + y*sn[L])/sp[L], k0 = Math.floor(t0), kk = ((k0 % K) + K) % K;
+        const t = t0 + 0.22*Math.sin(along*0.07 + PH[L][kk]), kf = Math.floor(t), f = t - kf, kq = ((kf % K) + K) % K, Ik = I[L][kq];
+        const q = Math.abs(f - 0.5), wd = 0.50 + 0.38*Ik, cov = 1 - swStep(wd/2 - 0.14, wd/2 + 0.14, q);
+        const ml = swClamp(0.5 - (sd + J[L][kq] - 1.7)*ds, 0, 1);
+        const gt = G.val(x*1.25 + L*13, y*1.25)*0.55 + G.val(x*3.3, y*3.3 + 5)*0.45, hit = swStep(0.24, 0.55, gt + (Ik - 0.55)*0.5);
+        keep *= 1 - cov*ml*hit*(L === 0 ? 0.90 : 0.62)*(0.82 + 0.18*Ik);
+      }
+      const a = 1 - keep; if (a <= 0.01) continue;
+      const o = (j*W + i)*4;
+      if (dark){ d[o] = hr; d[o + 1] = hg; d[o + 2] = hb; d[o + 3] = 240*a; } else { d[o] = pr; d[o + 1] = pg; d[o + 2] = pb; d[o + 3] = 255*a; }
+    }
+  }
+  g.putImageData(id, 0, 0); return c;
+}
+function lapizSwatch(ctx, x, y, w, h, hex, seed){
+  const ds = swDev(ctx), dark = swDark(), pad = 6;
+  const c = swCached(['lp', hex, seed, Math.round(w*10), Math.round(h*10), Math.round(ds*100), dark ? 1 : 0].join('|'), () => lapizBuild(w, h, hex, seed, ds, pad, dark));
+  ctx.save(); ctx.globalCompositeOperation = dark ? 'source-over' : 'multiply';
+  ctx.drawImage(c, x - pad, y - pad, w + 2*pad, h + 2*pad); ctx.restore();
 }
 /* Espátula: pintura espesa arrastrada. Se calcula el espesor punto por punto (vetas del arrastre,
    cordón al final, labios en los bordes) y se ilumina con una luz arriba a la izquierda. */
@@ -2497,24 +2558,6 @@ function knifeSwatch(ctx, x, y, w, h, hex, seed){
   ctx.drawImage(c, x - pad, y - pad, w + 2*pad, h + 2*pad); ctx.restore();
 }
 
-function watercolorSwatch(ctx, x, y, w, h, hex, seed){
-  const dark = hex2ok(S.paper ? rgbHex(...S.paper) : '#EEE6CD')[0] < 0.5;
-  watercolorWash(ctx, x + w*0.02, y + h*0.04, w*0.96, h*0.92, hex, seed, dark);
-}
-function watercolorSwatchOld(ctx, x, y, w, h, hex, seed){
-  const r = rng(seed*131 + 7), cx = x + w/2, cy = y + h/2, R = Math.min(w, h)/2*0.86, dark = hex2ok(S.paper ? rgbHex(...S.paper) : '#EEE6CD')[0] < 0.5;
-  ctx.save();
-  blobPath(ctx, cx, cy, R*0.95, rng(seed*131 + 7), 0.05, 0.02); ctx.fillStyle = hex; ctx.globalAlpha = dark ? 0.6 : 0.45; ctx.fill();
-  for (let pass = 0; pass < 4; pass++){
-    blobPath(ctx, cx + (r()-0.5)*R*0.08, cy + (r()-0.5)*R*0.08, R*(0.9 + r()*0.12), rng(seed*131 + 7 + pass*3), 0.07, 0.03);
-    ctx.fillStyle = hex; ctx.globalAlpha = 0.2; ctx.fill();
-  }
-  blobPath(ctx, cx, cy, R, rng(seed*131 + 7), 0.07, 0.03);
-  ctx.strokeStyle = shade(hex, -0.12); ctx.globalAlpha = 0.42; ctx.lineWidth = R*0.035; ctx.stroke();
-  ctx.clip();
-  for (let k = 0; k < 260; k++){ ctx.globalAlpha = 0.06 + r()*0.1; ctx.fillStyle = shade(hex, Math.round((r()-0.6)*0.2*40)/40); ctx.beginPath(); ctx.arc(cx + (r()*2-1)*R, cy + (r()*2-1)*R, R*(0.01 + r()*0.025), 0, Math.PI*2); ctx.fill(); }
-  ctx.restore();
-}
 function splitTwo(text){
   const w = text.trim().split(/\s+/); if (w.length < 2) return [text];
   let best = 1, bd = Infinity;
@@ -2543,44 +2586,21 @@ function swatchLabels(ctx, colors, centers, base, size, maxW, wrap){
     ctx.restore();
   }
 }
-function pantoneChips(ctx, colors, L, labels){
-  const ds = devScale(ctx), cw = L.w*0.97, ch = L.h*1.42, top = L.y - L.h*0.11, blockH = ch*0.62, fsN = L.h*0.118, fsH = L.h*0.082;
-  colors.forEach((c, i) => {
-    const x = L.xs[i] + (L.w - cw)/2;
-    ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.28)'; ctx.shadowBlur = 4*ds; ctx.shadowOffsetY = 1.5*ds;
-    ctx.fillStyle = '#FBFAF7'; ctx.fillRect(x, top, cw, ch); ctx.restore();
-    ctx.fillStyle = c.hex; ctx.fillRect(x + 5, top + 5, cw - 10, blockH);
-    if (!labels) return;
-    ctx.fillStyle = '#1B1A18'; ctx.textAlign = 'left';
-    const name = c.name.trim(), maxW = cw - 12;
-    ctx.font = `500 ${fsN}px ${MONO}`;
-    let ls = [name]; if (ctx.measureText(name).width > maxW){ const two = splitTwo(name); if (two.length === 2) ls = two; }
-    const y0 = top + 5 + blockH + fsN*1.25;
-    ls.forEach((l, j) => { fitFont(ctx, l, maxW, fsN, MONO, 500); ctx.fillText(l, x + 6, y0 + j*fsN*1.1); });
-    ctx.fillStyle = '#6E6A62'; ctx.font = `400 ${fsH}px ${MONO}`; ctx.fillText(c.hex.toUpperCase(), x + 6, top + ch - fsH*0.9);
-  });
-}
 function drawSwatches(ctx, colors, L, label, seedBase, labels, wrap){
   const shape = state.shape;
-  if (shape === 'pantone'){ pantoneChips(ctx, colors, L, labels); return; }
   const single = colors.length === 1;
-  let centers = L.xs.map(x => x + L.w/2);
-  if (shape === 'franja' && !single){
-    const x0 = L.xs[0], x1 = L.xs[2] + L.w, bh = L.h*0.56, y0 = L.y + (L.h - bh)/2, seg = (x1 - x0)/3;
-    colors.forEach((c, i) => { ctx.fillStyle = c.hex; ctx.fillRect(x0 + seg*i, y0, seg + (i < 2 ? 0.5 : 0), bh); });
-    ctx.strokeStyle = S.frame; ctx.lineWidth = 1.6; ctx.strokeRect(x0 - 4, y0 - 4, x1 - x0 + 8, bh + 8);
-    centers = [0, 1, 2].map(i => x0 + seg*(i + 0.5));
-  } else {
-    colors.forEach((c, i) => {
-      const x = L.xs[i], y = L.y, w = L.w, h = L.h;
-      if (shape === 'circulos') circleSwatch(ctx, x, y, w, h, L.inset, c.hex);
-      else if (shape === 'pincel') brushSwatch(ctx, x, y, w, h, c.hex, single ? seedBase : seedBase*3 + i);
-      else if (shape === 'acuarela') watercolorSwatch(ctx, x, y, w, h, c.hex, single ? seedBase : seedBase*3 + i);
-      else if (shape === 'pastilla') panSwatch(ctx, x + w*0.03, y + h*0.03, w*0.94, h*0.94, c.hex, single ? seedBase : seedBase*3 + i);
-      else if (shape === 'espatula') knifeSwatch(ctx, x, y, w, h, c.hex, single ? seedBase : seedBase*3 + i);
-      else squareSwatch(ctx, x, y, w, h, L.inset, c.hex);
-    });
-  }
+  const centers = L.xs.map(x => x + L.w/2);
+  colors.forEach((c, i) => {
+    const x = L.xs[i], y = L.y, w = L.w, h = L.h, sd = single ? seedBase : seedBase*3 + i;
+    if (shape === 'circulos') circleSwatch(ctx, x, y, w, h, L.inset, c.hex);
+    else if (shape === 'pincel') brushSwatch(ctx, x, y, w, h, c.hex, sd);
+    else if (shape === 'acuarela') wcSwatch(ctx, 'wash', x + w*0.02, y + h*0.03, w*0.96, h*0.94, c.hex, sd);
+    else if (shape === 'gota') wcSwatch(ctx, 'drop', x, y, w, h, c.hex, sd);
+    else if (shape === 'brocha') brochaSwatch(ctx, x, y, w, h, c.hex, sd);
+    else if (shape === 'lapiz') lapizSwatch(ctx, x, y, w, h, c.hex, sd);
+    else if (shape === 'espatula') knifeSwatch(ctx, x, y, w, h, c.hex, sd);
+    else squareSwatch(ctx, x, y, w, h, L.inset, c.hex);
+  });
   if (labels) swatchLabels(ctx, colors, centers, label.base, label.size, label.maxW, wrap);
 }
 
@@ -2775,7 +2795,7 @@ const PTOP = 50, SW_K = {chicos:0.75, medianos:1, grandes:1.15}, DECO_M = {troqu
 const pmTopRight = (p, mini) => !mini && state.pm !== 'ninguno' && pmPosOf(p) === 'arriba-der';
 function postalLayoutBase(p, n, H, mini){
   const P = POSTAL, Lo = layOf(p), k = SW_K[Lo.swSize] || 1, big = Lo.photoSize === 'grande';
-  const hexH = !mini && state.show.postal.hex && state.shape !== 'pantone' ? 18 : 0;
+  const hexH = !mini && state.show.postal.hex ? 18 : 0;
   const strip = !mini && stripText(p, n).some(Boolean);
   const kind = state.decoPostal && !mini ? postalDeco() : 'none', m = DECO_M[kind] || 0;
   const side = big ? 25 : 43.5, top0 = (big ? PTOP : 55) + m*0.6;
@@ -3956,7 +3976,7 @@ function renderShapeThumbs(){
     state.shape = c.dataset.shape;
     const x = c.getContext('2d'); x.setTransform(1,0,0,1,0,0); x.clearRect(0, 0, c.width, c.height);
     x.setTransform(c.width/192, 0, 0, c.height/88, 0, 0);
-    const L = state.shape === 'pantone' ? {xs:[14, 72, 130], y:14, w:48, h:44, inset:3} : {xs:[10, 70, 130], y:14, w:52, h:52, inset:3.5};
+    const L = {xs:[10, 70, 130], y:14, w:52, h:52, inset:3.5};
     drawSwatches(x, cols, L, null, 1, false, false);
   });
   state.shape = keepShape; S = keepS;
@@ -4052,7 +4072,7 @@ const PRESET_EXAMPLES = [
   {name:'Clásica', d:{style:'archivo', deco:'cintas-clip', decoPostal:false, frame:'fina', format:'1:1', comp:'postal', shape:'cuadrados', photoSize:'normal', paperTex:'textura', swSize:'medianos', swPos:'centro', stampColor:'', extras:{postmark:false, border:false, filmdate:false, counter:false}}},
   {name:'Costa vertical', d:{style:'archivo', deco:'paspartu', decoPostal:true, frame:'fina', format:'4:5', comp:'postal', shape:'cuadrados', photoSize:'grande', paperTex:'liso', swSize:'medianos', swPos:'costado', counterInk:'tinta', extras:{postmark:false, border:false, filmdate:false, counter:true}}, cover:{on:true, look:'sola', bg:'blanco'}}
 ];
-function migratePreset(pr){ if (pr && pr.d && !('stampMode' in pr.d)) pr.d.stampMode = pr.d.stampColor ? 'elegido' : 'papel'; if (pr && pr.d && pr.d.vertSep === true && pr.d.swPos === 'centro' && (pr.d.swPosV || 'costado') === 'costado') pr.d.swPos = 'auto'; return pr; }
+function migratePreset(pr){ if (pr && pr.d && pr.d.shape && !SHAPES.some(x => x[0] === pr.d.shape)) pr.d.shape = 'acuarela'; if (pr && pr.d && !('stampMode' in pr.d)) pr.d.stampMode = pr.d.stampColor ? 'elegido' : 'papel'; if (pr && pr.d && pr.d.vertSep === true && pr.d.swPos === 'centro' && (pr.d.swPosV || 'costado') === 'costado') pr.d.swPos = 'auto'; return pr; }
 function loadPresets(){ try { const v = JSON.parse(localStorage.getItem(PRESET_KEY) || 'null'); return Array.isArray(v) ? v.map(migratePreset) : PRESET_EXAMPLES.map(x => JSON.parse(JSON.stringify(x))); } catch(e){ return PRESET_EXAMPLES.slice(); } }
 function savePresets(list){ try { localStorage.setItem(PRESET_KEY, JSON.stringify(list)); } catch(e){} }
 let PRESETS = [], lastPreset = '';
