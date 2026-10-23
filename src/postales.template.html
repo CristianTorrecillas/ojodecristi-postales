@@ -616,7 +616,8 @@ body.bg-cada .lay-bg{display:flex !important}
 .modes button:hover{color:var(--ink)}
 .modes button[aria-selected="true"]{background:var(--stamp);color:var(--on-stamp)}
 @media (min-width:1100px){.mast{display:grid;grid-template-columns:auto auto auto;justify-content:start;align-items:center;column-gap:12px;row-gap:8px}.mast .paletas{grid-column:1/-1}.mast .modes{margin-left:6px}.modes button{min-height:26px;padding:0 11px;font-size:12.5px}}
-body[data-mode="marcos"] .bar,body[data-mode="marcos"] .views,body[data-mode="marcos"] #sampleNote,body[data-mode="marcos"] main.cols,body[data-mode="marcos"] .mbar,body[data-mode="marcos"] #mini{display:none !important}
+body[data-mode="marcos"] .bar,body[data-mode="marcos"] .views,body[data-mode="marcos"] #sampleNote,body[data-mode="marcos"] main.cols,body[data-mode="marcos"] .mbar,body[data-mode="marcos"] #mini,
+body[data-mode="imprimir"] .bar,body[data-mode="imprimir"] .views,body[data-mode="imprimir"] #sampleNote,body[data-mode="imprimir"] main.cols,body[data-mode="imprimir"] .mbar,body[data-mode="imprimir"] #mini{display:none !important}
 #marcos{display:none;flex-direction:column;gap:18px}
 body[data-mode="marcos"] #marcos{display:flex}
 .mk-bar{display:flex;flex-wrap:wrap;align-items:flex-end;gap:14px 20px;padding:14px 16px;background:var(--panel);border:1px solid var(--rule);border-radius:var(--r-md);box-shadow:var(--shadow)}
@@ -652,6 +653,60 @@ body[data-mode="marcos"] #marcos{display:flex}
   .mk-saves .btn{flex:1}
   .mk-range input{width:120px}
 }
+
+/* ---------- modo Imprimir: postales y fichas de cuadro ---------- */
+#imprimir{display:none;flex-direction:column;gap:16px}
+body[data-mode="imprimir"] #imprimir{display:flex}
+.pr-head{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.pr-tool button{font-size:13px !important;min-height:32px !important;padding:0 14px !important}
+.pr-sub{margin:0;color:var(--muted);font-size:13.5px}
+.pr-cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:28px;align-items:start}
+#imprimir[data-tool="postal"] .pr-panel[data-tool="ficha"],#imprimir[data-tool="ficha"] .pr-panel[data-tool="postal"]{display:none}
+.pr-panel{display:flex;flex-direction:column;gap:18px;min-width:0}
+.pr-sec{background:var(--panel);border:1px solid var(--rule);border-radius:var(--r-md);padding:12px 14px 16px;display:flex;flex-direction:column;gap:12px}
+.pr-sec .col-head{margin-bottom:0}
+.pr-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 12px}
+.pr-grid.pr-nums{grid-template-columns:repeat(3,minmax(0,1fr))}
+.pr-f{display:flex;flex-direction:column;gap:4px;min-width:0}
+.pr-f.wide{grid-column:1/-1}
+.pr-f>span,.pr-opt .lbl{font-size:12.5px;color:var(--muted)}
+.pr-f .inp.num{width:100%}
+.pr-opts{display:flex;flex-direction:column;gap:8px}
+.pr-opt{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.pr-help{margin:0;font-size:13px;color:var(--muted);line-height:1.5}
+.pr-pick,.pr-sigpick{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;font-size:200px;z-index:2}
+.pr-drop{margin-top:0;min-height:96px !important}
+.pr-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.pr-item{display:grid;grid-template-columns:64px minmax(0,1fr) auto;gap:10px;align-items:start;padding:8px;border:1px solid var(--rule);border-radius:var(--r-sm);background:var(--paper);cursor:pointer}
+.pr-item.sel{outline:2px solid var(--stamp);outline-offset:1px}
+.pr-item canvas{width:64px;height:64px;object-fit:cover;border-radius:3px;display:block}
+.pr-item .pr-fields{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) minmax(0,.8fr);gap:6px}
+.pr-item .inp{height:32px;font-size:14px}
+.pr-item .ico{width:28px;height:28px}
+.pr-photo{display:flex;align-items:center;gap:14px}
+.pr-photo canvas{width:80px;height:80px;border-radius:4px;background:var(--well);flex:none}
+.pr-photo-acts{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.btn.mini{height:32px;padding:0 12px;font-size:12px}
+.pr-sig{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.pr-sig canvas{width:210px;height:60px;border:1px dashed var(--rule);border-radius:4px;background:#FBF8F1}
+.pr-view{position:sticky;top:calc(var(--topH,64px) + 16px);display:flex;flex-direction:column;gap:12px;min-width:0}
+.pr-cards{display:flex;flex-wrap:wrap;gap:18px;align-items:flex-start;justify-content:center;background:var(--well);border-radius:var(--r-lg);padding:22px}
+.pr-cards figure{margin:0;display:flex;flex-direction:column;align-items:center;gap:8px;min-width:0}
+.pr-cards canvas{display:block;max-width:100%;height:auto;box-shadow:0 1px 1px rgba(40,28,12,.10),0 12px 26px -10px rgba(40,28,12,.40)}
+.pr-cards figcaption{font-size:12px;color:var(--muted)}
+.pr-info{margin:0;font-size:13px;color:var(--muted)}
+.pr-acts{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+@media (max-width:1099px){
+  .pr-cols{grid-template-columns:minmax(0,1fr)}
+  .pr-view{position:static;order:-1}
+  .pr-cards{padding:14px;gap:12px}
+}
+@media (max-width:700px){
+  .pr-grid,.pr-grid.pr-nums{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .pr-item .pr-fields{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .pr-item .pr-fields .inp:first-child{grid-column:1/-1}
+  .pr-acts .btn{flex:1}
+}
 </style>
 </head>
 <body>
@@ -671,6 +726,7 @@ body[data-mode="marcos"] #marcos{display:flex}
     <div class="modes" role="tablist" aria-label="Modo">
       <button type="button" role="tab" data-mode="postales" aria-selected="true">Postales</button>
       <button type="button" role="tab" data-mode="marcos" aria-selected="false">Marcos blancos</button>
+      <button type="button" role="tab" data-mode="imprimir" aria-selected="false">Imprimir</button>
     </div>
   </header>
 
@@ -1232,6 +1288,95 @@ body[data-mode="marcos"] #marcos{display:flex}
       <div class="drop picker mk-drop"><svg class="drop-ico" viewBox="0 0 48 56" aria-hidden="true"><rect x="2" y="2" width="44" height="52" fill="none" stroke="currentColor" stroke-width="2.6" stroke-dasharray="0.1 5.15" stroke-linecap="round"/><rect x="8.5" y="8.5" width="31" height="39" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M11.5 43l8.5-10.5 6 7 4-4 7 7.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><circle cx="31" cy="18.5" r="3.4" fill="none" stroke="currentColor" stroke-width="1.4"/></svg><span id="mkDropTxt">Soltá las fotos acá o tocá para elegirlas<small>Verticales y horizontales mezcladas, en el orden del carrusel</small></span><input type="file" class="mk-pick" accept="image/*" multiple aria-label="Elegir fotos"></div>
     </div>
   </section>
+
+  <section id="imprimir" aria-label="Imprimir">
+    <div class="pr-head">
+      <div class="chips segc pr-tool" role="radiogroup" aria-label="Qué imprimir" data-pr="tool">
+        <button type="button" role="radio" data-v="postal">Postal</button>
+        <button type="button" role="radio" data-v="ficha">Ficha de cuadro</button>
+      </div>
+      <p class="pr-sub" id="prSub"></p>
+    </div>
+
+    <div class="pr-cols">
+      <!-- ===== Postal ===== -->
+      <div class="pr-panel" data-tool="postal">
+        <div class="pr-sec">
+          <div class="col-head"><h2>Fotos</h2><span class="col-tools"><span id="prpCount" class="count"></span></span></div>
+          <ol id="prpList" class="pr-list"></ol>
+          <div class="drop picker pr-drop"><span id="prpDropTxt">Soltá las fotos acá o tocá para elegirlas<small>Una postal por foto: frente con la foto y el sello, dorso para escribir</small></span><input type="file" class="pr-pick" data-for="postal" accept="image/*" multiple aria-label="Elegir fotos para postales"></div>
+        </div>
+        <div class="pr-sec">
+          <div class="col-head"><h2>Dorso</h2></div>
+          <div class="pr-grid">
+            <label class="pr-f wide"><span>Enlace del QR</span><input class="inp" id="prQr" type="url" autocomplete="off"></label>
+            <label class="pr-f"><span>Usuario</span><input class="inp" id="prUser" type="text" autocomplete="off"></label>
+            <label class="pr-f"><span>Texto junto al QR</span><input class="inp" id="prQrTxt" type="text" autocomplete="off"></label>
+          </div>
+          <div class="pr-opts">
+            <div class="pr-opt"><span class="lbl">Renglones para escribir</span><div class="chips segc" role="radiogroup" data-pr="lines"><button type="button" role="radio" data-v="si">Sí</button><button type="button" role="radio" data-v="no">No</button></div></div>
+            <div class="pr-opt"><span class="lbl">Borde de correo aéreo</span><div class="chips segc" role="radiogroup" data-pr="air"><button type="button" role="radio" data-v="si">Sí</button><button type="button" role="radio" data-v="no">No</button></div></div>
+            <div class="pr-opt"><span class="lbl">Sello en el frente</span><div class="chips segc" role="radiogroup" data-pr="stampFront"><button type="button" role="radio" data-v="si">Sí</button><button type="button" role="radio" data-v="no">No</button></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== Ficha ===== -->
+      <div class="pr-panel" data-tool="ficha">
+        <div class="pr-sec">
+          <div class="col-head"><h2>Cuadro</h2></div>
+          <div class="pr-photo">
+            <canvas id="prfThumb" width="160" height="160" aria-hidden="true"></canvas>
+            <div class="pr-photo-acts">
+              <span class="picker btn btn-ghost mini">Elegir foto<input type="file" class="pr-pick" data-for="ficha" accept="image/*" aria-label="Elegir la foto del cuadro"></span>
+              <button type="button" class="linkbtn" id="prfNoPhoto" hidden>Sin foto</button>
+            </div>
+          </div>
+          <div class="pr-grid">
+            <label class="pr-f"><span>Título</span><input class="inp" id="prfTitle" type="text" placeholder="El Arco" autocomplete="off"></label>
+            <label class="pr-f"><span>Título en inglés</span><input class="inp" id="prfTitleEn" type="text" placeholder="The Bow" autocomplete="off"></label>
+            <label class="pr-f"><span>Lugar</span><input class="inp" id="prfPlace" type="text" placeholder="Mar del Plata" autocomplete="off"></label>
+            <label class="pr-f"><span>Fecha</span><input class="inp" id="prfDate" type="text" placeholder="04-09-2025" autocomplete="off"></label>
+            <label class="pr-f wide"><span>Detalle (opcional)</span><input class="inp" id="prfDetail" type="text" placeholder="Impresión fine art · 30 × 45 cm" autocomplete="off"></label>
+          </div>
+          <div class="pr-grid pr-nums">
+            <label class="pr-f"><span>Tirada (copias en total)</span><input class="inp num" id="prfEd" type="number" min="1" max="999" inputmode="numeric"></label>
+            <label class="pr-f"><span>Fichas desde la copia</span><input class="inp num" id="prfFrom" type="number" min="1" max="999" inputmode="numeric"></label>
+            <label class="pr-f"><span>hasta la copia</span><input class="inp num" id="prfTo" type="number" min="1" max="999" inputmode="numeric"></label>
+          </div>
+          <div class="pr-opts">
+            <div class="pr-opt"><span class="lbl">Sello</span><div class="chips segc" role="radiogroup" data-pr="fStamp"><button type="button" role="radio" data-v="si">Sí</button><button type="button" role="radio" data-v="no">No</button></div></div>
+          </div>
+        </div>
+        <div class="pr-sec">
+          <div class="col-head"><h2>Firma</h2></div>
+          <p class="pr-help">Firmá con lapicera negra sobre una hoja blanca y sacale una foto con buena luz. La herramienta borra el papel y deja solo el trazo, del mismo tono que el resto de la ficha. Si no cargás ninguna, queda una línea para firmar a mano.</p>
+          <div class="pr-sig">
+            <canvas id="prSigView" width="420" height="120" aria-label="Firma cargada"></canvas>
+            <div class="pr-photo-acts">
+              <span class="picker btn btn-ghost mini">Cargar foto de la firma<input type="file" id="prSigFile" class="pr-sigpick" accept="image/*" aria-label="Cargar foto de la firma"></span>
+              <button type="button" class="linkbtn" id="prSigDel" hidden>Quitar firma</button>
+            </div>
+          </div>
+          <div class="pr-opts">
+            <div class="pr-opt"><span class="lbl">Tinta de la firma</span><div class="chips segc" role="radiogroup" data-pr="sigInk"><button type="button" role="radio" data-v="texto">Como el texto</button><button type="button" role="radio" data-v="sello">Roja del sello</button><button type="button" role="radio" data-v="azul">Azul lapicera</button></div></div>
+            <div class="pr-opt"><span class="lbl">Firma en la ficha</span><div class="chips segc" role="radiogroup" data-pr="sigUse"><button type="button" role="radio" data-v="imagen">Impresa</button><button type="button" role="radio" data-v="linea">Línea para firmar a mano</button></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== Vista previa ===== -->
+      <div class="pr-view">
+        <div class="pr-opt pr-paper"><span class="lbl">Fondo</span><div class="chips segc" role="radiogroup" data-pr="paper"><button type="button" role="radio" data-v="crema">Crema</button><button type="button" role="radio" data-v="blanco">Blanco</button><button type="button" role="radio" data-v="textura">Papel con textura</button></div></div>
+        <div class="pr-cards" id="prCards"></div>
+        <p class="pr-info" id="prInfo"></p>
+        <div class="pr-acts">
+          <button type="button" id="prZip" class="btn btn-ghost">Imágenes (.zip)</button>
+          <button type="button" id="prPdf" class="btn btn-stamp">PDF para imprimir</button>
+        </div>
+      </div>
+    </div>
+  </section>
 </div>
 
 <button type="button" id="mini" class="mini-prev" hidden aria-label="Ver en grande"><canvas id="miniC" width="300" height="300"></canvas><span id="miniLbl"></span></button>
@@ -1310,6 +1455,7 @@ body[data-mode="marcos"] #marcos{display:flex}
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
 <script src="vendor/jszip.min.js" defer></script>
+<script src="vendor/qrcode.js" defer></script>
 <script>
 (() => {
 'use strict';
@@ -4232,7 +4378,7 @@ function undo(){
   syncDesign(); syncCover(); syncRecipe(); renderStyleThumbs(); renderShapeThumbsSoon(); scheduleOut(); toast('Cambio deshecho');
 }
 $('#undoBtn').addEventListener('click', undo);
-document.addEventListener('keydown', e => { if (inMarcos()) return; if ((e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey && e.key.toLowerCase() === 'z' && !/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement && document.activeElement.tagName)){ e.preventDefault(); undo(); } });
+document.addEventListener('keydown', e => { if (notPostales()) return; if ((e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey && e.key.toLowerCase() === 'z' && !/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement && document.activeElement.tagName)){ e.preventDefault(); undo(); } });
 function renderRecipePhotos(){
   renderCoverPhotos();
   const sel = $('#rcPhoto'), R = state.recipe;
@@ -4460,7 +4606,7 @@ $('#stageSave').addEventListener('click', async e => {
   try { await shareOrSave(outName(o, selK).file, await renderBlob(o, state.size)); } finally { b.innerHTML = t; }
 });
 document.addEventListener('keydown', e => {
-  if (inMarcos() || !isWide() || !lb.hidden || !$('#igv').hidden || /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement && document.activeElement.tagName)) return;
+  if (notPostales() || !isWide() || !lb.hidden || !$('#igv').hidden || /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement && document.activeElement.tagName)) return;
   const n = outputs().length; if (!n) return;
   if (e.key === 'ArrowRight'){ selectOut((selK + 1) % n); scrollStrip(selK); e.preventDefault(); }
   else if (e.key === 'ArrowLeft'){ selectOut((selK - 1 + n) % n); scrollStrip(selK); e.preventDefault(); }
@@ -4665,7 +4811,7 @@ document.addEventListener('dragleave', () => { dragDepth = Math.max(0, dragDepth
 document.addEventListener('dragover', e => { if (e.dataTransfer && [...e.dataTransfer.types].includes('Files')) e.preventDefault(); });
 document.addEventListener('drop', e => {
   if (!e.dataTransfer || !e.dataTransfer.files.length) return;
-  e.preventDefault(); dragDepth = 0; document.body.classList.remove('dragging'); if (inMarcos()) mkAdd([...e.dataTransfer.files]); else addFiles(e.dataTransfer.files);
+  e.preventDefault(); dragDepth = 0; document.body.classList.remove('dragging'); if (inMarcos()) mkAdd([...e.dataTransfer.files]); else if (inImprimir()) prDrop([...e.dataTransfer.files]); else addFiles(e.dataTransfer.files);
 });
 
 /* ---------- boot ---------- */
@@ -4924,12 +5070,347 @@ function setMode(m){
   document.querySelectorAll('.modes [data-mode]').forEach(b => { const on = b.dataset.mode === m; b.setAttribute('aria-selected', String(on)); b.tabIndex = on ? 0 : -1; });
   try { localStorage.setItem(MODE_KEY, m); } catch(e){}
   if (m === 'marcos') mkRender();
+  if (m === 'imprimir') prRender();
 }
 document.querySelector('.modes').addEventListener('click', e => { const b = e.target.closest('[data-mode]'); if (b) setMode(b.dataset.mode); });
 mkSync(); mkSaveLabel();
-{ let m = 'postales'; try { m = localStorage.getItem(MODE_KEY) === 'marcos' ? 'marcos' : 'postales'; } catch(e){} setMode(m); }
 
+
+/* ---------- modo Imprimir: postales imprimibles y fichas numeradas de cuadro ---------- */
+function inImprimir(){ return document.body.dataset.mode === 'imprimir'; }
+function notPostales(){ return (document.body.dataset.mode || 'postales') !== 'postales'; }
+const PR_KEY = 'postales-ojodecristi-imprimir', SIG_KEY = 'postales-ojodecristi-firma';
+const MM = 300/25.4, PT = 72/25.4;
+const PR_INK = '#2A2620', PR_MUTED = '#776D5F', PR_RED = '#A62520', PR_BLUE = '#1F3A8A', PR_CREAM = '#F4EEDF';
+const PR_SLAB = '"Zilla Slab", Georgia, serif';
+const PR = {tool:'postal', paper:'crema', lines:'si', air:'no', stampFront:'si', fStamp:'si', sigInk:'texto', sigUse:'imagen',
+  qr:'https://www.instagram.com/ojodecristi/', user:'@ojodecristi', qrTxt:'Seguime en Instagram',
+  f:{title:'', titleEn:'', place:'', date:'', detail:'', ed:10, from:1, to:10},
+  postals:[], sel:0, fphoto:null, sig:null, busy:false};
+const PR_CHIPS = ['tool', 'paper', 'lines', 'air', 'stampFront', 'fStamp', 'sigInk', 'sigUse'];
+try { const o = JSON.parse(localStorage.getItem(PR_KEY) || 'null'); if (o && typeof o === 'object'){
+  PR_CHIPS.forEach(k => { if (typeof o[k] === 'string') PR[k] = o[k]; });
+  ['qr', 'user', 'qrTxt'].forEach(k => { if (typeof o[k] === 'string') PR[k] = o[k]; });
+  if (o.f && typeof o.f === 'object') Object.keys(PR.f).forEach(k => { if (o.f[k] != null && typeof o.f[k] === typeof PR.f[k]) PR.f[k] = o.f[k]; });
+} } catch(e){}
+function prSave(){ try { const o = {f:PR.f, qr:PR.qr, user:PR.user, qrTxt:PR.qrTxt}; PR_CHIPS.forEach(k => o[k] = PR[k]); localStorage.setItem(PR_KEY, JSON.stringify(o)); } catch(e){} }
+
+/* --- fotos --- */
+async function prLoad(file){
+  const ex = await readExif(file), src = await decodeFile(file, ex, 1600);
+  const prev = downscale(src, 1400); if (src.close) src.close();
+  return {id:uid(), file, ex, prev, title:'', place:'', date: ex.date || fmtDate(new Date(file.lastModified || Date.now()))};
+}
+async function prFull(p, maxSide){ const src = await decodeFile(p.file, p.ex, maxSide*1.3); const c = downscale(src, maxSide); if (src.close) src.close(); return c; }
+
+/* --- dibujo (todo en milímetros) --- */
+function prBg(ctx, w, h){
+  if (PR.paper === 'textura' && IMG.paper){ const P = IMG.paper, s = Math.max(w/P.width, h/P.height), sw = w/s, sh = h/s; ctx.drawImage(P, (P.width - sw)/2, (P.height - sh)/2, sw, sh, 0, 0, w, h); }
+  else { ctx.fillStyle = PR.paper === 'blanco' ? '#FFFFFF' : PR_CREAM; ctx.fillRect(0, 0, w, h); }
+}
+function prCover(ctx, img, x, y, w, h){ const iw = img.width, ih = img.height, s = Math.max(w/iw, h/ih), sw = w/s, sh = h/s; ctx.drawImage(img, (iw - sw)/2, (ih - sh)/2, sw, sh, x, y, w, h); }
+function prTxt(ctx, t, x, y, size, fam, weight, color, align, maxW){ if (!t) return; fitFont(ctx, t, maxW, size, fam, weight); ctx.fillStyle = color; ctx.textAlign = align || 'left'; ctx.textBaseline = 'alphabetic'; ctx.fillText(t, x, y); }
+function prLine(ctx, x0, y0, x1, y1, lw, color){ ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.lineWidth = lw; ctx.strokeStyle = color; ctx.stroke(); }
+function prStamp(ctx, cx, cy, d, rot, alpha){ if (!IMG.stamp) return; const img = tinted('stamp', PR_RED); ctx.save(); ctx.translate(cx, cy); ctx.rotate(rot*Math.PI/180); ctx.globalAlpha = alpha || 0.95; ctx.drawImage(img, -d/2, -d/2, d, d); ctx.restore(); }
+function prQR(ctx, text, x, y, size, color){
+  if (typeof window.qrcode !== 'function' || !text) return false;
+  try { const q = window.qrcode(0, 'M'); q.addData(text); q.make(); const n = q.getModuleCount(), m = size/n; ctx.fillStyle = color;
+    for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (q.isDark(r, c)) ctx.fillRect(x + c*m, y + r*m, m + 0.01, m + 0.01);
+    return true; } catch(e){ return false; }
+}
+function prAir(ctx, w, h, B){
+  ctx.save(); ctx.beginPath(); ctx.rect(0, 0, w, h); ctx.rect(B, B, w - 2*B, h - 2*B); ctx.clip('evenodd');
+  const sw = 3.2, cols = ['#C4352B', null, '#21428F', null]; ctx.globalAlpha = 0.92;
+  for (let s = -h, i = 0; s < w + h; s += sw, i++){ const c = cols[i % 4]; if (!c) continue; ctx.fillStyle = c; ctx.beginPath(); ctx.moveTo(s, 0); ctx.lineTo(s + sw, 0); ctx.lineTo(s + sw - h, h); ctx.lineTo(s - h, h); ctx.closePath(); ctx.fill(); }
+  ctx.restore();
+}
+function prPostalSize(p){ return p.prev.width >= p.prev.height ? [150, 100] : [100, 150]; }
+function prCaption(p){
+  const title = (p.title || '').trim(), place = (p.place || '').trim(), date = (p.date || '').trim();
+  return title ? [title, [place, date].filter(Boolean).join(' · ')] : [place, date];
+}
+function drawPostalFront(ctx, p, img, w, h){
+  prBg(ctx, w, h);
+  const m = 6, band = 17, pw = w - 2*m, ph = h - m - band, st = PR.stampFront === 'si';
+  prCover(ctx, img, m, m, pw, ph);
+  ctx.strokeStyle = 'rgba(0,0,0,.10)'; ctx.lineWidth = 0.15; ctx.strokeRect(m, m, pw, ph);
+  const [a, b] = prCaption(p), maxW = pw - (st ? 28 : 0), base = h - band + 7.6;
+  if (a) prTxt(ctx, a, m, base, 4.6, PR_SLAB, 500, PR_INK, 'left', maxW);
+  if (b) prTxt(ctx, b.toUpperCase(), m, base + (a ? 5.2 : 0), 2.5, MONO, 400, PR_MUTED, 'left', maxW);
+  if (!st) prTxt(ctx, PR.user, m + pw, base + 5.2, 2.4, MONO, 400, PR_MUTED, 'right', 40);
+  else prStamp(ctx, m + pw - 11, m + ph + 1.5, 23, -12);
+}
+function drawPostalBack(ctx, p, w, h){
+  prBg(ctx, w, h);
+  if (PR.air === 'si') prAir(ctx, w, h, 2.6);
+  const ink = PR_INK, mut = PR_MUTED, faint = 'rgba(42,38,32,.28)', div = 84;
+  prTxt(ctx, 'POSTAL · POSTCARD', 10, 14, 2.4, MONO, 500, mut);
+  prLine(ctx, div, 18, div, 88, 0.25, 'rgba(42,38,32,.45)');
+  if (PR.lines === 'si') for (let y = 27; y <= 59; y += 8) prLine(ctx, 10, y, div - 6, y, 0.2, faint);
+  const qs = 19, qx = 10, qy = h - 10 - qs, hasQr = PR.qr.trim() && prQR(ctx, PR.qr.trim(), qx, qy, qs, ink);
+  const tx = hasQr ? qx + qs + 4 : 10, tw = div - 6 - tx;
+  prTxt(ctx, PR.user, tx, qy + 6, 4.2, PR_SLAB, 500, ink, 'left', tw);
+  prTxt(ctx, PR.qrTxt, tx, qy + 10.6, 2.4, MONO, 400, mut, 'left', tw);
+  const [a, b] = prCaption(p), cred = [a, b].filter(Boolean).join(' — ');
+  if (cred) prTxt(ctx, 'Foto: ' + cred, tx, qy + 15.4, 2.1, MONO, 400, mut, 'left', tw);
+  const bw = 21, bh = 25, bx = w - 10 - bw, by = 12;
+  ctx.save(); ctx.setLineDash([1, 0.8]); ctx.strokeStyle = 'rgba(42,38,32,.5)'; ctx.lineWidth = 0.25; ctx.strokeRect(bx, by, bw, bh); ctx.restore();
+  prTxt(ctx, 'SELLO', bx + bw/2, by + bh/2 + 0.7, 1.9, MONO, 400, mut, 'center');
+  prStamp(ctx, bx - 3, by + bh - 4, 19, -14, 0.9);
+  for (let i = 0; i < 4; i++){ const y = 50 + i*10; prLine(ctx, div + 6, y, w - 10, y, 0.22, 'rgba(42,38,32,.42)'); }
+}
+/* firma: trazo en un canvas con transparencia, teñido al dibujar */
+const SIG_TINT = new Map();
+function prSigInk(){ return PR.sigInk === 'sello' ? PR_RED : PR.sigInk === 'azul' ? PR_BLUE : PR_INK; }
+function prSigImg(){
+  if (!PR.sig) return null; const col = prSigInk(); if (SIG_TINT.has(col)) return SIG_TINT.get(col);
+  const c = document.createElement('canvas'); c.width = PR.sig.width; c.height = PR.sig.height; const x = c.getContext('2d');
+  x.drawImage(PR.sig, 0, 0); x.globalCompositeOperation = 'source-in'; x.fillStyle = col; x.fillRect(0, 0, c.width, c.height);
+  SIG_TINT.clear(); SIG_TINT.set(col, c); return c;
+}
+function prDrawFicha(ctx, img, n, w, h){
+  prBg(ctx, w, h);
+  const F = PR.f, ed = Math.max(1, F.ed | 0), ink = PR_INK, mut = PR_MUTED, x1 = w - 6;
+  let x0 = 8, ph = 0, pw = 0, px = 6, py = 6;
+  if (img){ const bw = 33, bh = 58, s = Math.min(bw/img.width, bh/img.height); pw = img.width*s; ph = img.height*s; px = 6 + (bw - pw)/2; py = 6;
+    ctx.drawImage(img, px, py, pw, ph); ctx.strokeStyle = 'rgba(0,0,0,.12)'; ctx.lineWidth = 0.15; ctx.strokeRect(px, py, pw, ph); x0 = 45; }
+  const cw = x1 - x0, pad2 = v => String(v).padStart(2, '0');
+  prTxt(ctx, 'OJODECRISTI · ARCHIVO', x0, 10.6, 2.1, MONO, 500, mut, 'left', cw - 22);
+  prTxt(ctx, `N.° ${pad2(n)}/${pad2(ed)}`, x1, 10.8, 2.9, MONO, 500, PR_RED, 'right', 22);
+  prTxt(ctx, F.title.trim() || 'Sin título', x0, 20.2, 5.4, PR_SLAB, 500, ink, 'left', cw);
+  if (F.titleEn.trim()) prTxt(ctx, F.titleEn.trim(), x0, 25.8, 3.6, PR_SLAB, 400, mut, 'left', cw);
+  prLine(ctx, x0, 29.6, x1, 29.6, 0.2, 'rgba(42,38,32,.5)');
+  const rows = [['LUGAR', F.place.trim()], ['FECHA', F.date.trim()], ['COPIA', `${n} de ${ed}`]];
+  rows.forEach(([k, v], i) => { const y = 35.4 + i*6.2; prTxt(ctx, k, x0, y, 1.9, MONO, 500, mut, 'left', 14); prTxt(ctx, v || '—', x0 + 15, y, 3, SANS, 400, ink, 'left', cw - 15); });
+  const stNoPhoto = PR.fStamp === 'si' && !img, sigW = 36, sx = x1 - sigW, sy = 63.4;
+  if (F.detail.trim()) prTxt(ctx, F.detail.trim(), x0, 53.8, 2.4, SANS, 400, mut, 'left', stNoPhoto ? sx - x0 - 18 : cw);
+  prLine(ctx, sx, sy, x1, sy, 0.22, 'rgba(42,38,32,.55)');
+  prTxt(ctx, 'FIRMA', sx, sy + 3, 1.8, MONO, 500, mut);
+  const sig = PR.sigUse === 'imagen' ? prSigImg() : null;
+  if (sig){ const bh = 7.6, s = Math.min(sigW/sig.width, bh/sig.height), dw = sig.width*s, dh = sig.height*s; ctx.drawImage(sig, sx + (sigW - dw)/2, sy + 1.4 - dh, dw, dh); }
+  if (PR.fStamp === 'si'){
+    if (!img) prStamp(ctx, sx - 11, 59, 14, -14);
+    else if (64 - (py + ph) >= 20) prStamp(ctx, 6 + 33/2, (py + ph + 64)/2 + 1, 17, -12); // foto horizontal: el sello va debajo, en el lugar libre
+    else prStamp(ctx, px + pw - 2, py + ph - 2, 15, -14);
+  }
+}
+
+/* --- vista previa --- */
+function prCanvas(wmm, hmm, cssW){
+  const c = document.createElement('canvas'), dpr = Math.min(2, window.devicePixelRatio || 1), k = cssW*dpr/wmm;
+  c.width = Math.round(wmm*k); c.height = Math.round(hmm*k); c.style.width = cssW + 'px';
+  const x = c.getContext('2d'); x.scale(k, k); x.imageSmoothingQuality = 'high'; return [c, x];
+}
+function prFig(c, cap){ const f = document.createElement('figure'); f.appendChild(c); const fc = document.createElement('figcaption'); fc.textContent = cap; f.appendChild(fc); return f; }
+let prRaf = 0;
+function prRender(){ cancelAnimationFrame(prRaf); prRaf = requestAnimationFrame(prRenderNow); }
+function prRenderNow(){
+  const root = $('#imprimir'); root.dataset.tool = PR.tool;
+  document.querySelectorAll('#imprimir [data-pr]').forEach(g => g.querySelectorAll('[data-v]').forEach(b => b.setAttribute('aria-checked', String(b.dataset.v === PR[g.dataset.pr]))));
+  const box = $('#prCards'); box.innerHTML = '';
+  const avail = Math.max(240, Math.min(720, box.clientWidth - 44));
+  if (PR.tool === 'postal'){
+    $('#prSub').textContent = 'Postales de 10 × 15 cm para regalar con los cuadros, dejar en hoteles y cafés o usar como tarjeta. Frente con la foto y el sello; dorso para escribir con QR a tu Instagram.';
+    prList();
+    const p = PR.postals[PR.sel];
+    if (!p){ box.innerHTML = '<p class="pr-info">Agregá una foto para ver la postal.</p>'; }
+    else {
+      const [w, h] = prPostalSize(p), wide = avail >= 560, fw = w > h ? (wide ? avail*0.52 : avail) : (wide ? avail*0.36 : avail*0.7), bw = wide ? avail*0.44 : avail;
+      const [c1, x1] = prCanvas(w, h, Math.round(fw)); drawPostalFront(x1, p, p.prev, w, h); box.appendChild(prFig(c1, 'Frente'));
+      const [c2, x2] = prCanvas(150, 100, Math.round(w > h ? fw : bw)); drawPostalBack(x2, p, 150, 100); box.appendChild(prFig(c2, 'Dorso'));
+    }
+    const n = PR.postals.length;
+    $('#prInfo').textContent = n ? `${n} ${n === 1 ? 'postal' : 'postales'} · 10 × 15 cm a 300 dpi. El .zip trae frente y dorso en JPG para la imprenta o el laboratorio; el PDF trae cada postal en su tamaño real, frente y dorso, para imprimir a doble faz.` : '';
+    $('#prZip').disabled = $('#prPdf').disabled = !n;
+  } else {
+    $('#prSub').textContent = 'Una ficha numerada de 10 × 7 cm para cada copia de un cuadro: título, lugar, fecha, número de copia y tu firma.';
+    const F = PR.f, ed = Math.max(1, F.ed | 0), a = Math.min(Math.max(1, F.from | 0), ed), b = Math.min(Math.max(a, F.to | 0), ed);
+    const img = PR.fphoto ? PR.fphoto.prev : null;
+    const [c, x] = prCanvas(100, 70, Math.round(Math.min(avail, 520))); prDrawFicha(x, img, a, 100, 70); box.appendChild(prFig(c, `Ficha de la copia ${a} de ${ed}`));
+    const cnt = b - a + 1, pages = Math.ceil(cnt/8);
+    $('#prInfo').textContent = `${cnt} ${cnt === 1 ? 'ficha' : 'fichas'} (copias ${a} a ${b} de ${ed}) · 10 × 7 cm. El PDF las acomoda de a 8 por hoja A4 (${pages} ${pages === 1 ? 'hoja' : 'hojas'}) con marcas de corte: imprimí al 100 %, sin «ajustar a la página».`;
+    $('#prZip').disabled = $('#prPdf').disabled = false;
+    const t = $('#prfThumb'), tx = t.getContext('2d'); tx.clearRect(0, 0, t.width, t.height);
+    if (img) prCover(tx, img, 0, 0, t.width, t.height); $('#prfNoPhoto').hidden = !img;
+  }
+  prSigView();
+}
+function prList(){
+  const ol = $('#prpList'), n = PR.postals.length; $('#prpCount').textContent = n ? `${n} ${n === 1 ? 'postal' : 'postales'}` : '';
+  const keep = new Map([...ol.children].map(li => [li.dataset.id, li]));
+  PR.postals.forEach((p, k) => {
+    let li = keep.get(p.id);
+    if (!li){
+      li = document.createElement('li'); li.className = 'pr-item'; li.dataset.id = p.id;
+      li.innerHTML = `<canvas width="128" height="128"></canvas><div class="pr-fields"><input class="inp" data-k="title" placeholder="Título (opcional)" aria-label="Título"><input class="inp" data-k="place" placeholder="Lugar" aria-label="Lugar"><input class="inp" data-k="date" placeholder="Fecha" aria-label="Fecha"></div><button type="button" class="ico" data-act="quitar" aria-label="Quitar">×</button>`;
+      ['title', 'place', 'date'].forEach(f => li.querySelector(`[data-k="${f}"]`).value = p[f]);
+      prCover(li.querySelector('canvas').getContext('2d'), p.prev, 0, 0, 128, 128);
+    }
+    keep.delete(p.id); if (ol.children[k] !== li) ol.insertBefore(li, ol.children[k] || null);
+    li.classList.toggle('sel', k === PR.sel);
+  });
+  keep.forEach(li => li.remove());
+}
+function prSigView(){
+  const c = $('#prSigView'), x = c.getContext('2d'); x.clearRect(0, 0, c.width, c.height);
+  const s = prSigImg(); $('#prSigDel').hidden = !s;
+  if (s){ const k = Math.min((c.width - 20)/s.width, (c.height - 16)/s.height); x.drawImage(s, (c.width - s.width*k)/2, (c.height - s.height*k)/2, s.width*k, s.height*k); }
+  else { x.fillStyle = '#9A9081'; x.font = `400 22px ${SANS}`; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText('Sin firma cargada', c.width/2, c.height/2); }
+}
+
+/* --- firma desde una foto: se borra el papel (aunque tenga sombras) y queda el trazo --- */
+async function prSigFrom(file){
+  const ex = await readExif(file), src = await decodeFile(file, ex, 2200), c = downscale(src, 1600); if (src.close) src.close();
+  const W = c.width, H = c.height, x = c.getContext('2d', {willReadFrequently:true}), id = x.getImageData(0, 0, W, H), d = id.data, N = W*H;
+  const L = new Float32Array(N); for (let i = 0; i < N; i++) L[i] = 0.299*d[i*4] + 0.587*d[i*4+1] + 0.114*d[i*4+2];
+  const B = 40, gw = Math.ceil(W/B), gh = Math.ceil(H/B), bg = new Float32Array(gw*gh);
+  for (let gy = 0; gy < gh; gy++) for (let gx = 0; gx < gw; gx++){
+    const v = []; for (let y = gy*B; y < Math.min(H, gy*B + B); y += 2) for (let xx = gx*B; xx < Math.min(W, gx*B + B); xx += 2) v.push(L[y*W + xx]);
+    v.sort((a, b) => a - b); bg[gy*gw + gx] = v[Math.floor(v.length*0.85)] || 255;
+  }
+  const A = new Float32Array(N); let x0 = W, y0 = H, x1 = 0, y1 = 0;
+  for (let y = 0; y < H; y++) for (let xx = 0; xx < W; xx++){
+    const fx = Math.min(gw - 1, Math.max(0, xx/B - 0.5)), fy = Math.min(gh - 1, Math.max(0, y/B - 0.5)), ix = Math.floor(fx), iy = Math.floor(fy), tx = fx - ix, ty = fy - iy, ix2 = Math.min(gw - 1, ix + 1), iy2 = Math.min(gh - 1, iy + 1);
+    const b = (bg[iy*gw + ix]*(1 - tx) + bg[iy*gw + ix2]*tx)*(1 - ty) + (bg[iy2*gw + ix]*(1 - tx) + bg[iy2*gw + ix2]*tx)*ty;
+    const i = y*W + xx, a = Math.min(1, Math.max(0, ((b - L[i])/Math.max(30, b*0.55) - 0.12)*1.5));
+    A[i] = a; if (a > 0.3){ if (xx < x0) x0 = xx; if (xx > x1) x1 = xx; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+  }
+  releaseCanvas(c);
+  if (x1 <= x0 || y1 <= y0) throw new Error('vacía');
+  const p = Math.round(Math.max(x1 - x0, y1 - y0)*0.03) + 4; x0 = Math.max(0, x0 - p); y0 = Math.max(0, y0 - p); x1 = Math.min(W - 1, x1 + p); y1 = Math.min(H - 1, y1 + p);
+  const ow = x1 - x0 + 1, oh = y1 - y0 + 1, o = document.createElement('canvas'); o.width = ow; o.height = oh;
+  const ox = o.getContext('2d'), od = ox.createImageData(ow, oh);
+  for (let y = 0; y < oh; y++) for (let xx = 0; xx < ow; xx++){ const a = A[(y + y0)*W + xx + x0], j = (y*ow + xx)*4; od.data[j] = od.data[j+1] = od.data[j+2] = 0; od.data[j+3] = Math.round(a*255); }
+  ox.putImageData(od, 0, 0);
+  return ow > 1200 ? downscale(o, 1200) : o;
+}
+function prSigLoadSaved(){ try { const u = localStorage.getItem(SIG_KEY); if (u) loadImg(u).then(im => { const c = document.createElement('canvas'); c.width = im.width; c.height = im.height; c.getContext('2d').drawImage(im, 0, 0); PR.sig = c; SIG_TINT.clear(); prRender(); }).catch(() => {}); } catch(e){} }
+
+/* --- PDF mínimo: una imagen JPEG por página, al tamaño exacto --- */
+function prPdf(pages){
+  const enc = new TextEncoder(), chunks = [], offs = []; let len = 0;
+  const push = v => { const b = typeof v === 'string' ? enc.encode(v) : v; chunks.push(b); len += b.length; };
+  const obj = (id, body) => { offs[id] = len; push(`${id} 0 obj\n`); body(); push('\nendobj\n'); };
+  push('%PDF-1.4\n%âãÏÓ\n');
+  obj(1, () => push('<< /Type /Catalog /Pages 2 0 R >>'));
+  obj(2, () => push(`<< /Type /Pages /Kids [${pages.map((_, i) => `${3 + 3*i} 0 R`).join(' ')}] /Count ${pages.length} >>`));
+  pages.forEach((p, i) => {
+    const P = 3 + 3*i, W = p.wpt.toFixed(2), H = p.hpt.toFixed(2), cs = `q ${W} 0 0 ${H} 0 0 cm /Im${i} Do Q`;
+    obj(P, () => push(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${W} ${H}] /Resources << /XObject << /Im${i} ${P + 2} 0 R >> >> /Contents ${P + 1} 0 R >>`));
+    obj(P + 1, () => { push(`<< /Length ${cs.length} >>\nstream\n`); push(cs); push('\nendstream'); });
+    obj(P + 2, () => { push(`<< /Type /XObject /Subtype /Image /Width ${p.w} /Height ${p.h} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${p.jpg.length} >>\nstream\n`); push(p.jpg); push('\nendstream'); });
+  });
+  const xref = len, total = 3 + 3*pages.length;
+  push(`xref\n0 ${total}\n0000000000 65535 f \n`); for (let i = 1; i < total; i++) push(String(offs[i]).padStart(10, '0') + ' 00000 n \n');
+  push(`trailer\n<< /Size ${total} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF\n`);
+  return new Blob(chunks, {type:'application/pdf'});
+}
+async function prJpg(c){ const b = await toBlobP(c, 'image/jpeg', 0.95); return {blob:b, bytes:new Uint8Array(await b.arrayBuffer())}; }
+function prSheet(wmm, hmm){ const c = document.createElement('canvas'); c.width = Math.round(wmm*MM); c.height = Math.round(hmm*MM); const x = c.getContext('2d'); x.scale(c.width/wmm, c.height/hmm); x.imageSmoothingQuality = 'high'; return [c, x]; }
+async function prFontsReady(){ try { await Promise.all([document.fonts.load(`500 20px ${PR_SLAB}`), document.fonts.load(`400 20px ${PR_SLAB}`), document.fonts.load(`500 20px ${MONO}`), document.fonts.load(`400 20px ${MONO}`), document.fonts.load(`400 20px ${SANS}`)]); } catch(e){} }
+/* arma todo lo que se exporta: [{name, canvas}] por imagen y las páginas del PDF */
+async function prBuild(onStep){
+  await prFontsReady();
+  const files = [], pages = [];
+  if (PR.tool === 'postal'){
+    for (let k = 0; k < PR.postals.length; k++){
+      onStep(k + 1, PR.postals.length);
+      const p = PR.postals[k], [w, h] = prPostalSize(p), full = await prFull(p, 2000), n = String(k + 1).padStart(2, '0');
+      const [f, fx] = prSheet(w, h); drawPostalFront(fx, p, full, w, h); releaseCanvas(full);
+      const [bk, bx] = prSheet(150, 100); drawPostalBack(bx, p, 150, 100);
+      const F = await prJpg(f), Bk = await prJpg(bk);
+      files.push({name:`postal-${n}-frente.jpg`, blob:F.blob}, {name:`postal-${n}-dorso.jpg`, blob:Bk.blob});
+      pages.push({jpg:F.bytes, w:f.width, h:f.height, wpt:w*PT, hpt:h*PT});
+      if (w < h){ // frente vertical: el dorso va girado en una página del mismo tamaño, para imprimir a doble faz
+        const r = document.createElement('canvas'); r.width = bk.height; r.height = bk.width; const rx = r.getContext('2d'); rx.translate(r.width, 0); rx.rotate(Math.PI/2); rx.drawImage(bk, 0, 0);
+        const R = await prJpg(r); pages.push({jpg:R.bytes, w:r.width, h:r.height, wpt:w*PT, hpt:h*PT}); releaseCanvas(r);
+      } else pages.push({jpg:Bk.bytes, w:bk.width, h:bk.height, wpt:150*PT, hpt:100*PT});
+      releaseCanvas(f); releaseCanvas(bk);
+    }
+  } else {
+    const F = PR.f, ed = Math.max(1, F.ed | 0), a = Math.min(Math.max(1, F.from | 0), ed), b = Math.min(Math.max(a, F.to | 0), ed);
+    const img = PR.fphoto ? await prFull(PR.fphoto, 900) : null, cards = [];
+    for (let n = a; n <= b; n++){
+      onStep(n - a + 1, b - a + 1);
+      const [c, x] = prSheet(100, 70); prDrawFicha(x, img, n, 100, 70); cards.push(c);
+      files.push({name:`ficha-${String(n).padStart(2, '0')}-de-${String(ed).padStart(2, '0')}.jpg`, blob:(await prJpg(c)).blob});
+    }
+    if (img) releaseCanvas(img);
+    const ML = 5, MT = 8.5, CW = 100, CH = 70;
+    for (let s = 0; s < cards.length; s += 8){
+      const [pg, px] = prSheet(210, 297); px.fillStyle = '#FFFFFF'; px.fillRect(0, 0, 210, 297);
+      const group = cards.slice(s, s + 8), rows = Math.ceil(group.length/2);
+      group.forEach((c, i) => px.drawImage(c, ML + (i % 2)*CW, MT + Math.floor(i/2)*CH, CW, CH));
+      px.strokeStyle = '#8A8A8A'; px.lineWidth = 0.15; const cols = group.length > 1 ? 2 : 1;
+      for (let i = 0; i <= cols; i++){ const xx = ML + i*CW; prLine(px, xx, 1.5, xx, MT - 1.5, 0.15, '#8A8A8A'); prLine(px, xx, MT + rows*CH + 1.5, xx, MT + rows*CH + 6.5, 0.15, '#8A8A8A'); }
+      for (let j = 0; j <= rows; j++){ const yy = MT + j*CH; prLine(px, 0.5, yy, ML - 1.2, yy, 0.15, '#8A8A8A'); prLine(px, ML + cols*CW + 1.2, yy, 209.5, yy, 0.15, '#8A8A8A'); }
+      const P = await prJpg(pg); pages.push({jpg:P.bytes, w:pg.width, h:pg.height, wpt:210*PT, hpt:297*PT}); releaseCanvas(pg);
+    }
+    cards.forEach(releaseCanvas);
+  }
+  return {files, pages};
+}
+function prBaseName(){ return PR.tool === 'postal' ? 'ojodecristi-postales-10x15' : 'ojodecristi-fichas-' + (slug(PR.f.title || '') || 'cuadro'); }
+async function prExport(kind){
+  if (PR.busy) return; if (PR.tool === 'postal' && !PR.postals.length) return;
+  const btn = kind === 'pdf' ? $('#prPdf') : $('#prZip'), label = btn.textContent; PR.busy = true; btn.disabled = true;
+  try {
+    const {files, pages} = await prBuild((i, n) => { btn.textContent = `Armando ${i} de ${n}…`; });
+    if (kind === 'pdf'){ btn.textContent = 'Armando el PDF…'; await saveBlob(prBaseName() + '.pdf', prPdf(pages)); }
+    else {
+      if (typeof JSZip === 'undefined'){ toast('No cargó el armador de .zip. Probá con el PDF.'); return; }
+      const zip = new JSZip(); files.forEach(f => zip.file(f.name, f.blob, {compression:'STORE'}));
+      btn.textContent = 'Comprimiendo…'; await saveBlob(prBaseName() + '.zip', await zip.generateAsync({type:'blob', compression:'STORE'}));
+    }
+  } catch(e){ toast('Algo falló armando el archivo. Probá de nuevo.'); }
+  finally { PR.busy = false; btn.textContent = label; btn.disabled = false; prRender(); }
+}
+
+/* --- eventos --- */
+async function prAddPostal(files){
+  files = files.filter(f => /^image\//.test(f.type) || /\.(jpe?g|png|webp|heic|heif)$/i.test(f.name)); if (!files.length) return;
+  const t = $('#prpDropTxt'), keep = t.innerHTML; let fails = 0;
+  for (let i = 0; i < files.length; i++){ t.textContent = `Cargando ${i + 1} de ${files.length}…`; try { PR.postals.push(await prLoad(files[i])); PR.sel = PR.postals.length - 1; prRender(); } catch(e){ fails++; } }
+  t.innerHTML = keep; if (fails) toast(`${fails} archivo(s) no se pudieron abrir. Si son RAW, exportalos como JPG.`);
+}
+async function prSetFicha(file){
+  if (!file) return; try { PR.fphoto = await prLoad(file); if (!PR.f.date.trim()) { PR.f.date = PR.fphoto.date; $('#prfDate').value = PR.f.date; prSave(); } prRender(); }
+  catch(e){ toast('No se pudo abrir la foto. Si es RAW, exportala como JPG.'); }
+}
+function prDrop(files){ if (PR.tool === 'postal') prAddPostal(files); else prSetFicha(files.find(f => /^image\//.test(f.type) || /\.(jpe?g|png|webp|heic|heif)$/i.test(f.name))); }
+document.querySelectorAll('#imprimir [data-pr]').forEach(g => g.addEventListener('click', e => {
+  const b = e.target.closest('[data-v]'); if (!b) return; PR[g.dataset.pr] = b.dataset.v; prSave(); prRender();
+}));
+[['prQr', 'qr'], ['prUser', 'user'], ['prQrTxt', 'qrTxt']].forEach(([id, k]) => { const el = $('#' + id); el.value = PR[k]; el.addEventListener('input', () => { PR[k] = el.value; prSave(); prRender(); }); });
+[['prfTitle', 'title'], ['prfTitleEn', 'titleEn'], ['prfPlace', 'place'], ['prfDate', 'date'], ['prfDetail', 'detail'], ['prfEd', 'ed', 1], ['prfFrom', 'from', 1], ['prfTo', 'to', 1]].forEach(([id, k, num]) => {
+  const el = $('#' + id); el.value = PR.f[k];
+  el.addEventListener('input', () => { if (num){ const v = parseInt(el.value, 10); if (isNaN(v)) return; PR.f[k] = Math.max(1, Math.min(999, v)); if (k === 'ed' && PR.f.to > PR.f.ed){ PR.f.to = PR.f.ed; $('#prfTo').value = PR.f.to; } } else PR.f[k] = el.value; prSave(); prRender(); });
+});
+document.querySelectorAll('input.pr-pick').forEach(inp => inp.addEventListener('change', e => { const fl = [...(e.target.files || [])]; e.target.value = ''; if (!fl.length) return; if (inp.dataset.for === 'postal') prAddPostal(fl); else prSetFicha(fl[0]); }));
+$('#prfNoPhoto').addEventListener('click', () => { PR.fphoto = null; prRender(); });
+$('#prpList').addEventListener('input', e => { const inp = e.target.closest('[data-k]'); if (!inp) return; const p = PR.postals.find(q => q.id === inp.closest('.pr-item').dataset.id); if (p){ p[inp.dataset.k] = inp.value; prRender(); } });
+$('#prpList').addEventListener('click', e => {
+  const li = e.target.closest('.pr-item'); if (!li) return; const k = PR.postals.findIndex(q => q.id === li.dataset.id); if (k < 0) return;
+  if (e.target.closest('[data-act="quitar"]')){ PR.postals.splice(k, 1); PR.sel = Math.min(PR.sel, Math.max(0, PR.postals.length - 1)); }
+  else PR.sel = k;
+  prRender();
+});
+$('#prSigFile').addEventListener('change', async e => {
+  const f = e.target.files && e.target.files[0]; e.target.value = ''; if (!f) return;
+  try { const c = await prSigFrom(f); PR.sig = c; SIG_TINT.clear(); PR.sigUse = 'imagen';
+    try { localStorage.setItem(SIG_KEY, c.toDataURL('image/png')); } catch(err){ toast('La firma se usa ahora, pero no se pudo guardar para la próxima vez'); }
+    prSave(); prRender(); toast('Firma lista');
+  } catch(err){ toast('No encontré la firma en la foto. Probá con más luz y lapicera oscura.'); }
+});
+$('#prSigDel').addEventListener('click', () => { PR.sig = null; SIG_TINT.clear(); try { localStorage.removeItem(SIG_KEY); } catch(e){} prRender(); });
+$('#prZip').addEventListener('click', () => prExport('zip'));
+$('#prPdf').addEventListener('click', () => prExport('pdf'));
+window.addEventListener('resize', () => { if (inImprimir()) prRender(); });
+prSigLoadSaved();
+
+{ let m = 'postales'; try { { const v = localStorage.getItem(MODE_KEY); m = v === 'marcos' || v === 'imprimir' ? v : 'postales'; } } catch(e){} setMode(m); }
 window.__marcos = {mk, mkRect, mkRenderBlob, mkAdd};
+window.__imprimir = {pr:PR, prBuild, prPdf, prRender};
 window.__postales = {state, outputs, renderTo, renderBlob, extractPalette, colorName, readExif, STYLES, saveOneByOne, postalLayout, postalBoxes, pmSpot, pmPosOf, PM_R, PM_K, D, inter1, nameCands, colorName, nameSet, hex2ok};
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
 boot();
