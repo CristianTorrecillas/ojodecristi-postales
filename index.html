@@ -639,6 +639,12 @@ body[data-mode="marcos"] #marcos{display:flex}
 .mk-meta .ico{width:28px;height:28px;font-size:13px}
 .mk-meta .ico[disabled]{opacity:.35;cursor:default}
 .mk-empty{margin:0;color:var(--muted);font-size:14px}
+.mk-tints{display:flex;align-items:center;gap:5px;flex-wrap:nowrap}
+.mk-tints .lbl{font-size:11.5px;color:var(--muted);margin-right:2px}
+.mk-tints button{width:24px;height:20px;padding:0;border-radius:5px;border:1px solid rgba(0,0,0,.18);background:var(--c);cursor:pointer;font-size:10px;line-height:1;color:var(--muted)}
+.mk-tints button[aria-checked="true"]{outline:2px solid var(--stamp);outline-offset:1px}
+.mk-tints input{width:24px;height:20px;padding:0;border:1px solid var(--rule);border-radius:5px;background:var(--paper);cursor:pointer}
+.mk-sw .mk-auto{width:auto;padding:0 9px;font-family:var(--sans);font-size:12px;color:#3A2426;background:linear-gradient(90deg,#F7D8CB,#F5E2A5,#CFE3EC,#D5DDC2)}
 .mk-drop{margin-top:0}
 @media (max-width:700px){
   .mk-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 12px}
@@ -1202,6 +1208,7 @@ body[data-mode="marcos"] #marcos{display:flex}
           <button type="button" role="radio" data-v="#F6F3EC" style="--c:#F6F3EC" title="Hueso" aria-label="Hueso"></button>
           <button type="button" role="radio" data-v="#EEE7D1" style="--c:#EEE7D1" title="Crema" aria-label="Crema"></button>
           <button type="button" role="radio" data-v="#141414" style="--c:#141414" title="Negro" aria-label="Negro"></button>
+          <button type="button" role="radio" data-v="auto" class="mk-auto" title="Cada foto con un color sugerido a partir de sus propios colores">Según foto</button>
           <input type="color" id="mkCustom" title="Otro color" aria-label="Otro color">
         </div>
       </div>
@@ -4756,7 +4763,7 @@ const mk = {photos:[], fmt:'3:4', size:1080, margin:6, color:'#FFFFFF', pos:'cen
 try { const o = JSON.parse(localStorage.getItem(MK_KEY) || 'null'); if (o && typeof o === 'object'){
   if (MK_FMT[o.fmt]) mk.fmt = o.fmt; if (o.size === 1080 || o.size === 2160) mk.size = o.size;
   if (typeof o.margin === 'number' && o.margin >= 0 && o.margin <= 20) mk.margin = o.margin;
-  if (/^#[0-9A-Fa-f]{6}$/.test(o.color || '')) mk.color = o.color.toUpperCase(); if (o.pos === 'arriba' || o.pos === 'centro') mk.pos = o.pos;
+  if (/^#[0-9A-Fa-f]{6}$/.test(o.color || '')) mk.color = o.color.toUpperCase(); else if (o.color === 'auto') mk.color = 'auto'; if (o.pos === 'arriba' || o.pos === 'centro') mk.pos = o.pos;
 } } catch(e){}
 function mkSavePrefs(){ try { localStorage.setItem(MK_KEY, JSON.stringify({fmt:mk.fmt, size:mk.size, margin:mk.margin, color:mk.color, pos:mk.pos})); } catch(e){} }
 function mkDims(size){ const W = size || mk.size; return [W, Math.round(W*MK_FMT[mk.fmt])]; }
@@ -4767,8 +4774,16 @@ function mkRect(W, H, iw, ih){
   const x = Math.round((W - pw)/2), free = H - ph, y = Math.round(mk.pos === 'arriba' ? Math.max(m, free*0.42) : free/2);
   return {x, y, w:pw, h:ph};
 }
-function mkPaint(ctx, W, H, src, iw, ih){
-  ctx.fillStyle = mk.color; ctx.fillRect(0, 0, W, H);
+/* sugerencias de fondo a partir de los colores de la foto: tonos suaves, que acompañan sin competir */
+function mkSuggest(cols){
+  if (!cols || !cols.length) return ['#FFFFFF'];
+  const v = vividOf(cols.map(h => ({hex:h}))), out = [toneOf(v, 'suave')];
+  cols.forEach(h => out.push(toneOf(h, 'suave'))); out.push(toneOf(v, 'medio'));
+  const seen = []; return out.filter(h => { const o = hex2ok(h); if (seen.some(q => Math.hypot(q[0]-o[0], q[1]-o[1], q[2]-o[2]) < 0.035)) return false; seen.push(o); return true; }).slice(0, 4);
+}
+function mkColorOf(p){ return (p && p.color) || (mk.color === 'auto' ? ((p && p.sug && p.sug[0]) || '#FFFFFF') : mk.color); }
+function mkPaint(ctx, W, H, src, iw, ih, color){
+  ctx.fillStyle = color || (mk.color === 'auto' ? '#FFFFFF' : mk.color); ctx.fillRect(0, 0, W, H);
   const r = mkRect(W, H, iw, ih);
   ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
   ctx.drawImage(src, r.x, r.y, r.w, r.h);
@@ -4778,7 +4793,7 @@ async function mkRenderBlob(p){
   const full = await decodeFile(p.file, p.ex, Math.max(r.w, r.h)*1.5);
   const img = downscale(full, Math.max(r.w, r.h)); if (full.close) full.close();
   const c = document.createElement('canvas'); c.width = W; c.height = H;
-  mkPaint(c.getContext('2d'), W, H, img, img.width, img.height); releaseCanvas(img);
+  mkPaint(c.getContext('2d'), W, H, img, img.width, img.height, mkColorOf(p)); releaseCanvas(img);
   const b = await toBlobP(c, 'image/jpeg', 0.95); releaseCanvas(c); return b;
 }
 function mkFileName(k){ return `marco-${String(k + 1).padStart(2, '0')}.jpg`; }
@@ -4791,7 +4806,8 @@ async function mkAdd(files){
     try {
       const f = files[i], ex = await readExif(f), src = await decodeFile(f, ex, 1400);
       const thumb = downscale(src, 900); if (src.close) src.close();
-      mk.photos.push({id:uid(), file:f, ex, name:f.name, w:thumb.width, h:thumb.height, thumb}); ok++;
+      let cols = []; try { cols = extractPalette(thumb).map(c => c.hex); } catch(e){}
+      mk.photos.push({id:uid(), file:f, ex, name:f.name, w:thumb.width, h:thumb.height, thumb, cols, sug:mkSuggest(cols), color:null}); ok++;
       mkRender();
     } catch(e){ fails++; }
     await new Promise(r => setTimeout(r, 0));
@@ -4812,7 +4828,7 @@ function mkRenderNow(){
     let li = keep.get(p.id);
     if (!li){
       li = document.createElement('li'); li.className = 'mk-card'; li.dataset.id = p.id;
-      li.innerHTML = `<canvas></canvas><div class="mk-meta"><span class="mk-idx"></span><span class="mk-name"></span><button type="button" class="ico" data-act="izq" aria-label="Mover antes">←</button><button type="button" class="ico" data-act="der" aria-label="Mover después">→</button><button type="button" class="ico" data-act="quitar" aria-label="Quitar">×</button></div>`;
+      li.innerHTML = `<canvas></canvas><div class="mk-meta"><span class="mk-idx"></span><span class="mk-name"></span><button type="button" class="ico" data-act="izq" aria-label="Mover antes">←</button><button type="button" class="ico" data-act="der" aria-label="Mover después">→</button><button type="button" class="ico" data-act="quitar" aria-label="Quitar">×</button></div><div class="mk-tints" role="radiogroup" aria-label="Color del marco de esta foto"><button type="button" role="radio" data-tint="" title="Como todas" aria-label="Como todas">=</button>${p.sug.map(h => `<button type="button" role="radio" data-tint="${h}" style="--c:${h}" title="Sugerido ${h}" aria-label="Sugerido ${h}"></button>`).join('')}<input type="color" data-tint-pick title="Otro color para esta foto" aria-label="Otro color para esta foto"></div>`;
       li.querySelector('.mk-name').textContent = p.name;
     }
     keep.delete(p.id);
@@ -4821,14 +4837,18 @@ function mkRenderNow(){
     li.querySelector('[data-act="izq"]').disabled = k === 0; li.querySelector('[data-act="der"]').disabled = k === n - 1;
     const c = li.querySelector('canvas'), cw = 420, ch = Math.round(cw*H/W);
     if (c.width !== cw || c.height !== ch){ c.width = cw; c.height = ch; }
-    mkPaint(c.getContext('2d'), cw, ch, p.thumb, p.thumb.width, p.thumb.height);
+    li.querySelectorAll('[data-tint]').forEach(b => b.setAttribute('aria-checked', String((b.dataset.tint || null) === p.color)));
+    const g = li.querySelector('[data-tint=""]'); g.style.setProperty('--c', mk.color === 'auto' ? 'var(--paper)' : mk.color); g.textContent = mk.color === 'auto' ? 'A' : '';
+    g.title = mk.color === 'auto' ? 'Como todas (sugerido automático)' : 'Como todas';
+    li.querySelector('[data-tint-pick]').value = mkColorOf(p).toLowerCase();
+    mkPaint(c.getContext('2d'), cw, ch, p.thumb, p.thumb.width, p.thumb.height, mkColorOf(p));
   });
   keep.forEach(li => li.remove());
 }
 function mkSync(){
   document.querySelectorAll('#marcos [data-mk]').forEach(g => g.querySelectorAll('[data-v]').forEach(b => b.setAttribute('aria-checked', String(b.dataset.v === String(mk[g.dataset.mk])))));
   document.querySelectorAll('#mkColors [data-v]').forEach(b => b.setAttribute('aria-checked', String(b.dataset.v === mk.color)));
-  $('#mkCustom').value = mk.color.toLowerCase(); $('#mkMargin').value = mk.margin; $('#mkMarginOut').textContent = String(mk.margin).replace('.', ',') + ' %';
+  if (mk.color !== 'auto') $('#mkCustom').value = mk.color.toLowerCase(); $('#mkMargin').value = mk.margin; $('#mkMarginOut').textContent = String(mk.margin).replace('.', ',') + ' %';
 }
 function mkChanged(){ mk.shareFiles = null; mkSaveLabel(); mkSync(); mkSavePrefs(); mkRender(); }
 document.querySelectorAll('#marcos [data-mk]').forEach(g => g.addEventListener('click', e => {
@@ -4838,7 +4858,10 @@ document.querySelectorAll('#marcos [data-mk]').forEach(g => g.addEventListener('
 $('#mkColors').addEventListener('click', e => { const b = e.target.closest('[data-v]'); if (b){ mk.color = b.dataset.v; mkChanged(); } });
 $('#mkCustom').addEventListener('input', e => { mk.color = e.target.value.toUpperCase(); mkChanged(); });
 $('#mkMargin').addEventListener('input', e => { mk.margin = +e.target.value; mkChanged(); });
+function mkPhotoOf(el){ const li = el.closest('.mk-card'); return li && mk.photos.find(p => p.id === li.dataset.id); }
+$('#mkGrid').addEventListener('input', e => { if (!e.target.matches('[data-tint-pick]')) return; const p = mkPhotoOf(e.target); if (p){ p.color = e.target.value.toUpperCase(); mk.shareFiles = null; mkSaveLabel(); mkRender(); } });
 $('#mkGrid').addEventListener('click', e => {
+  const t = e.target.closest('[data-tint]'); if (t){ const p = mkPhotoOf(t); if (p){ p.color = t.dataset.tint || null; mk.shareFiles = null; mkSaveLabel(); mkRender(); } return; }
   const b = e.target.closest('[data-act]'); if (!b) return;
   const k = mk.photos.findIndex(p => p.id === b.closest('.mk-card').dataset.id); if (k < 0) return;
   if (b.dataset.act === 'quitar'){ const [p] = mk.photos.splice(k, 1); releaseCanvas(p.thumb); }
