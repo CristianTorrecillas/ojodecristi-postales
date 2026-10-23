@@ -5153,11 +5153,7 @@ function drawPostalBack(ctx, p, w, h){
   prTxt(ctx, PR.qrTxt, tx, qy + 10.6, 2.4, MONO, 400, mut, 'left', tw);
   const [a, b] = prCaption(p), cred = [a, b].filter(Boolean).join(' — ');
   if (cred) prTxt(ctx, 'Foto: ' + cred, tx, qy + 15.4, 2.1, MONO, 400, mut, 'left', tw);
-  const bw = 21, bh = 25, bx = w - 10 - bw, by = 12;
-  ctx.save(); ctx.setLineDash([1, 0.8]); ctx.strokeStyle = 'rgba(42,38,32,.5)'; ctx.lineWidth = 0.25; ctx.strokeRect(bx, by, bw, bh); ctx.restore();
-  prTxt(ctx, 'SELLO', bx + bw/2, by + bh/2 + 0.7, 1.9, MONO, 400, mut, 'center');
-  prStamp(ctx, bx - 3, by + bh - 4, 19, -14, 0.9);
-  for (let i = 0; i < 4; i++){ const y = 50 + i*10; prLine(ctx, div + 6, y, w - 10, y, 0.22, 'rgba(42,38,32,.42)'); }
+  for (let i = 0; i < 4; i++){ const y = 42 + i*11; prLine(ctx, div + 6, y, w - 10, y, 0.22, 'rgba(42,38,32,.42)'); }
 }
 /* firma: trazo en un canvas con transparencia, teñido al dibujar */
 const SIG_TINT = new Map();
