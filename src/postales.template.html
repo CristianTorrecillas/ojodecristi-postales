@@ -1538,7 +1538,7 @@ textarea.inp.cap-text{width:100%;min-height:150px;font-family:var(--sans);font-s
             <h3 class="sect">Detalles</h3>
             <label class="check" id="gdTapeRow"><input type="checkbox" id="gdTape"> Cinta del color de cada foto</label>
             <label class="check" id="gdSealRow"><input type="checkbox" id="gdSeal"> Sello de goma con el título</label>
-            <label class="check" id="gdPmRow"><input type="checkbox" id="gdPm"> Matasellos entre las dos primeras</label>
+            <label class="check" id="gdPmRow"><input type="checkbox" id="gdPm"> Matasellos en la esquina de la primera</label>
           </div>
           <p class="subhint">Los colores usan la forma elegida en «Postal» → «Colores».</p>
         </div>
@@ -3837,7 +3837,7 @@ function gridCells(n, x0, x1, y0, y1, gx, gy){
 function settleRows(cells, hs, y0, y1, gy){
   const rows = cells.length <= 2 ? 1 : 2, rh = [0, 0]; cells.forEach((c, i) => { const r = i < 2 ? 0 : 1; rh[r] = Math.max(rh[r], hs[i]); });
   const used = rh[0] + (rows > 1 ? rh[1] + gy : 0), free = Math.max(0, y1 - y0 - used);
-  const top = y0 + (rows > 1 ? free*0.3 : free/2), gap = gy + (rows > 1 ? free*0.4 : 0);
+  const top = y0 + (rows > 1 ? free*0.36 : free/2), gap = gy + (rows > 1 ? free*0.28 : 0);
   cells.forEach((c, i) => { c.y = i < 2 ? top : top + rh[0] + gap; });
 }
 function fitPhoto(p, w, h){ const ar = p.fw && p.fh ? p.fw/p.fh : 1.5; let ww = w, hh = ww/ar; if (hh > h){ hh = h; ww = hh*ar; } return {w:ww, h:hh}; }
@@ -3971,25 +3971,26 @@ function gridCuaderno(ctx, g, items, hi, H){
 }
 function gridEstampillas(ctx, g, items, hi, H){
   const G = state.grid, ink = gridInk(), top = gridHeadCover(ctx, g, ink, 50), foot = G.foot !== 'nada', ds = devScale(ctx);
-  const y0 = top + 30, y1 = H - (foot ? 84 : 42), cells = gridCells(items.length, 46, D - 46, y0, y1, 30, 30), pad = 12, capH = 22, barH = 46, yr = gridYear(items), rects = [];
+  const y0 = top + 30, y1 = H - (foot ? 84 : 42), cells = gridCells(items.length, 46, D - 46, y0, y1, 30, 30), pad = 12, capH = 22, barH = 40, yr = gridYear(items);
   const markInk = S.ink, red = G.ink === 'tinta' ? '#C8352B' : legibleOn(ink, '#FBF7EE', 3);
   const fits = items.map((p, i) => fitPhoto(p, cells[i].w - 2*pad, cells[i].h - barH - pad - capH)); settleRows(cells, fits.map(f => f.h + pad + capH + barH), y0, y1, 30);
+  /* 1) el papel troquelado de cada estampilla */
+  const st = items.map((p, i) => { const c = cells[i], f = fits[i], sw = f.w + 2*pad, sh = f.h + pad + capH; return {x:c.x + (c.w - sw)/2, y:c.y, w:sw, h:sh, f}; });
+  st.forEach(a => { ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.34)'; ctx.shadowBlur = 9*ds; ctx.shadowOffsetY = 4*ds; perforated(ctx, a.x, a.y, a.w, a.h, 3.7, 12.4); ctx.fillStyle = '#FBF7EE'; ctx.fill(); ctx.restore(); });
+  /* 2) el matasellos en la esquina de la primera, por debajo de la foto: se ve en el borde y en el fondo, nunca encima de la imagen */
+  if (G.pm && st.length){ const a = st[0], dm = gridDm(items); waveMark(ctx, a.x + a.w - 6, a.y + 8, 42, red, placeOf(items[0]) || '', dm || yr, dm ? yr : '', false); }
+  /* 3) fotos, pie de la estampilla y barra de colores */
   items.forEach((p, i) => {
-    const c = cells[i], n = numOf(p, g*4 + i), f = fits[i];
-    const sw = f.w + 2*pad, sh = f.h + pad + capH, sx = c.x + (c.w - sw)/2, sy = c.y;
-    ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.34)'; ctx.shadowBlur = 9*ds; ctx.shadowOffsetY = 4*ds; perforated(ctx, sx, sy, sw, sh, 3.7, 12.4); ctx.fillStyle = '#FBF7EE'; ctx.fill(); ctx.restore();
-    const r = {x:sx + pad, y:sy + pad, w:f.w, h:f.h}; drawCover(ctx, srcOf(p, hi), r, 0); rects.push({x:sx, y:sy, w:sw, h:sh});
-    ctx.save(); ctx.fillStyle = '#2B221D'; ctx.font = `500 7.4px ${MONO}`; spacedAt(ctx, `${(placeOf(p) || '').toUpperCase()} · ${yr}`, r.x + 1, sy + sh - 8.5, 1.3, 'left');
-    ctx.fillStyle = red; ctx.font = `500 9.6px ${MONO}`; ctx.textAlign = 'right'; ctx.fillText('N.º ' + pad3(n), r.x + r.w - 1, sy + sh - 8); ctx.restore();
-    /* barra de colores con marcas de registro, como en una prueba de imprenta */
-    const cols = (p.colors || []).slice(0, 3), bw = 38, bh = 20, regW = 15, totW = cols.length*bw + 2*(regW + 7), bx = sx + (sw - totW)/2, by = sy + sh + 13;
-    const reg = (x0) => { ctx.save(); ctx.strokeStyle = markInk; ctx.globalAlpha = 0.7; ctx.lineWidth = 0.9; ctx.beginPath(); ctx.arc(x0 + regW/2, by + bh/2, 4.3, 0, Math.PI*2); ctx.moveTo(x0 + regW/2, by + bh/2 - 7.2); ctx.lineTo(x0 + regW/2, by + bh/2 + 7.2); ctx.moveTo(x0, by + bh/2); ctx.lineTo(x0 + regW, by + bh/2); ctx.stroke(); ctx.restore(); };
+    const a = st[i], n = numOf(p, g*4 + i), r = {x:a.x + pad, y:a.y + pad, w:a.f.w, h:a.f.h};
+    drawCover(ctx, srcOf(p, hi), r, 0);
+    ctx.save(); ctx.fillStyle = '#2B221D'; ctx.font = `500 7.4px ${MONO}`; spacedAt(ctx, `${(placeOf(p) || '').toUpperCase()} · ${yr}`, r.x + 1, a.y + a.h - 8.5, 1.3, 'left');
+    ctx.fillStyle = red; ctx.font = `500 9.6px ${MONO}`; ctx.textAlign = 'right'; ctx.fillText('N.º ' + pad3(n), r.x + r.w - 1, a.y + a.h - 8); ctx.restore();
+    const cols = (p.colors || []).slice(0, 3), bw = 40, bh = 20, bx = a.x + (a.w - cols.length*bw)/2, by = a.y + a.h + 13;
     if (cols.length){
-      reg(bx); cols.forEach((col, k) => { ctx.fillStyle = col.hex; ctx.fillRect(bx + regW + 7 + k*bw, by, bw, bh); }); reg(bx + regW + 7 + cols.length*bw + 7);
-      ctx.save(); ctx.fillStyle = markInk; ctx.globalAlpha = 0.6; ctx.font = `400 6.6px ${MONO}`; ctx.textAlign = 'center'; cols.forEach((col, k) => ctx.fillText(col.hex.slice(1), bx + regW + 7 + k*bw + bw/2, by + bh + 10)); ctx.restore();
+      cols.forEach((col, k) => { ctx.fillStyle = col.hex; ctx.fillRect(bx + k*bw, by, bw, bh); });
+      ctx.save(); ctx.fillStyle = markInk; ctx.globalAlpha = 0.6; ctx.font = `400 6.6px ${MONO}`; ctx.textAlign = 'center'; cols.forEach((col, k) => ctx.fillText(col.hex.slice(1), bx + k*bw + bw/2, by + bh + 10)); ctx.restore();
     }
   });
-  if (G.pm && rects.length){ const a = rects[0]; waveMark(ctx, a.x + a.w - 112, a.y + a.h - 70, 52, red, placeOf(items[0]) || '', gridDm(items) || yr, gridDm(items) ? yr : '', rects.length > 1); }
   gridFootCover(ctx, H, items);
 }
 const GRID_LOOKS = {catalogo:gridCatalogo, cuaderno:gridCuaderno, estampillas:gridEstampillas};
@@ -5511,7 +5512,7 @@ $('#gridTitles').addEventListener('input', e => {
   const g = e.target.dataset.g; if (g === undefined) return; state.titles[+g] = e.target.value; scheduleOut();
 });
 /* pestaña Grilla: diseño, título, color, pie, fondo y detalles */
-const GRID_HINT = {clasica:'Las fichas de siempre, con la decoración elegida en «Detalles».', catalogo:'Como la portada: cabecera con OJODECRISTI, fotos derechas con borde blanco y el pie de lugar y fecha.', cuaderno:'Cuaderno de campo: título a mano, fotos un poco torcidas, cinta del color de cada foto y un sello de goma.', estampillas:'Cada foto como estampilla troquelada, barra de colores de imprenta y un matasellos.'};
+const GRID_HINT = {clasica:'Las fichas de siempre, con la decoración elegida en «Detalles».', catalogo:'Como la portada: cabecera con OJODECRISTI, fotos derechas con borde blanco y el pie de lugar y fecha.', cuaderno:'Cuaderno de campo: título a mano, fotos un poco torcidas, cinta del color de cada foto y un sello de goma.', estampillas:'Cada foto como estampilla troquelada, con su barra de colores y un matasellos en la esquina.'};
 function syncGrid(){
   const G = state.grid, look = G.look, designed = !!GRID_LOOKS[look];
   document.querySelectorAll('.chips[data-gradio]').forEach(box => box.querySelectorAll('button').forEach(b => b.setAttribute('aria-checked', String(G[box.dataset.gradio] === b.dataset.v))));
