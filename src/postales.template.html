@@ -265,6 +265,10 @@ body.dragging .drop{border-color:var(--stamp);color:var(--ink);background:var(--
 @media (max-width:560px){.gt{grid-template-columns:minmax(0,1fr) auto;gap:5px 8px}.gt label{grid-column:1/-1}}
 .gt label{font-family:var(--mono);font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
 .gt .inp{font-family:var(--mono);letter-spacing:.02em}
+#gridBox .gtitles{margin:2px 0 4px;order:0}
+#gridBox .gt{grid-template-columns:minmax(0,1fr) auto;gap:6px 8px}
+#gridBox .gt label{grid-column:1/-1}
+#gridBox .gt .gsub{grid-column:1/-1;font-family:inherit;letter-spacing:0}
 .olist{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:14px}
 .ocard{display:flex;flex-direction:column;gap:6px;min-width:0}
 .o-open{display:block;padding:0;border:0;background:transparent;cursor:zoom-in;box-shadow:var(--shadow)}
@@ -1033,7 +1037,6 @@ textarea.inp.cap-text{width:100%;min-height:150px;font-family:var(--sans);font-s
           <input id="place" class="inp" type="text" value="Chubut" placeholder="Ej. Mar del Plata" autocomplete="off">
         </div>
       </div>
-      <div id="gridTitles" class="gtitles"></div>
       <ol id="photoList" class="plist" aria-label="Fotos del carrusel, en orden"></ol>
       <div class="drop picker"><svg class="drop-ico" viewBox="0 0 48 56" aria-hidden="true"><rect x="2" y="2" width="44" height="52" fill="none" stroke="currentColor" stroke-width="2.6" stroke-dasharray="0.1 5.15" stroke-linecap="round"/><rect x="8.5" y="8.5" width="31" height="39" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M11.5 43l8.5-10.5 6 7 4-4 7 7.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><circle cx="31" cy="18.5" r="3.4" fill="none" stroke="currentColor" stroke-width="1.4"/></svg><span id="drop">Soltá las fotos acá o tocá para elegirlas<small>Hasta 16, en el orden del carrusel</small></span><input type="file" class="pick" accept="image/*" multiple aria-label="Elegir fotos"></div>
     </section>
@@ -1077,6 +1080,7 @@ textarea.inp.cap-text{width:100%;min-height:150px;font-family:var(--sans);font-s
           <button type="button" role="tab" data-tab="postal" aria-selected="false">Postal</button>
           <button type="button" role="tab" data-tab="detalles" aria-selected="false">Detalles</button>
           <button type="button" role="tab" data-tab="portada" aria-selected="false">Portada</button>
+          <button type="button" role="tab" data-tab="grilla" aria-selected="false">Grilla</button>
           <button type="button" role="tab" data-tab="receta" aria-selected="false">Receta</button>
         </div>
 
@@ -1484,6 +1488,59 @@ textarea.inp.cap-text{width:100%;min-height:150px;font-family:var(--sans);font-s
               <label class="colorpick" for="cvColor"><input type="color" id="cvColor" value="#F3EFE6"> Elegir color</label>
             </div>
           </div>
+        </div>
+
+        <!-- Grilla: la última imagen, con las fotos de a 4 y sus colores -->
+        <div class="pane" data-pane="grilla" id="gridBox">
+          <div class="opt">
+            <span class="lbl">Diseño</span>
+            <div class="chips segc" role="radiogroup" aria-label="Diseño de la grilla" data-gradio="look">
+              <button type="button" role="radio" data-v="clasica">Clásica</button>
+              <button type="button" role="radio" data-v="catalogo">Catálogo</button>
+              <button type="button" role="radio" data-v="cuaderno">Cuaderno</button>
+              <button type="button" role="radio" data-v="estampillas">Estampillas</button>
+            </div>
+          </div>
+          <p class="subhint" id="gdHint"></p>
+          <h3 class="sect">Título</h3>
+          <label class="check"><input type="checkbox" id="gdFromCover"> Usar el título y el subtítulo de la portada</label>
+          <div id="gridTitles" class="gtitles"></div>
+          <div class="opt" id="gdInkRow">
+            <span class="lbl">Color</span>
+            <div class="optrow">
+              <div class="chips segc" role="radiogroup" aria-label="Color del título de la grilla" data-gradio="ink">
+                <button type="button" role="radio" data-v="portada" title="El mismo color que el título de la portada">Como la portada</button>
+                <button type="button" role="radio" data-v="tinta" title="El color de la tinta del papel">Tinta</button>
+              </div>
+              <label class="colorpick" for="gdInkColor"><input type="color" id="gdInkColor" value="#D12F27"> Elegir</label>
+            </div>
+          </div>
+          <div class="opt" id="gdFootRow">
+            <label class="lbl" for="gdFoot">Pie</label>
+            <select id="gdFoot" class="inp" data-gsel="foot">
+              <option value="lugar">Lugar y fecha</option>
+              <option value="marca">OJODECRISTI</option>
+              <option value="nada">Sin pie</option>
+            </select>
+          </div>
+          <h3 class="sect">Fondo</h3>
+          <div class="opt">
+            <span class="lbl">Fondo</span>
+            <div class="optrow">
+              <div class="chips segc" role="radiogroup" aria-label="Fondo de la grilla" data-gradio="bg">
+                <button type="button" role="radio" data-v="postales">Como las postales</button>
+                <button type="button" role="radio" data-v="otro">Propio</button>
+              </div>
+              <label class="colorpick" for="gdBgColor"><input type="color" id="gdBgColor" value="#2F241F"> Elegir</label>
+            </div>
+          </div>
+          <div id="gdDecoBox">
+            <h3 class="sect">Detalles</h3>
+            <label class="check" id="gdTapeRow"><input type="checkbox" id="gdTape"> Cinta del color de cada foto</label>
+            <label class="check" id="gdSealRow"><input type="checkbox" id="gdSeal"> Sello de goma con el título</label>
+            <label class="check" id="gdPmRow"><input type="checkbox" id="gdPm"> Matasellos entre las dos primeras</label>
+          </div>
+          <p class="subhint">Los colores usan la forma elegida en «Postal» → «Colores».</p>
         </div>
 
         <!-- Receta -->
@@ -1971,7 +2028,7 @@ const TECH_LABELS = {cam:'Cámara', lens:'Lente', focal:'Focal', ap:'Apertura', 
 
 /* ---------- state ---------- */
 const state = {
-  photos:[], startNum:1, place:'Chubut', titles:['FLORENTINO AMEGHINO'], size:1080, sample:true, picking:null,
+  photos:[], startNum:1, place:'Chubut', titles:['FLORENTINO AMEGHINO'], gridSubs:[], size:1080, sample:true, picking:null,
   style:'archivo', custom:'#D8C7A6', deco:'cintas-clip', decoPostal:false, tilt:false,
   extras:{postmark:false, border:false, filmdate:false, counter:false, icons:false},
   shape:'cuadrados', frame:'fina', format:'1:1', comp:'postal', titleFont:'mono', titlePos:'arriba-centro', titleSize:'medio', titleCaps:'normal', titleColor:'auto', lastEnd:0,
@@ -1993,9 +2050,11 @@ const RECIPE_DEFAULT = {
 state.recipe = {...RECIPE_DEFAULT};
 const COVER_DEFAULT = {on:false, photo:0, look:'sola', bg:'blanco', color:'#F3EFE6', title:'', sub:'', size:'grande', frame:'ninguno', pick:-1, tone:'suave', sign:false, foot:'fotos', footText:'', shape:'entera', cz:1, cx:0, cy:0, ink:'auto', inkColor:'#1B1A18'};
 state.cover = {...COVER_DEFAULT};
+const GRID_DEFAULT = {look:'clasica', fromCover:false, ink:'portada', inkColor:'#D12F27', foot:'lugar', bg:'postales', bgColor:'#2F241F', tape:true, seal:true, pm:true};
+state.grid = {...GRID_DEFAULT};
 const PENS = {azul:'#1F3A7A', negra:'#1E1D1B', sepia:'#5B3A22'};
 const PREF_KEY = 'postales-ojodecristi-v1';
-const PREF_FIELDS = ['style','custom','deco','decoPostal','tilt','extras','shape','frame','format','comp','titleFont','titlePos','titleSize','titleCaps','titleColor','size','show','lastEnd','recipe','photoSize','stampColor','stampMode','paperTex','swSize','swPos','counterInk','cover','bgEach','bgTone','bgPick','pm','pmIcon','pmPos','lineStyle','linePos'];
+const PREF_FIELDS = ['style','custom','deco','decoPostal','tilt','extras','shape','frame','format','comp','titleFont','titlePos','titleSize','titleCaps','titleColor','size','show','lastEnd','recipe','photoSize','stampColor','stampMode','paperTex','swSize','swPos','counterInk','cover','grid','bgEach','bgTone','bgPick','pm','pmIcon','pmPos','lineStyle','linePos'];
 function loadPrefs(){
   try{
     const o = JSON.parse(localStorage.getItem(PREF_KEY) || 'null'); if (!o || typeof o !== 'object') return;
@@ -2003,6 +2062,7 @@ function loadPrefs(){
       if (!(k in o)) continue;
       if (k === 'extras') Object.assign(state.extras, o.extras);
       else if (k === 'cover'){ if (o.cover && typeof o.cover === 'object') for (const f in COVER_DEFAULT) if (typeof o.cover[f] === typeof COVER_DEFAULT[f]) state.cover[f] = o.cover[f]; }
+      else if (k === 'grid'){ if (o.grid && typeof o.grid === 'object') for (const f in GRID_DEFAULT) if (typeof o.grid[f] === typeof GRID_DEFAULT[f]) state.grid[f] = o.grid[f]; }
       else if (k === 'recipe'){ if (o.recipe && typeof o.recipe === 'object') for (const f in RECIPE_DEFAULT) if (typeof o.recipe[f] === typeof RECIPE_DEFAULT[f]) state.recipe[f] = o.recipe[f]; }
       else if (k === 'show'){ for (const sc of ['postal','grid']) if (o.show && o.show[sc]) for (const f in state.show[sc]) if (typeof o.show[sc][f] === 'boolean') state.show[sc][f] = o.show[sc][f]; }
       else state[k] = o[k];
@@ -3708,6 +3768,7 @@ function drawFicha(ctx, p, n, cell, hi, single, extra){
 }
 function gridTitle(g){ return (state.titles[g] || '').trim(); }
 function drawGrid(ctx, g, hi, H){
+  if (GRID_LOOKS[state.grid.look]){ H = H || D; paper(ctx, hi, H); const items = state.photos.slice(g*4, g*4 + 4); if (items.length) GRID_LOOKS[state.grid.look](ctx, g, items, hi, H); return; }
   H = H || D; const dy = (H - D)/2, G = GRID;
   paper(ctx, hi, H);
   const border = state.extras.border; if (border) airmail(ctx, H);
@@ -3740,6 +3801,198 @@ function drawGrid(ctx, g, hi, H){
   ctx.fillStyle = S.rule; ctx.fillRect(G.footer.x0, fy - G.footer.lw/2, G.footer.x1 - G.footer.x0, G.footer.lw);
   ctx.fillStyle = S.ink; centerText(ctx, G.footer.text, D/2, fb, G.footer.size, 400, MONO);
 }
+/* ---------- grillas con diseño: Catálogo (como la portada), Cuaderno de campo y Estampillas ---------- */
+function gridHeadText(g){
+  const C = state.cover, ct = (C.title || '').trim(), cs = (C.sub || '').trim(), pl = (state.place || '').trim();
+  if (state.grid.fromCover) return {t:ct || gridTitle(g) || pl, s:cs};
+  const t = gridTitle(g), su = (state.gridSubs[g] || '').trim();
+  if (t) return {t, s:su};
+  return {t:ct || pl, s:su || (ct ? cs : '')};
+}
+function gridBgHex(){ return S.paper ? rgbHex(...S.paper) : paperAvg; }
+function gridInk(){
+  const G = state.grid, bg = gridBgHex();
+  if (G.ink === 'otro') return G.inkColor;
+  if (G.ink === 'portada' && state.cover.on){
+    const p = coverPhoto();
+    if (p){ const cb = coverBg(p) || paperAvg, def = hex2ok(cb)[0] < 0.55 ? '#F3EFE6' : '#1B1A18', t = coverTitleInk(p, cb, def); if (t) return legibleOn(t, bg, 3); }
+  }
+  return S.ink;
+}
+function gridYear(items){ for (const p of items){ const m = String(p.date || '').match(/(\d{4})/); if (m) return m[1]; } const w = coverWhen().match(/(\d{4})/); return w ? w[1] : String(new Date().getFullYear()); }
+function spacedAt(ctx, text, x, base, track, align){
+  const cs = [...text], w = cs.reduce((a, c) => a + ctx.measureText(c).width, 0) + track*(cs.length - 1);
+  spaced(ctx, text, align === 'left' ? x + w/2 : align === 'right' ? x - w/2 : x, base, track);
+}
+/* celdas de 2 columnas; con 1 o 3 fotos, la fila incompleta va centrada */
+function gridCells(n, x0, x1, y0, y1, gx, gy){
+  const rows = n <= 2 ? 1 : 2, w = (x1 - x0 - gx)/2, h = (y1 - y0 - gy*(rows - 1))/rows, out = [];
+  for (let i = 0; i < n; i++){
+    const r = i < 2 ? 0 : 1, inRow = r === 0 ? Math.min(2, n) : n - 2, c = r === 0 ? i : i - 2, rowW = inRow*w + (inRow - 1)*gx;
+    out.push({x:x0 + (x1 - x0 - rowW)/2 + c*(w + gx), y:y0 + r*(h + gy), w, h});
+  }
+  return out;
+}
+/* reparte el alto que sobra: un poco arriba y abajo, más entre las filas, así el bloque queda centrado */
+function settleRows(cells, hs, y0, y1, gy){
+  const rows = cells.length <= 2 ? 1 : 2, rh = [0, 0]; cells.forEach((c, i) => { const r = i < 2 ? 0 : 1; rh[r] = Math.max(rh[r], hs[i]); });
+  const used = rh[0] + (rows > 1 ? rh[1] + gy : 0), free = Math.max(0, y1 - y0 - used);
+  const top = y0 + (rows > 1 ? free*0.3 : free/2), gap = gy + (rows > 1 ? free*0.4 : 0);
+  cells.forEach((c, i) => { c.y = i < 2 ? top : top + rh[0] + gap; });
+}
+function fitPhoto(p, w, h){ const ar = p.fw && p.fh ? p.fw/p.fh : 1.5; let ww = w, hh = ww/ar; if (hh > h){ hh = h; ww = hh*ar; } return {w:ww, h:hh}; }
+/* cabecera como la portada: OJODECRISTI, rayita, título en mayúsculas espaciadas y subtítulo */
+function gridHeadCover(ctx, g, ink, top){
+  const {t, s} = gridHeadText(g);
+  ctx.save(); ctx.fillStyle = S.ink; ctx.globalAlpha = 0.72; ctx.font = `500 9.2px ${MONO}`; spaced(ctx, 'OJODECRISTI', D/2, top, 5.1); ctx.restore();
+  ctx.fillStyle = ink; ctx.fillRect(D/2 - 15, top + 11, 30, 1.4);
+  let y = top + 13;
+  const T = splitLines(t).map(x => x.toUpperCase());
+  if (T.length){
+    const fs = Math.min(...T.map(x => fitSpaced(ctx, x, D - 90, 28.5, SANS, 500, 0.16)));
+    ctx.font = `500 ${fs}px ${SANS}`; ctx.fillStyle = ink;
+    T.forEach((x, i) => { y += i ? fs*1.2 : 14 + fs*0.78; spaced(ctx, x, D/2, y, fs*0.16); });
+  }
+  const SL = splitLines(s);
+  if (SL.length){
+    ctx.save(); ctx.fillStyle = S.ink; ctx.globalAlpha = 0.82;
+    const ss = Math.min(...SL.map(x => fitSpaced(ctx, x, D - 120, 13.7, SANS, 400, 0.01))); ctx.font = `400 ${ss}px ${SANS}`;
+    SL.forEach(x => { y += ss*1.6; spaced(ctx, x, D/2, y, ss*0.01); }); ctx.restore();
+  }
+  return y;
+}
+function gridFootCover(ctx, H, items){
+  const G = state.grid; if (G.foot === 'nada') return;
+  const y = H - 58, tr = 2.9;
+  ctx.save(); ctx.fillStyle = S.ink; ctx.globalAlpha = 0.32; ctx.fillRect(40, y, D - 80, 0.8); ctx.globalAlpha = 0.85; ctx.font = `500 9.2px ${MONO}`;
+  if (G.foot === 'marca') spaced(ctx, 'OJODECRISTI', D/2, y + 21, tr);
+  else { spacedAt(ctx, (placeOf(items[0]) || '').toUpperCase(), 40, y + 21, tr, 'left'); spacedAt(ctx, coverWhen().toUpperCase(), D - 40, y + 21, tr, 'right'); }
+  ctx.restore();
+}
+/* los colores de cada foto con la forma elegida (pinceles, acuarela…), alineados a la derecha de la celda */
+function gridSwatches(ctx, p, n, xRight, y, sw, sh, gap, labSize){
+  const cols = (p.colors || []).slice(0, 3); if (!cols.length) return;
+  const tot = cols.length*sw + (cols.length - 1)*gap, xs = cols.map((_, k) => xRight - tot + k*(sw + gap));
+  drawSwatches(ctx, cols, {xs, y, w:sw, h:sh, inset:2}, {size:labSize, base:y + sh + labSize + 3.5, maxW:sw + gap - 2}, n, labSize > 0, false);
+}
+function ringText(x, text, R, size){
+  x.font = `500 ${size}px ${MONO}`; const cs = [...text], ws = cs.map(c => x.measureText(c).width), tot = ws.reduce((a, b) => a + b, 0);
+  if (tot > 2*Math.PI*R*0.98){ size *= 2*Math.PI*R*0.98/tot; return ringText(x, text, R, size); }
+  const k = 2*Math.PI*R/tot; let a = -Math.PI/2; x.textAlign = 'center'; x.textBaseline = 'middle';
+  cs.forEach((c, i) => { const da = ws[i]*k/R; x.save(); x.rotate(a + da/2 + Math.PI/2); x.fillText(c, 0, -R); x.restore(); a += da; });
+  x.textBaseline = 'alphabetic';
+}
+function grunge(x, half, seed, n, rmax){
+  const r = rng(seed); x.save(); x.globalCompositeOperation = 'destination-out';
+  for (let i = 0; i < n; i++){ x.globalAlpha = 0.2 + r()*0.65; x.beginPath(); x.arc((r()*2 - 1)*half, (r()*2 - 1)*half, 0.4 + r()*rmax, 0, Math.PI*2); x.fill(); }
+  x.restore();
+}
+/* sello de goma redondo: OJODECRISTI · lugar · año alrededor, una palabra del título y la fecha al centro */
+function rubberSeal(ctx, cx, cy, R, ink, word, place, year, date){
+  const ds = devScale(ctx), half = R + 4, c = document.createElement('canvas'); c.width = c.height = Math.ceil(2*half*ds);
+  const x = c.getContext('2d'); x.setTransform(ds, 0, 0, ds, half*ds, half*ds); x.strokeStyle = x.fillStyle = ink;
+  x.lineWidth = 2.6; x.beginPath(); x.arc(0, 0, R - 2, 0, Math.PI*2); x.stroke();
+  x.lineWidth = 1.3; x.beginPath(); x.arc(0, 0, R - 17, 0, Math.PI*2); x.stroke();
+  ringText(x, `OJODECRISTI • ${place.toUpperCase()} • ${year} • `, R - 9.5, 7.4);
+  if (word){ let fs = 19; x.font = `700 ${fs}px ${HAND}`; const w = x.measureText(word).width; if (w > (R - 20)*1.75){ fs *= (R - 20)*1.75/w; x.font = `700 ${fs}px ${HAND}`; } x.textAlign = 'center'; x.fillText(word, 0, date ? 2 : 6); }
+  if (date){ x.font = `500 7.6px ${MONO}`; x.textAlign = 'center'; x.fillText(date, 0, 15); }
+  grunge(x, half, 97, 320, 1.6);
+  ctx.save(); ctx.translate(cx, cy); ctx.rotate(-14*Math.PI/180); ctx.globalAlpha = 0.85; ctx.drawImage(c, -half, -half, 2*half, 2*half); ctx.restore();
+  releaseCanvas(c);
+}
+/* matasellos con ondas que cruza de la primera estampilla a la segunda */
+function waveMark(ctx, cx, cy, R, ink, place, dm, year, waves){
+  const ds = devScale(ctx), W = R + 8 + (waves ? 245 : 0), Hh = R + 6, c = document.createElement('canvas');
+  c.width = Math.ceil((R + 6 + W)*ds); c.height = Math.ceil(2*Hh*ds);
+  const x = c.getContext('2d'); x.setTransform(ds, 0, 0, ds, (R + 6)*ds, Hh*ds); x.strokeStyle = x.fillStyle = ink; x.lineCap = 'round';
+  x.lineWidth = 3; x.beginPath(); x.arc(0, 0, R, 0, Math.PI*2); x.stroke();
+  x.lineWidth = 1.7; x.beginPath(); x.arc(0, 0, R - 17, 0, Math.PI*2); x.stroke();
+  ringText(x, `${place.toUpperCase()} • OJODECRISTI • `, R - 8.6, 8);
+  x.textAlign = 'center'; x.font = `500 11px ${MONO}`; x.fillText(dm, 0, -1); x.font = `500 11px ${MONO}`; x.fillText(year, 0, 13);
+  if (waves){ x.lineWidth = 2.9; for (let k = 0; k < 6; k++){ const y = -27 + k*10.6; x.beginPath(); x.moveTo(R + 8, y); for (let t = 0; t <= 245; t += 3) x.lineTo(R + 8 + t, y - 4.6*Math.sin(t/26*Math.PI*2)); x.stroke(); } }
+  grunge(x, Math.max(W, Hh), 41, 520, 1.5);
+  ctx.save(); ctx.translate(cx, cy); ctx.rotate(-8*Math.PI/180); ctx.globalAlpha = 0.95; ctx.drawImage(c, -(R + 6), -Hh, c.width/ds, c.height/ds); ctx.restore();
+  releaseCanvas(c);
+}
+function gridDm(items){
+  for (const p of items){
+    const m = String(p.date || '').trim().match(/^(\d{1,2})[-/.](\d{1,2})[-/.](\d{2,4})$/); if (!m) continue;
+    let d = +m[1], mo = +m[2]; if (mo > 12 && d <= 12){ const t = d; d = mo; mo = t; }
+    if (mo >= 1 && mo <= 12) return String(d).padStart(2, '0') + ' ' + MESES[mo - 1].slice(0, 3).toUpperCase();
+  }
+  return '';
+}
+function gridCatalogo(ctx, g, items, hi, H){
+  const ink = gridInk(), top = gridHeadCover(ctx, g, ink, 50), foot = state.grid.foot !== 'nada';
+  const y0 = top + 34, y1 = H - (foot ? 84 : 42), cells = gridCells(items.length, 40, D - 40, y0, y1, 29, 34), b = 6, metaH = 58, ds = devScale(ctx);
+  const fits = items.map((p, i) => fitPhoto(p, cells[i].w - 2*b, cells[i].h - metaH - 2*b)); settleRows(cells, fits.map(f => f.h + 2*b + metaH), y0, y1, 34);
+  items.forEach((p, i) => {
+    const c = cells[i], n = numOf(p, g*4 + i), f = fits[i];
+    const r = {x:c.x + (c.w - f.w)/2, y:c.y + b, w:f.w, h:f.h};
+    ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.17)'; ctx.shadowBlur = 11*ds; ctx.shadowOffsetY = 3.2*ds; ctx.fillStyle = '#FFFFFF'; ctx.fillRect(r.x - b, r.y - b, r.w + 2*b, r.h + 2*b); ctx.restore();
+    drawCover(ctx, srcOf(p, hi), r, 0);
+    const my = r.y + r.h + b + 19;
+    ctx.fillStyle = S.ink; ctx.textAlign = 'left'; ctx.font = `500 12.4px ${MONO}`; ctx.fillText('N.º ' + pad3(n), c.x, my);
+    ctx.save(); ctx.globalAlpha = 0.72; ctx.font = `400 10px ${SANS}`; ctx.fillText(placeOf(p), c.x, my + 16); if (p.date) ctx.fillText(String(p.date), c.x, my + 29); ctx.restore();
+    gridSwatches(ctx, p, n, c.x + c.w, my - 13, 44, 33, 6, 6.8);
+  });
+  gridFootCover(ctx, H, items);
+}
+function gridCuaderno(ctx, g, items, hi, H){
+  const G = state.grid, ink = gridInk(), {t, s} = gridHeadText(g), T = splitLines(t), SL = splitLines(s);
+  let y = 76;
+  ctx.fillStyle = ink; ctx.textAlign = 'center';
+  if (T.length){
+    let fs = 50; ctx.font = `700 ${fs}px ${HAND}`; const mw = Math.max(...T.map(x => ctx.measureText(x).width)); if (mw > D - 100){ fs *= (D - 100)/mw; ctx.font = `700 ${fs}px ${HAND}`; }
+    T.forEach((x, i) => ctx.fillText(x, D/2, y + i*fs*1.02)); y += (T.length - 1)*fs*1.02;
+    const tw = Math.min(D - 100, Math.max(...T.map(x => ctx.measureText(x).width)));
+    underline(ctx, D/2 - tw/2 - 8, D/2 + tw/2 + 8, y + 12, y + 9);
+  }
+  if (SL.length){ ctx.save(); ctx.globalAlpha = 0.72; ctx.fillStyle = S.ink; ctx.font = `400 22px ${HAND}`; SL.forEach((x, i) => ctx.fillText(x, D/2, y + 38 + i*22)); ctx.restore(); y += 38 + (SL.length - 1)*22; }
+  const foot = G.foot !== 'nada', seal = G.seal, bottom = H - (seal ? 112 : foot ? 72 : 40);
+  const y0 = y + 40, cells = gridCells(items.length, 44, D - 44, y0, bottom, 36, 30), tilts = [-1.4, 1.1, 0.9, -1.0], b = 8, metaH = 72, ds = devScale(ctx);
+  const fits = items.map((p, i) => fitPhoto(p, cells[i].w - 2*b - 8, cells[i].h - metaH - 2*b - 6)); settleRows(cells, fits.map(f => f.h + 2*b + 6 + metaH), y0, bottom, 30);
+  items.forEach((p, i) => {
+    const c = cells[i], n = numOf(p, g*4 + i), f = fits[i];
+    const r = {x:c.x + (c.w - f.w)/2, y:c.y + b + 6, w:f.w, h:f.h}, cx = c.x + c.w/2, cy = c.y + c.h/2;
+    ctx.save(); ctx.translate(cx, cy); ctx.rotate(tilts[i]*Math.PI/180); ctx.translate(-cx, -cy);
+    ctx.save(); ctx.shadowColor = 'rgba(40,25,15,.2)'; ctx.shadowBlur = 12*ds; ctx.shadowOffsetY = 3.5*ds; ctx.fillStyle = '#FCFAF5'; ctx.fillRect(r.x - b, r.y - b, r.w + 2*b, r.h + 2*b + 2); ctx.restore();
+    drawCover(ctx, srcOf(p, hi), r, 0);
+    if (G.tape) colorTape(ctx, r.x + r.w/2, r.y - b, -2 - tilts[i]*2.2, 86, 23, lightestOf(p));
+    const my = r.y + r.h + b + 27;
+    ctx.fillStyle = S.ink; ctx.textAlign = 'left'; ctx.font = `700 20px ${HAND}`; ctx.fillText('N.º ' + pad3(n), c.x + 2, my);
+    ctx.save(); ctx.globalAlpha = 0.8; ctx.font = `400 15.5px ${HAND}`; ctx.fillText(placeOf(p), c.x + 2, my + 17); if (p.date) ctx.fillText(String(p.date).replace(/[-/.]/g, '·'), c.x + 2, my + 33); ctx.restore();
+    gridSwatches(ctx, p, n, c.x + c.w - 2, my - 16, 44, 33, 6, 6.8);
+    ctx.restore();
+  });
+  const pl = placeOf(items[0]) || '', yr = gridYear(items);
+  if (foot){ ctx.save(); ctx.fillStyle = S.ink; ctx.globalAlpha = 0.75; ctx.textAlign = 'left'; ctx.font = `600 19.6px ${HAND}`; ctx.fillText(G.foot === 'marca' ? 'ojodecristi' : [pl, coverWhen()].filter(Boolean).join(' · '), 50, H - 44); ctx.restore(); }
+  if (seal){ const words = (t || '').split(/\s+/).filter(w => w.length > 2), word = words.length ? words[words.length - 1] : 'ojodecristi'; rubberSeal(ctx, D - 92, H - 70, 58, ink, word, pl, yr, String(items[0].date || '')); }
+}
+function gridEstampillas(ctx, g, items, hi, H){
+  const G = state.grid, ink = gridInk(), top = gridHeadCover(ctx, g, ink, 50), foot = G.foot !== 'nada', ds = devScale(ctx);
+  const y0 = top + 30, y1 = H - (foot ? 84 : 42), cells = gridCells(items.length, 46, D - 46, y0, y1, 30, 30), pad = 12, capH = 22, barH = 46, yr = gridYear(items), rects = [];
+  const markInk = S.ink, red = G.ink === 'tinta' ? '#C8352B' : legibleOn(ink, '#FBF7EE', 3);
+  const fits = items.map((p, i) => fitPhoto(p, cells[i].w - 2*pad, cells[i].h - barH - pad - capH)); settleRows(cells, fits.map(f => f.h + pad + capH + barH), y0, y1, 30);
+  items.forEach((p, i) => {
+    const c = cells[i], n = numOf(p, g*4 + i), f = fits[i];
+    const sw = f.w + 2*pad, sh = f.h + pad + capH, sx = c.x + (c.w - sw)/2, sy = c.y;
+    ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.34)'; ctx.shadowBlur = 9*ds; ctx.shadowOffsetY = 4*ds; perforated(ctx, sx, sy, sw, sh, 3.7, 12.4); ctx.fillStyle = '#FBF7EE'; ctx.fill(); ctx.restore();
+    const r = {x:sx + pad, y:sy + pad, w:f.w, h:f.h}; drawCover(ctx, srcOf(p, hi), r, 0); rects.push({x:sx, y:sy, w:sw, h:sh});
+    ctx.save(); ctx.fillStyle = '#2B221D'; ctx.font = `500 7.4px ${MONO}`; spacedAt(ctx, `${(placeOf(p) || '').toUpperCase()} · ${yr}`, r.x + 1, sy + sh - 8.5, 1.3, 'left');
+    ctx.fillStyle = red; ctx.font = `500 9.6px ${MONO}`; ctx.textAlign = 'right'; ctx.fillText('N.º ' + pad3(n), r.x + r.w - 1, sy + sh - 8); ctx.restore();
+    /* barra de colores con marcas de registro, como en una prueba de imprenta */
+    const cols = (p.colors || []).slice(0, 3), bw = 38, bh = 20, regW = 15, totW = cols.length*bw + 2*(regW + 7), bx = sx + (sw - totW)/2, by = sy + sh + 13;
+    const reg = (x0) => { ctx.save(); ctx.strokeStyle = markInk; ctx.globalAlpha = 0.7; ctx.lineWidth = 0.9; ctx.beginPath(); ctx.arc(x0 + regW/2, by + bh/2, 4.3, 0, Math.PI*2); ctx.moveTo(x0 + regW/2, by + bh/2 - 7.2); ctx.lineTo(x0 + regW/2, by + bh/2 + 7.2); ctx.moveTo(x0, by + bh/2); ctx.lineTo(x0 + regW, by + bh/2); ctx.stroke(); ctx.restore(); };
+    if (cols.length){
+      reg(bx); cols.forEach((col, k) => { ctx.fillStyle = col.hex; ctx.fillRect(bx + regW + 7 + k*bw, by, bw, bh); }); reg(bx + regW + 7 + cols.length*bw + 7);
+      ctx.save(); ctx.fillStyle = markInk; ctx.globalAlpha = 0.6; ctx.font = `400 6.6px ${MONO}`; ctx.textAlign = 'center'; cols.forEach((col, k) => ctx.fillText(col.hex.slice(1), bx + regW + 7 + k*bw + bw/2, by + bh + 10)); ctx.restore();
+    }
+  });
+  if (G.pm && rects.length){ const a = rects[0]; waveMark(ctx, a.x + a.w - 112, a.y + a.h - 70, 52, red, placeOf(items[0]) || '', gridDm(items) || yr, gridDm(items) ? yr : '', rects.length > 1); }
+  gridFootCover(ctx, H, items);
+}
+const GRID_LOOKS = {catalogo:gridCatalogo, cuaderno:gridCuaderno, estampillas:gridEstampillas};
 /* ---------- recipe note: a handwritten sheet with the Fujifilm settings ---------- */
 function recipeDeco(){ return state.deco === 'cintas-clip' || state.deco === 'clips' ? 'clip' : postalDeco(); }
 function recipePhoto(){ const R = state.recipe; return R.photo >= 0 ? state.photos[R.photo] || null : null; }
@@ -4006,6 +4259,7 @@ function outName(o, k){
 function renderTo(canvas, o, size, hi){
   S = currentStyle();
   if (state.style === 'foto' && state.bgEach === 'cada'){ const p = o.kind === 'postal' ? state.photos[o.i] : o.kind === 'grid' ? state.photos[o.g*4] : null; if (p) S = withStamp(fotoStyle(bgHexFor(p))); }
+  if (o.kind === 'grid' && state.grid.bg === 'otro') S = withStamp(Object.assign(customStyle(state.grid.bgColor), {id:'gridbg'}));
   const {w, h} = dimsOf(size), H = D * h / w;
   canvas.width = w; canvas.height = h;
   const ctx = canvas.getContext('2d'); ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
@@ -5090,12 +5344,12 @@ function photoMeta(p){
 }
 function docData(){
   const d = {}; DOC_FIELDS.forEach(k => d[k] = state[k]);
-  return {d, c:{startNum:state.startNum, place:state.place, titles:state.titles, caption:state.caption == null ? null : state.caption}, p:state.photos.map(photoMeta)};
+  return {d, c:{startNum:state.startNum, place:state.place, titles:state.titles, gridSubs:state.gridSubs, caption:state.caption == null ? null : state.caption}, p:state.photos.map(photoMeta)};
 }
 function docSnap(){ const o = docData(); return {js:JSON.stringify(o), ids:o.p.map(m => m.id)}; }
 function applyDoc(o){
   DOC_FIELDS.forEach(k => { if (k in o.d) state[k] = JSON.parse(JSON.stringify(o.d[k])); });
-  state.startNum = o.c.startNum; state.place = o.c.place || ''; state.titles = (o.c.titles || []).slice(); state.caption = o.c.caption == null ? null : o.c.caption;
+  state.startNum = o.c.startNum; state.place = o.c.place || ''; state.titles = (o.c.titles || []).slice(); state.gridSubs = (o.c.gridSubs || []).slice(); state.caption = o.c.caption == null ? null : o.c.caption;
   state.photos = o.p.map(m => { const p = ALLP.get(m.id); if (!p) return null; Object.assign(p, JSON.parse(JSON.stringify(m))); p.tech = Object.assign({cam:'', lens:'', focal:'', ap:'', sh:'', iso:'', time:'', gps:''}, p.tech); return p; }).filter(Boolean);
 }
 /* volver a dibujar todo después de cambiar el estado entero (deshacer, rehacer, abrir un carrusel guardado) */
@@ -5248,11 +5502,35 @@ function renderGridTitles(){
   let html = '';
   for (let g=0; g<groups; g++){
     const a = g*4 + 1, b = Math.min(state.photos.length, g*4 + 4);
-    html += `<div class="gt"><label for="gtitle-${g}" title="Título de la grilla ${g+1}: fotos ${a} a ${b}">Grilla ${g+1} <small>${a}–${b}</small></label><input class="inp" id="gtitle-${g}" data-g="${g}" value="${esc(state.titles[g] || '')}" placeholder="Sin título" autocomplete="off" title="Vacío = la grilla va sin título ni subrayado"><button type="button" class="btn btn-ghost mini" data-useplace="${g}" title="Poner el lugar como título">Usar lugar</button></div>`;
+    html += `<div class="gt"><label for="gtitle-${g}" title="Título de la grilla ${g+1}: fotos ${a} a ${b}">Grilla ${g+1} <small>${a}–${b}</small></label><input class="inp" id="gtitle-${g}" data-g="${g}" value="${esc(state.titles[g] || '')}" placeholder="Sin título" autocomplete="off" title="Vacío = la grilla va sin título ni subrayado"><button type="button" class="btn btn-ghost mini" data-useplace="${g}" title="Poner el lugar como título">Usar lugar</button><input class="inp gsub" id="gsub-${g}" data-gs="${g}" value="${esc(state.gridSubs[g] || '')}" placeholder="Subtítulo (ej. en inglés)" autocomplete="off" aria-label="Subtítulo de la grilla ${g+1}"></div>`;
   }
-  box.innerHTML = html;
+  box.innerHTML = html; syncGrid();
 }
-$('#gridTitles').addEventListener('input', e => { const g = e.target.dataset.g; if (g === undefined) return; state.titles[+g] = e.target.value; scheduleOut(); });
+$('#gridTitles').addEventListener('input', e => {
+  const gs = e.target.dataset.gs; if (gs !== undefined){ state.gridSubs[+gs] = e.target.value; scheduleOut(); return; }
+  const g = e.target.dataset.g; if (g === undefined) return; state.titles[+g] = e.target.value; scheduleOut();
+});
+/* pestaña Grilla: diseño, título, color, pie, fondo y detalles */
+const GRID_HINT = {clasica:'Las fichas de siempre, con la decoración elegida en «Detalles».', catalogo:'Como la portada: cabecera con OJODECRISTI, fotos derechas con borde blanco y el pie de lugar y fecha.', cuaderno:'Cuaderno de campo: título a mano, fotos un poco torcidas, cinta del color de cada foto y un sello de goma.', estampillas:'Cada foto como estampilla troquelada, barra de colores de imprenta y un matasellos.'};
+function syncGrid(){
+  const G = state.grid, look = G.look, designed = !!GRID_LOOKS[look];
+  document.querySelectorAll('.chips[data-gradio]').forEach(box => box.querySelectorAll('button').forEach(b => b.setAttribute('aria-checked', String(G[box.dataset.gradio] === b.dataset.v))));
+  document.querySelectorAll('select[data-gsel]').forEach(x => x.value = G[x.dataset.gsel]);
+  $('#gdHint').textContent = GRID_HINT[look] || '';
+  $('#gdFromCover').checked = G.fromCover; $('#gridTitles').hidden = G.fromCover;
+  document.querySelectorAll('#gridTitles .gsub').forEach(el => el.hidden = !designed);
+  $('#gdInkRow').hidden = $('#gdFootRow').hidden = !designed;
+  $('#gdInkColor').value = G.inkColor; $('#gdBgColor').value = G.bgColor;
+  $('#gdTape').checked = G.tape; $('#gdSeal').checked = G.seal; $('#gdPm').checked = G.pm;
+  $('#gdTapeRow').hidden = $('#gdSealRow').hidden = look !== 'cuaderno'; $('#gdPmRow').hidden = look !== 'estampillas'; $('#gdDecoBox').hidden = look !== 'cuaderno' && look !== 'estampillas';
+}
+function gridChanged(){ syncGrid(); showOut(o => o.kind === 'grid'); scheduleOut(); }
+document.querySelectorAll('.chips[data-gradio]').forEach(box => box.addEventListener('click', e => { const b = e.target.closest('button[data-v]'); if (!b) return; state.grid[box.dataset.gradio] = b.dataset.v; gridChanged(); }));
+document.querySelectorAll('select[data-gsel]').forEach(x => x.addEventListener('change', () => { state.grid[x.dataset.gsel] = x.value; gridChanged(); }));
+$('#gdFromCover').addEventListener('change', e => { state.grid.fromCover = e.target.checked; gridChanged(); });
+$('#gdInkColor').addEventListener('input', e => { state.grid.inkColor = e.target.value; state.grid.ink = 'otro'; gridChanged(); });
+$('#gdBgColor').addEventListener('input', e => { state.grid.bgColor = e.target.value; state.grid.bg = 'otro'; gridChanged(); });
+[['gdTape', 'tape'], ['gdSeal', 'seal'], ['gdPm', 'pm']].forEach(([id, k]) => $('#' + id).addEventListener('change', e => { state.grid[k] = e.target.checked; gridChanged(); }));
 $('#gridTitles').addEventListener('click', e => {
   const b = e.target.closest('[data-useplace]'); if (!b) return; const g = +b.dataset.useplace;
   const pl = (state.photos[g*4] ? placeOf(state.photos[g*4]) : state.place).trim();
@@ -5337,15 +5615,14 @@ function flash(el){ if (!el) return; el.classList.remove('flash'); void el.offse
 function revealEditor(o){
   if (!o) return;
   if (o.kind === 'postal'){ const p = state.photos[o.i]; if (!p) return; setActive(p.id, {tab:true, edit:!isWide(), scroll:isWide()}); if (isWide()){ flash($('#insp')); const t = document.getElementById('title-' + p.id); if (t) t.focus({preventScroll:true}); } }
-  else if (o.kind === 'grid'){ const inp = document.getElementById('gtitle-' + o.g); if (inp){ inp.scrollIntoView({block:'center', behavior:'smooth'}); flash(inp.closest('.gt')); inp.focus({preventScroll:true}); } }
+  else if (o.kind === 'grid'){ setInsp('todas'); setTab('grilla'); flash($('#gridBox')); const inp = document.getElementById('gtitle-' + o.g); if (inp && !$('#gridTitles').hidden) inp.focus({preventScroll:true}); }
   else if (o.kind === 'cover'){ setInsp('todas'); setTab('portada'); flash($('#coverBox')); }
   else if (o.kind === 'recipe'){ setInsp('todas'); setTab('receta'); flash($('#recipeBox')); }
 }
-/* tocar una miniatura de la tira: muestra cuál es, sin cambiar de pestaña salvo para portada y receta */
+/* tocar una miniatura de la tira: muestra cuál es, sin cambiar de pestaña salvo para portada, grilla y receta */
 function revealSoft(o){
   if (!o) return;
   if (o.kind === 'postal'){ const p = state.photos[o.i]; const li = p && document.querySelector(`.prow[data-id="${p.id}"]`); if (li){ li.scrollIntoView({block:'nearest', behavior:'smooth'}); flash(li); } }
-  else if (o.kind === 'grid'){ const inp = document.getElementById('gtitle-' + o.g); if (inp){ inp.scrollIntoView({block:'nearest', behavior:'smooth'}); flash(inp.closest('.gt')); } }
   else revealEditor(o);
 }
 function renderStage(){
@@ -5470,6 +5747,7 @@ function setTab(t){
   document.querySelectorAll('.design [data-pane]').forEach(el => el.classList.toggle('pane-off', el.dataset.pane !== t));
   try { localStorage.setItem(TAB_KEY, t); } catch(e){}
   if (t === 'portada' && state.cover.on) showOut(o => o.kind === 'cover');
+  if (t === 'grilla'){ syncGrid(); showOut(o => o.kind === 'grid'); }
   if (t === 'receta' && state.recipe.on) showOut(o => o.kind === 'recipe');
 }
 ['coverBox', 'recipeBox'].forEach(id => ['input', 'change', 'click'].forEach(ev => $('#' + id).addEventListener(ev, () => { wantSel = id === 'coverBox' ? 'cover' : 'recipe'; })));
@@ -5479,7 +5757,7 @@ document.querySelector('.tabs').addEventListener('keydown', e => {
   const bs = [...document.querySelectorAll('.tabs [data-tab]')], i = bs.findIndex(b => b.getAttribute('aria-selected') === 'true');
   const nb = bs[(i + (e.key === 'ArrowRight' ? 1 : -1) + bs.length) % bs.length]; setTab(nb.dataset.tab); nb.focus(); e.preventDefault();
 });
-{ let t = 'estilo'; try { t = localStorage.getItem(TAB_KEY) || t; } catch(e){} if (!['estilo','postal','detalles','portada','receta'].includes(t)) t = 'estilo'; setTab(t); }
+{ let t = 'estilo'; try { t = localStorage.getItem(TAB_KEY) || t; } catch(e){} if (!['estilo','postal','detalles','portada','grilla','receta'].includes(t)) t = 'estilo'; setTab(t); }
 function placeBar(){
   const bar = $('.bar'), top = $('.top'), views = $('.views');
   if (isWide()){ if (bar.parentNode !== top) top.appendChild(bar); }
@@ -6079,7 +6357,7 @@ async function replaceImage(p, file){
 
 /* al llegar las primeras fotos propias, las de ejemplo se van */
 function leaveSample(){
-  state.sample = false; state.photos = []; state.titles = []; state.place = ''; $('#place').value = ''; state.caption = null;
+  state.sample = false; state.photos = []; state.titles = []; state.gridSubs = []; state.place = ''; $('#place').value = ''; state.caption = null;
   $('#sampleNote').hidden = true; outSig = ''; activeId = null; CUR_DRAFT = null; draftsLabel(); cid = 'k' + Date.now().toString(36);
   if (state.lastEnd > 0){ setStart(state.lastEnd + 1); toast(`La numeración sigue desde el último carrusel: N.° ${pad3(state.lastEnd + 1)}`); }
   else setStart(1);
@@ -6114,7 +6392,7 @@ async function saveSession(){
     if (fresh.length || gone.length) await idbDo('blobs', 'readwrite', st => { fresh.forEach(p => st.put(p.fullBlob, p.id)); gone.forEach(id => st.delete(id)); });
     fresh.forEach(p => SAVED.add(p.id)); gone.forEach(id => SAVED.delete(id));
     const meta = state.photos.map(photoMeta);
-    await idbDo('kv', 'readwrite', st => st.put({v:2, at:Date.now(), startNum:state.startNum, place:state.place, titles:state.titles, caption:state.caption, draft:CUR_DRAFT, photos:meta}, 'session'));
+    await idbDo('kv', 'readwrite', st => st.put({v:2, at:Date.now(), startNum:state.startNum, place:state.place, titles:state.titles, gridSubs:state.gridSubs, caption:state.caption, draft:CUR_DRAFT, photos:meta}, 'session'));
     if (CUR_DRAFT) await draftUpdate().catch(() => {});
   })();
   try { await sessBusy; } catch(e){} finally { sessBusy = null; }
@@ -6137,7 +6415,7 @@ async function restoreSession(){
       } catch(e){}
     }
     if (!photos.length) return false;
-    state.photos = photos; state.sample = false; state.titles = Array.isArray(sess.titles) ? sess.titles : [];
+    state.photos = photos; state.sample = false; state.titles = Array.isArray(sess.titles) ? sess.titles : []; state.gridSubs = Array.isArray(sess.gridSubs) ? sess.gridSubs : [];
     state.place = sess.place || ''; $('#place').value = state.place; setStart(sess.startNum || 1);
     state.caption = typeof sess.caption === 'string' ? sess.caption : null;
     CUR_DRAFT = sess.draft && sess.draft.id ? {id:sess.draft.id, name:String(sess.draft.name || '')} : null;
@@ -6151,7 +6429,7 @@ if (navigator.storage && navigator.storage.persist) navigator.storage.persist().
   const b = e.currentTarget;
   if (!b.classList.contains('armed')){ b.classList.add('armed'); b.textContent = '¿Vaciar todo? Tocá de nuevo'; clearTimeout(armT); armT = setTimeout(() => { b.classList.remove('armed'); b.textContent = 'Vaciar'; }, 3500); return; }
   clearTimeout(armT); b.classList.remove('armed'); b.textContent = 'Vaciar';
-  commitNow(); state.photos = []; state.titles = []; state.caption = null; outSig = ''; activeId = null; unlinkDraft();
+  commitNow(); state.photos = []; state.titles = []; state.gridSubs = []; state.caption = null; outSig = ''; activeId = null; unlinkDraft();
   afterStructure(); commitNow(); closeEditor(); toast('Listo: carrusel vacío. Si fue sin querer, tocá Deshacer');
 }); }
 
