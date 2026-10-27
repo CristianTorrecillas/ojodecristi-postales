@@ -1091,6 +1091,7 @@ textarea.inp.cap-text{width:100%;min-height:150px;font-family:var(--sans);font-s
             <div class="chips segc" role="radiogroup" aria-label="Color del papel" data-radio="bgEach">
               <button type="button" role="radio" data-v="cada">Uno por postal</button>
               <button type="button" role="radio" data-v="una">Uno para todas</button>
+              <button type="button" role="radio" data-v="portada" title="El mismo color de la portada, en todas las postales">Color del book</button>
             </div>
           </div>
           <div class="opt" id="fotoPickRow">
@@ -1203,6 +1204,7 @@ textarea.inp.cap-text{width:100%;min-height:150px;font-family:var(--sans);font-s
             <div class="chips segc" role="radiogroup" aria-label="Tipo de postal" data-radio="comp">
               <button type="button" role="radio" data-v="postal">Postal</button>
               <button type="button" role="radio" data-v="ficha">Ficha</button>
+              <button type="button" role="radio" data-v="sola" title="Solo la foto con su marco sobre el fondo, sin colores ni sello">Solo foto</button>
             </div>
           </div>
           <div class="opt" data-ifpostal>
@@ -1407,6 +1409,20 @@ textarea.inp.cap-text{width:100%;min-height:150px;font-family:var(--sans);font-s
               </div>
             </div>
             <div class="opt">
+              <span class="lbl">Foto</span>
+              <div class="chips segc" role="radiogroup" aria-label="Forma de la foto en la portada" data-cradio="shape">
+                <button type="button" role="radio" data-v="entera" title="La foto completa, con su proporción">Entera</button>
+                <button type="button" role="radio" data-v="cuadrada" title="Recortada en cuadrado: se ve más grande en la portada">Cuadrada</button>
+              </div>
+            </div>
+            <div class="opt stack" id="cvCropRow">
+              <div class="rc-grid">
+                <label>Zoom<input type="range" id="cvCz" min="1" max="3" step="0.02"></label>
+                <label>Izquierda ↔ derecha<input type="range" id="cvCx" min="-1" max="1" step="0.02"></label>
+                <label>Arriba ↔ abajo<input type="range" id="cvCy" min="-1" max="1" step="0.02"></label>
+              </div>
+            </div>
+            <div class="opt">
               <label class="lbl" for="cvFrameSel">Marco</label>
               <select id="cvFrameSel" class="inp" data-csel="frame">
                 <option value="ninguno">Sin marco</option>
@@ -1436,6 +1452,17 @@ textarea.inp.cap-text{width:100%;min-height:150px;font-family:var(--sans);font-s
                   <button type="button" role="radio" data-v="medio">Medio</button>
                   <button type="button" role="radio" data-v="intenso">Intenso</button>
                 </div>
+              </div>
+            </div>
+            <div class="opt" id="cvInkRow">
+              <span class="lbl">Título</span>
+              <div class="optrow">
+                <div class="chips segc" role="radiogroup" aria-label="Color del título" data-cradio="ink">
+                  <button type="button" role="radio" data-v="auto">Auto</button>
+                  <button type="button" role="radio" data-v="blanco">Blanco</button>
+                </div>
+                <div class="chips" id="cvInkSw" role="group" aria-label="Colores sugeridos para el título"></div>
+                <label class="colorpick" for="cvInkColor"><input type="color" id="cvInkColor" value="#1B1A18"> Elegir</label>
               </div>
             </div>
             <div class="opt" id="cvSignRow">
@@ -1917,9 +1944,9 @@ function currentStyle(){ return withStamp(baseStyle()); }
 function vividOf(cols){ let best = cols[0].hex, bc = -1; cols.forEach(c => { const o = hex2ok(c.hex), ch = Math.hypot(o[1], o[2]) * (o[0] > 0.35 ? 1 : 0.5); if (ch > bc){ bc = ch; best = c.hex; } }); return best; }
 function toneOf(hex, tone){ if (tone === 'intenso') return hex; const k = tone === 'medio' ? 0.3 : 0.55, [r, g, b] = hexRgb(hex); return rgbHex(r + (255 - r)*k, g + (255 - g)*k, b + (255 - b)*k); }
 const BG_NONE = '#E8DFC8';
-function sharedBgHex(){ const cols = (state.photos[0] && state.photos[0].colors) || []; if (!cols.length) return BG_NONE; return toneOf(state.bgPick >= 0 && cols[state.bgPick] ? cols[state.bgPick].hex : vividOf(cols), state.bgTone); }
+function sharedBgHex(){ if (state.bgEach === 'portada'){ const h = coverPick(coverPhoto()); if (h) return toneOf(h, state.cover.tone); } const cols = (state.photos[0] && state.photos[0].colors) || []; if (!cols.length) return BG_NONE; return toneOf(state.bgPick >= 0 && cols[state.bgPick] ? cols[state.bgPick].hex : vividOf(cols), state.bgTone); }
 function bgHexFor(p){
-  if (state.bgEach === 'una') return sharedBgHex();
+  if (state.bgEach === 'una' || state.bgEach === 'portada') return sharedBgHex();
   const cols = (p && p.colors) || []; if (!cols.length) return BG_NONE;
   const L = p.lay || {}, k = L.bg != null && L.bg !== '' ? +L.bg : -1;
   return toneOf(k >= 0 && cols[k] ? cols[k].hex : vividOf(cols), state.bgTone);
@@ -1954,7 +1981,7 @@ const RECIPE_DEFAULT = {
   note:''
 };
 state.recipe = {...RECIPE_DEFAULT};
-const COVER_DEFAULT = {on:false, photo:0, look:'sola', bg:'blanco', color:'#F3EFE6', title:'', sub:'', size:'grande', frame:'ninguno', pick:-1, tone:'suave', sign:false, foot:'fotos', footText:''};
+const COVER_DEFAULT = {on:false, photo:0, look:'sola', bg:'blanco', color:'#F3EFE6', title:'', sub:'', size:'grande', frame:'ninguno', pick:-1, tone:'suave', sign:false, foot:'fotos', footText:'', shape:'entera', cz:1, cx:0, cy:0, ink:'auto', inkColor:'#1B1A18'};
 state.cover = {...COVER_DEFAULT};
 const PENS = {azul:'#1F3A7A', negra:'#1E1D1B', sepia:'#5B3A22'};
 const PREF_KEY = 'postales-ojodecristi-v1';
@@ -3566,9 +3593,18 @@ function markerFraction(ctx, a, b, xr, base){
   x += gap - h*0.12; digits(B);
   ctx.restore();
 }
+/* «Solo foto»: la foto entera con su marco sobre el fondo, sin colores, sello ni título (para books con portada y grilla de colores al final) */
+function drawFotoSola(ctx, p, hi, H){
+  const fr = state.frame, fp = COVER_FRAME[fr] || 0, M = 30;
+  const ar = p.fw && p.fh ? p.fw/p.fh : 1.5, aw = D - 2*(M + fp), ah = H - 2*(M + fp);
+  let w = aw, h = w/ar; if (h > ah){ h = ah; w = h*ar; }
+  const r = {x:(D - w)/2, y:(H - h)/2, w, h};
+  framedPhoto(ctx, srcOf(p, hi), r, 3.9, 0);
+}
 function drawPostal(ctx, p, n, hi, mini, H){
   H = H || D; let dy = (H - D)/2;
   paper(ctx, hi, H);
+  if (state.comp === 'sola'){ drawFotoSola(ctx, p, hi, H); return; }
   if (!mini && state.extras.border) airmail(ctx, H);
   if (state.comp === 'ficha' && !mini){
     ctx.save(); ctx.translate(0, dy);
@@ -3813,6 +3849,30 @@ function coverPick(p){
   const C = state.cover; if (C.pick >= 0 && cols[C.pick]) return cols[C.pick].hex;
   return vividOf(cols);
 }
+/* color del título de la portada: Auto, Blanco, dos sugeridos de la foto (que se lean sobre el fondo) o uno elegido */
+function lumOf(hex){ const [r, g, b] = hexRgb(hex).map(v => { v /= 255; return v <= 0.04045 ? v/12.92 : Math.pow((v + 0.055)/1.055, 2.4); }); return 0.2126*r + 0.7152*g + 0.0722*b; }
+function contrastOf(a, b){ const la = lumOf(a), lb = lumOf(b); return (Math.max(la, lb) + 0.05)/(Math.min(la, lb) + 0.05); }
+function legibleOn(hex, bgHex, min){
+  if (contrastOf(hex, bgHex) >= min) return hex;
+  const to = lumOf(bgHex) > 0.4 ? [24, 20, 16] : [250, 246, 238], [r, g, b] = hexRgb(hex);
+  for (let t = 0.08; t <= 1.001; t += 0.04){ const c = rgbHex(r + (to[0] - r)*t, g + (to[1] - g)*t, b + (to[2] - b)*t); if (contrastOf(c, bgHex) >= min) return c; }
+  return rgbHex(...to);
+}
+function coverInkChoices(p, bgHex){
+  const cols = ((p && p.colors) || []).map(c => c.hex), out = [];
+  const cand = cols.map(h => { const lh = legibleOn(h, bgHex, 4.5), o = hex2ok(lh); return {h:lh, chroma:Math.hypot(o[1], o[2]), o}; }).sort((a, b) => b.chroma - a.chroma);
+  for (const c of cand){ if (out.length >= 2) break; if (out.every(q => Math.hypot(q.o[0] - c.o[0], q.o[1] - c.o[1], q.o[2] - c.o[2]) > 0.07)) out.push(c); }
+  const fb = lumOf(bgHex) > 0.4 ? ['#2B2622', '#6B4A32'] : ['#F3EFE6', '#E8D3A8'];
+  while (out.length < 2){ const h = fb[out.length]; out.push({h, o:hex2ok(h)}); }
+  return out.map(c => c.h);
+}
+function coverTitleInk(p, bgHex, def){
+  const C = state.cover, k = C.ink;
+  if (k === 'blanco') return '#FFFFFF';
+  if (k === 'otro') return C.inkColor || def;
+  if (k === 's1' || k === 's2') return coverInkChoices(p, bgHex)[k === 's1' ? 0 : 1];
+  return def;
+}
 const COVER_FRAME = {ninguno:0, sombra:6, fina:5, blanca:11, negativo:26, paspartu:17, troquelado:13};
 function coverBg(p){
   const C = state.cover;
@@ -3869,8 +3929,9 @@ function drawPortada(ctx, hi, H){
   if (bg){ ctx.fillStyle = bg; ctx.fillRect(0, 0, D, H); } else paper(ctx, hi, H);
   const bgHex = bg || (S.paper ? rgbHex(...S.paper) : paperAvg), dark = hex2ok(bgHex)[0] < 0.55;
   const ink = dark ? '#F3EFE6' : (bg ? '#1B1A18' : S.ink);
+  const tink = coverTitleInk(p, bgHex, ink), cfocus = C.shape === 'cuadrada' ? {z:C.cz, x:C.cx, y:C.cy} : 0;
   const title = (C.title || '').trim() || placeOf(p), sub = (C.sub || '').trim();
-  const ar = p.fw && p.fh ? p.fw/p.fh : 1.5, M = C.size === 'mediano' ? 36 : 14, fp = COVER_FRAME[C.frame] || 0;
+  const ar = C.shape === 'cuadrada' ? 1 : p.fw && p.fh ? p.fw/p.fh : 1.5, M = C.size === 'mediano' ? 36 : 14, fp = COVER_FRAME[C.frame] || 0;
   let top = M, bot = M;
   const TL = splitLines(title), SL = splitLines(sub);
   if (C.look === 'titulo') top = (sub ? 104 : 86) + (TL.length - 1)*30 + (SL.length - 1)*19;
@@ -3880,22 +3941,22 @@ function drawPortada(ctx, hi, H){
   const r = {x:(D - w)/2, y:top + fp + (ah - h)/2, w, h};
   if (C.look === 'sola') r.y = (H - h)/2;
   if (C.look === 'titulo') r.y = Math.max(top + fp, (H - h + (top - M))/2);
-  if (C.frame === 'paspartu' || C.frame === 'troquelado'){ decorUnder(ctx, r, C.frame); drawCover(ctx, srcOf(p, hi), r, 0); }
-  else { const keepF = state.frame, keepS = S; state.frame = C.frame; if (dark) S = Object.assign({}, S, {frame:'#C9C4B8'}); framedPhoto(ctx, srcOf(p, hi), r, 3.9, 0); state.frame = keepF; S = keepS; }
+  if (C.frame === 'paspartu' || C.frame === 'troquelado'){ decorUnder(ctx, r, C.frame); drawCover(ctx, srcOf(p, hi), r, cfocus); }
+  else { const keepF = state.frame, keepS = S; state.frame = C.frame; if (dark) S = Object.assign({}, S, {frame:'#C9C4B8'}); framedPhoto(ctx, srcOf(p, hi), r, 3.9, cfocus); state.frame = keepF; S = keepS; }
   ctx.fillStyle = ink;
   if (C.look === 'titulo'){
-    const ft = titleFont(24), lines = TL.map(t => keepCase() ? t : t.toUpperCase()), lh = ft.size*1.2;
+    ctx.fillStyle = tink; const ft = titleFont(24), lines = TL.map(t => keepCase() ? t : t.toUpperCase()), lh = ft.size*1.2;
     const base = r.y - fp - (sub ? 52 + (SL.length - 1)*19 : 30);
     let tw = 0; lines.forEach((t, i) => { centerText(ctx, t, D/2, base - (lines.length - 1 - i)*lh, ft.size, 600, ft.family, ft.weight); tw = Math.max(tw, Math.min(600, ctx.measureText(t).width)); });
-    const keep = S; S = Object.assign({}, S, {ink}); underline(ctx, D/2 - tw/2 - 7, D/2 + tw/2 + 7, base + 10, base + 5); S = keep;
-    if (sub){ ctx.globalAlpha = 0.8; SL.forEach((t, i) => centerText(ctx, t, D/2, r.y - fp - 16 - (SL.length - 1 - i)*19, 15, 560, SANS, 400)); ctx.globalAlpha = 1; }
+    const keep = S; S = Object.assign({}, S, {ink:tink}); underline(ctx, D/2 - tw/2 - 7, D/2 + tw/2 + 7, base + 10, base + 5); S = keep;
+    if (sub){ ctx.fillStyle = ink; ctx.globalAlpha = 0.8; SL.forEach((t, i) => centerText(ctx, t, D/2, r.y - fp - 16 - (SL.length - 1 - i)*19, 15, 560, SANS, 400)); ctx.globalAlpha = 1; }
   } else if (C.look === 'libro'){
     ctx.globalAlpha = 0.75; ctx.font = `500 11px ${MONO}`; spaced(ctx, 'OJODECRISTI', D/2, 46, 4.2); ctx.globalAlpha = 1;
-    ctx.fillRect(D/2 - 16, 60, 32, 1.4);
+    ctx.fillStyle = tink; ctx.fillRect(D/2 - 16, 60, 32, 1.4);
     const Ts = TL.map(t => t.toUpperCase()), fs = Math.min(...Ts.map(t => fitSpaced(ctx, t, D - 2*M - 20, 40, SANS, 500, 0.16)));
     ctx.font = `500 ${fs}px ${SANS}`; Ts.forEach((t, i) => spaced(ctx, t, D/2, 112 + i*46, fs*0.16));
-    if (sub){ ctx.globalAlpha = 0.8; const ss = Math.min(...SL.map(t => fitSpaced(ctx, t, D - 2*M - 40, 16, SANS, 400, 0.04))); ctx.font = `400 ${ss}px ${SANS}`; SL.forEach((t, i) => spaced(ctx, t, D/2, 142 + (Ts.length - 1)*46 + i*20, ss*0.04)); ctx.globalAlpha = 1; }
-    const F = coverFoot(p);
+    if (sub){ ctx.fillStyle = ink; ctx.globalAlpha = 0.8; const ss = Math.min(...SL.map(t => fitSpaced(ctx, t, D - 2*M - 40, 16, SANS, 400, 0.04))); ctx.font = `400 ${ss}px ${SANS}`; SL.forEach((t, i) => spaced(ctx, t, D/2, 142 + (Ts.length - 1)*46 + i*20, ss*0.04)); ctx.globalAlpha = 1; }
+    ctx.fillStyle = ink; const F = coverFoot(p);
     if (F){
       const fy = H - 36, tr = s => s*0.22, maxW = D - 2*M;
       ctx.globalAlpha = 0.32; ctx.fillRect(M, fy - 20, maxW, 0.9); ctx.globalAlpha = 0.82;
@@ -4275,6 +4336,7 @@ function frameArOf(p){
   try {
     const H = D * (FORMATS[state.format] || 1);
     if (state.comp === 'ficha') return fichaIsTall(p) ? p.fw/p.fh : FICHA.photo.w/FICHA.photo.h;
+    if (state.comp === 'sola') return p.fw && p.fh ? p.fw/p.fh : 1.5;
     const L = postalLayout(p, numOf(p), H, false); return L.photo.w/L.photo.h;
   } catch(e){ return 1.5; }
 }
@@ -4800,9 +4862,9 @@ function syncDesign(){
   $('#paperName').textContent = currentStyle().name;
   $('#customRow').hidden = state.style !== 'custom';
   { const foto = state.style === 'foto';
-    $('#fotoEachRow').hidden = $('#fotoToneRow').hidden = !foto; $('#fotoPickRow').hidden = !foto || state.bgEach !== 'una'; $('#fotoHint').hidden = !foto || state.bgEach !== 'cada';
+    $('#fotoEachRow').hidden = $('#fotoToneRow').hidden = !foto; $('#fotoPickRow').hidden = !foto || state.bgEach !== 'una'; if (foto && state.bgEach === 'portada') $('#fotoToneRow').hidden = true; $('#fotoHint').hidden = !foto || state.bgEach !== 'cada';
     document.body.classList.toggle('bg-cada', foto && state.bgEach === 'cada'); renderBgSwatches(); renderFotoThumb(); }
-  document.querySelectorAll('[data-ifpostal]').forEach(el => el.hidden = state.comp === 'ficha');
+  document.querySelectorAll('[data-ifpostal]').forEach(el => el.hidden = state.comp !== 'postal');
   $('#decoPostalRow').hidden = state.deco === 'ninguno';
   document.body.classList.toggle('pm-on', state.pm !== 'ninguno');
   $('#pmIconRow').hidden = state.pm !== 'ilustrado'; $('#pmPosRow').hidden = state.pm === 'ninguno'; $('#linePosRow').hidden = state.lineStyle === 'ninguna' || state.comp === 'ficha';
@@ -4907,8 +4969,20 @@ function renderCoverSwatches(){
   box.innerHTML = cols.map((c, i) => `<button type="button" data-pick="${i}" aria-pressed="${c.hex === cur}" title="${esc(c.name || c.hex)}" style="background:${c.hex}"></button>`).join('');
 }
 $('#cvSw').addEventListener('click', e => { const b = e.target.closest('[data-pick]'); if (!b) return; state.cover.pick = +b.dataset.pick; renderCoverSwatches(); scheduleOut(); });
+function renderCoverInk(){
+  const box = $('#cvInkSw'); if (!box) return; const C = state.cover, p = coverPhoto();
+  $('#cvInkRow').hidden = !C.on || C.look === 'sola';
+  if (!p) { box.innerHTML = ''; return; }
+  const bgHex = coverBg(p) || (S && S.paper ? rgbHex(...S.paper) : paperAvg), cs = coverInkChoices(p, bgHex);
+  box.innerHTML = cs.map((h, i) => `<button type="button" data-ink="s${i + 1}" aria-pressed="${C.ink === 's' + (i + 1)}" title="Sugerido ${i + 1}" style="background:${h}"></button>`).join('');
+  $('#cvInkColor').value = C.ink === 'otro' ? C.inkColor : (C.ink === 'blanco' ? '#FFFFFF' : $('#cvInkColor').value);
+}
+$('#cvInkSw').addEventListener('click', e => { const b = e.target.closest('[data-ink]'); if (!b) return; state.cover.ink = b.dataset.ink; syncCover(); scheduleOut(); });
+$('#cvInkColor').addEventListener('input', e => { state.cover.inkColor = e.target.value; state.cover.ink = 'otro'; syncCover(); scheduleOut(); });
+[['cvCz', 'cz'], ['cvCx', 'cx'], ['cvCy', 'cy']].forEach(([id, k]) => $('#' + id).addEventListener('input', e => { state.cover[k] = +e.target.value; scheduleOut(); }));
 function syncCover(){
-  const C = state.cover; renderCoverSwatches();
+  const C = state.cover; renderCoverSwatches(); renderCoverInk();
+  $('#cvCropRow').hidden = !C.on || C.shape !== 'cuadrada'; $('#cvCz').value = C.cz; $('#cvCx').value = C.cx; $('#cvCy').value = C.cy;
   $('#cvOpts').hidden = !C.on; $('#cvOffHint').hidden = C.on; $('#cvTextRow').hidden = C.look === 'sola'; $('#cvColorRow').hidden = C.bg !== 'otro';
   document.querySelectorAll('select[data-csel]').forEach(x => x.value = C[x.dataset.csel]);
   $('#cvFootRow').hidden = C.look !== 'libro'; $('#cvFootTextRow').hidden = C.look !== 'libro' || C.foot !== 'texto'; $('#cvFootText').value = C.footText || '';
@@ -4918,7 +4992,7 @@ function syncCover(){
 }
 $('#cvOn').addEventListener('change', e => { state.cover.on = e.target.checked; syncCover(); scheduleOut(); });
 document.querySelectorAll('select[data-csel]').forEach(x => x.addEventListener('change', () => { state.cover[x.dataset.csel] = x.value; syncCover(); scheduleOut(); }));
-$('#cvPhoto').addEventListener('change', e => { state.cover.photo = +e.target.value; state.cover.pick = -1; renderCoverSwatches(); scheduleOut(); });
+$('#cvPhoto').addEventListener('change', e => { state.cover.photo = +e.target.value; state.cover.pick = -1; state.cover.cz = 1; state.cover.cx = 0; state.cover.cy = 0; renderCoverSwatches(); renderCoverInk(); scheduleOut(); });
 $('#cvFootText').addEventListener('input', e => { state.cover.footText = e.target.value; scheduleOut(); });
 $('#cvSign').addEventListener('change', e => { state.cover.sign = e.target.checked; scheduleOut(); });
 $('#cvTitle').addEventListener('input', e => { e.target.rows = Math.min(3, Math.max(1, e.target.value.split('\n').length)); state.cover.title = e.target.value; scheduleOut(); });
@@ -4971,7 +5045,7 @@ $('#presetCancel').addEventListener('click', closePresetSave);
 function savePresetNow(){
   const name = $('#presetName').value.trim(); if (!name){ toast('Ponele un nombre al diseño'); $('#presetName').focus(); return; }
   const d = {}; PRESET_FIELDS.forEach(k => d[k] = JSON.parse(JSON.stringify(state[k])));
-  const C = state.cover, cover = {on:C.on, look:C.look, bg:C.bg, color:C.color, size:C.size, frame:C.frame, tone:C.tone, sign:!!C.sign, foot:C.foot};
+  const C = state.cover, cover = {on:C.on, look:C.look, bg:C.bg, color:C.color, size:C.size, frame:C.frame, tone:C.tone, sign:!!C.sign, foot:C.foot, shape:C.shape, ink:C.ink, inkColor:C.inkColor};
   const i = PRESETS.findIndex(x => x.name.toLowerCase() === name.toLowerCase());
   if (i >= 0) PRESETS[i] = {name, d, cover}; else PRESETS.push({name, d, cover});
   lastPreset = name; savePresets(PRESETS); closePresetSave(); syncPresetSel(); toast((i >= 0 ? 'Actualizado: ' : 'Guardado: ') + name);
