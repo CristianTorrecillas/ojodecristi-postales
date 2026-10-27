@@ -1086,6 +1086,16 @@ textarea.inp.cap-text{width:100%;min-height:150px;font-family:var(--sans);font-s
             <span class="lbl">Papel · <b id="paperName"></b></span>
             <div id="styles" class="styles" role="radiogroup" aria-label="Papel"></div>
           </div>
+          <div class="opt" id="bgQuickRow">
+            <span class="lbl">Fondo</span>
+            <div class="optrow">
+              <div class="chips segc" role="radiogroup" aria-label="Fondo de las postales y la grilla" id="bgQuick">
+                <button type="button" role="radio" data-q="portada" title="El mismo fondo que la portada">Igual a la portada</button>
+                <button type="button" role="radio" data-q="blanco">Blanco</button>
+              </div>
+              <label class="colorpick" for="bgQuickColor"><input type="color" id="bgQuickColor" value="#F3EFE6"> Elegir color</label>
+            </div>
+          </div>
           <div class="opt" id="fotoEachRow">
             <span class="lbl">Color</span>
             <div class="chips segc" role="radiogroup" aria-label="Color del papel" data-radio="bgEach">
@@ -1944,7 +1954,7 @@ function currentStyle(){ return withStamp(baseStyle()); }
 function vividOf(cols){ let best = cols[0].hex, bc = -1; cols.forEach(c => { const o = hex2ok(c.hex), ch = Math.hypot(o[1], o[2]) * (o[0] > 0.35 ? 1 : 0.5); if (ch > bc){ bc = ch; best = c.hex; } }); return best; }
 function toneOf(hex, tone){ if (tone === 'intenso') return hex; const k = tone === 'medio' ? 0.3 : 0.55, [r, g, b] = hexRgb(hex); return rgbHex(r + (255 - r)*k, g + (255 - g)*k, b + (255 - b)*k); }
 const BG_NONE = '#E8DFC8';
-function sharedBgHex(){ if (state.bgEach === 'portada'){ const h = coverPick(coverPhoto()); if (h) return toneOf(h, state.cover.tone); } const cols = (state.photos[0] && state.photos[0].colors) || []; if (!cols.length) return BG_NONE; return toneOf(state.bgPick >= 0 && cols[state.bgPick] ? cols[state.bgPick].hex : vividOf(cols), state.bgTone); }
+function sharedBgHex(){ if (state.bgEach === 'portada'){ const cp = coverPhoto(), cb = cp ? coverBg(cp) : null; if (cb) return cb; const h = coverPick(cp); if (h) return toneOf(h, state.cover.tone); } const cols = (state.photos[0] && state.photos[0].colors) || []; if (!cols.length) return BG_NONE; return toneOf(state.bgPick >= 0 && cols[state.bgPick] ? cols[state.bgPick].hex : vividOf(cols), state.bgTone); }
 function bgHexFor(p){
   if (state.bgEach === 'una' || state.bgEach === 'portada') return sharedBgHex();
   const cols = (p && p.colors) || []; if (!cols.length) return BG_NONE;
@@ -4855,7 +4865,7 @@ function syncDesign(){
   document.querySelectorAll('.style-card').forEach(b => b.setAttribute('aria-checked', String(b.dataset.style === state.style)));
   document.querySelectorAll('.shape-card').forEach(b => b.setAttribute('aria-checked', String(b.dataset.shape === state.shape)));
   document.querySelectorAll('.chips[data-radio]').forEach(box => box.querySelectorAll('button').forEach(b => b.setAttribute('aria-checked', String(state[box.dataset.radio] === b.dataset.v))));
-  $('#styleName').textContent = currentStyle().name;
+  $('#styleName').textContent = currentStyle().name; syncBgQuick();
   $('#decoSel').value = state.deco; $('#decoPostal').checked = state.decoPostal; $('#tilt').checked = state.tilt;
   $('#exBorder').checked = state.extras.border; $('#exFilmdate').checked = state.extras.filmdate; $('#exCounter').checked = !!state.extras.counter; $('#exIcons').checked = !!state.extras.icons;
   $('#customColor').value = state.custom;
@@ -4932,6 +4942,19 @@ document.querySelectorAll('.chips[data-radio]').forEach(box => box.addEventListe
   const b = e.target.closest('button[data-v]'); if (!b) return;
   state[box.dataset.radio] = b.dataset.v; syncDesign(); if (box.dataset.radio === 'stampMode') renderStyleThumbs(); scheduleOut();
 }));
+const BG_WHITE = '#FBFAF7';
+function syncBgQuick(){
+  const q = state.style === 'foto' && state.bgEach === 'portada' ? 'portada' : state.style === 'custom' && String(state.custom).toUpperCase() === BG_WHITE ? 'blanco' : '';
+  document.querySelectorAll('#bgQuick [data-q]').forEach(b => b.setAttribute('aria-checked', String(b.dataset.q === q)));
+  if (state.style === 'custom') $('#bgQuickColor').value = state.custom;
+}
+function setPaperColor(hex){ state.custom = hex; state.style = 'custom'; $('#customColor').value = hex; syncDesign(); renderStyleThumbs(); scheduleOut(); }
+$('#bgQuick').addEventListener('click', e => {
+  const b = e.target.closest('[data-q]'); if (!b) return;
+  if (b.dataset.q === 'portada'){ state.style = 'foto'; state.bgEach = 'portada'; syncDesign(); scheduleOut(); }
+  else setPaperColor(BG_WHITE);
+});
+$('#bgQuickColor').addEventListener('input', e => setPaperColor(e.target.value));
 $('#customColor').addEventListener('input', e => {
   state.custom = e.target.value; state.style = 'custom'; syncDesign();
   const c = document.querySelector('.style-card canvas[data-style="custom"]');
