@@ -1479,6 +1479,18 @@ textarea.inp.cap-text{width:100%;min-height:150px;font-family:var(--sans);font-s
                 <label class="colorpick" for="cvInkColor"><input type="color" id="cvInkColor" value="#1B1A18"> Elegir</label>
               </div>
             </div>
+            <div class="opt" id="cvSubInkRow">
+              <span class="lbl">Subtítulo</span>
+              <div class="optrow">
+                <div class="chips segc" role="radiogroup" aria-label="Color del subtítulo" data-cradio="subInk">
+                  <button type="button" role="radio" data-v="auto">Auto</button>
+                  <button type="button" role="radio" data-v="titulo">Igual título</button>
+                  <button type="button" role="radio" data-v="blanco">Blanco</button>
+                </div>
+                <div class="chips" id="cvSubInkSw" role="group" aria-label="Colores sugeridos para el subtítulo"></div>
+                <label class="colorpick" for="cvSubInkColor"><input type="color" id="cvSubInkColor" value="#1B1A18"> Elegir</label>
+              </div>
+            </div>
             <div class="opt" id="cvSignRow">
               <span class="lbl">Firma</span>
               <label class="check"><input type="checkbox" id="cvSign"> @ojodecristi chiquito abajo</label>
@@ -2048,7 +2060,7 @@ const RECIPE_DEFAULT = {
   note:''
 };
 state.recipe = {...RECIPE_DEFAULT};
-const COVER_DEFAULT = {on:false, photo:0, look:'sola', bg:'blanco', color:'#F3EFE6', title:'', sub:'', size:'grande', frame:'ninguno', pick:-1, tone:'suave', sign:false, foot:'fotos', footText:'', shape:'entera', cz:1, cx:0, cy:0, ink:'auto', inkColor:'#1B1A18'};
+const COVER_DEFAULT = {on:false, photo:0, look:'sola', bg:'blanco', color:'#F3EFE6', title:'', sub:'', size:'grande', frame:'ninguno', pick:-1, tone:'suave', sign:false, foot:'fotos', footText:'', shape:'entera', cz:1, cx:0, cy:0, ink:'auto', inkColor:'#1B1A18', subInk:'auto', subInkColor:'#1B1A18'};
 state.cover = {...COVER_DEFAULT};
 const GRID_DEFAULT = {look:'clasica', fromCover:false, ink:'portada', inkColor:'#D12F27', foot:'lugar', bg:'postales', bgColor:'#2F241F', tape:true, seal:true, pm:true};
 state.grid = {...GRID_DEFAULT};
@@ -4137,6 +4149,15 @@ function coverTitleInk(p, bgHex, def){
   if (k === 's1' || k === 's2') return coverInkChoices(p, bgHex)[k === 's1' ? 0 : 1];
   return def;
 }
+/* color del subtítulo: null = automático (tinta de la portada, algo translúcida) */
+function coverSubInk(p, bgHex, tink){
+  const C = state.cover, k = C.subInk;
+  if (k === 'titulo') return tink;
+  if (k === 'blanco') return '#FFFFFF';
+  if (k === 'otro') return C.subInkColor || null;
+  if (k === 's1' || k === 's2') return coverInkChoices(p, bgHex)[k === 's1' ? 0 : 1];
+  return null;
+}
 const COVER_FRAME = {ninguno:0, sombra:6, fina:5, blanca:11, negativo:26, paspartu:17, troquelado:13};
 function coverBg(p){
   const C = state.cover;
@@ -4194,6 +4215,7 @@ function drawPortada(ctx, hi, H){
   const bgHex = bg || (S.paper ? rgbHex(...S.paper) : paperAvg), dark = hex2ok(bgHex)[0] < 0.55;
   const ink = dark ? '#F3EFE6' : (bg ? '#1B1A18' : S.ink);
   const tink = coverTitleInk(p, bgHex, ink), cfocus = C.shape === 'cuadrada' ? {z:C.cz, x:C.cx, y:C.cy} : 0;
+  const subc = coverSubInk(p, bgHex, tink), subInk = subc || ink, subA = subc ? 1 : 0.8;
   const title = (C.title || '').trim() || placeOf(p), sub = (C.sub || '').trim();
   const ar = C.shape === 'cuadrada' ? 1 : p.fw && p.fh ? p.fw/p.fh : 1.5, M = C.size === 'mediano' ? 36 : 14, fp = COVER_FRAME[C.frame] || 0;
   let top = M, bot = M;
@@ -4213,13 +4235,13 @@ function drawPortada(ctx, hi, H){
     const base = r.y - fp - (sub ? 52 + (SL.length - 1)*19 : 30);
     let tw = 0; lines.forEach((t, i) => { centerText(ctx, t, D/2, base - (lines.length - 1 - i)*lh, ft.size, 600, ft.family, ft.weight); tw = Math.max(tw, Math.min(600, ctx.measureText(t).width)); });
     const keep = S; S = Object.assign({}, S, {ink:tink}); underline(ctx, D/2 - tw/2 - 7, D/2 + tw/2 + 7, base + 10, base + 5); S = keep;
-    if (sub){ ctx.fillStyle = ink; ctx.globalAlpha = 0.8; SL.forEach((t, i) => centerText(ctx, t, D/2, r.y - fp - 16 - (SL.length - 1 - i)*19, 15, 560, SANS, 400)); ctx.globalAlpha = 1; }
+    if (sub){ ctx.fillStyle = subInk; ctx.globalAlpha = subA; SL.forEach((t, i) => centerText(ctx, t, D/2, r.y - fp - 16 - (SL.length - 1 - i)*19, 15, 560, SANS, 400)); ctx.globalAlpha = 1; }
   } else if (C.look === 'libro'){
     ctx.globalAlpha = 0.75; ctx.font = `500 11px ${MONO}`; spaced(ctx, 'OJODECRISTI', D/2, 46, 4.2); ctx.globalAlpha = 1;
     ctx.fillStyle = tink; ctx.fillRect(D/2 - 16, 60, 32, 1.4);
     const Ts = TL.map(t => t.toUpperCase()), fs = Math.min(...Ts.map(t => fitSpaced(ctx, t, D - 2*M - 20, 40, SANS, 500, 0.16)));
     ctx.font = `500 ${fs}px ${SANS}`; Ts.forEach((t, i) => spaced(ctx, t, D/2, 112 + i*46, fs*0.16));
-    if (sub){ ctx.fillStyle = ink; ctx.globalAlpha = 0.8; const ss = Math.min(...SL.map(t => fitSpaced(ctx, t, D - 2*M - 40, 16, SANS, 400, 0.04))); ctx.font = `400 ${ss}px ${SANS}`; SL.forEach((t, i) => spaced(ctx, t, D/2, 142 + (Ts.length - 1)*46 + i*20, ss*0.04)); ctx.globalAlpha = 1; }
+    if (sub){ ctx.fillStyle = subInk; ctx.globalAlpha = subA; const ss =Math.min(...SL.map(t => fitSpaced(ctx, t, D - 2*M - 40, 16, SANS, 400, 0.04))); ctx.font = `400 ${ss}px ${SANS}`; SL.forEach((t, i) => spaced(ctx, t, D/2, 142 + (Ts.length - 1)*46 + i*20, ss*0.04)); ctx.globalAlpha = 1; }
     ctx.fillStyle = ink; const F = coverFoot(p);
     if (F){
       const fy = H - 36, tr = s => s*0.22, maxW = D - 2*M;
@@ -5254,7 +5276,13 @@ function renderCoverInk(){
   const bgHex = coverBg(p) || (S && S.paper ? rgbHex(...S.paper) : paperAvg), cs = coverInkChoices(p, bgHex);
   box.innerHTML = cs.map((h, i) => `<button type="button" data-ink="s${i + 1}" aria-pressed="${C.ink === 's' + (i + 1)}" title="Sugerido ${i + 1}" style="background:${h}"></button>`).join('');
   $('#cvInkColor').value = C.ink === 'otro' ? C.inkColor : (C.ink === 'blanco' ? '#FFFFFF' : $('#cvInkColor').value);
+  /* subtítulo: solo si hay subtítulo en el diseño con título */
+  const sbox = $('#cvSubInkSw'); $('#cvSubInkRow').hidden = $('#cvInkRow').hidden;
+  sbox.innerHTML = cs.map((h, i) => `<button type="button" data-ink="s${i + 1}" aria-pressed="${C.subInk === 's' + (i + 1)}" title="Sugerido ${i + 1}" style="background:${h}"></button>`).join('');
+  $('#cvSubInkColor').value = C.subInk === 'otro' ? C.subInkColor : (C.subInk === 'blanco' ? '#FFFFFF' : $('#cvSubInkColor').value);
 }
+$('#cvSubInkSw').addEventListener('click', e => { const b = e.target.closest('[data-ink]'); if (!b) return; state.cover.subInk = b.dataset.ink; syncCover(); scheduleOut(); });
+$('#cvSubInkColor').addEventListener('input', e => { state.cover.subInkColor = e.target.value; state.cover.subInk = 'otro'; syncCover(); scheduleOut(); });
 $('#cvInkSw').addEventListener('click', e => { const b = e.target.closest('[data-ink]'); if (!b) return; state.cover.ink = b.dataset.ink; syncCover(); scheduleOut(); });
 $('#cvInkColor').addEventListener('input', e => { state.cover.inkColor = e.target.value; state.cover.ink = 'otro'; syncCover(); scheduleOut(); });
 [['cvCz', 'cz'], ['cvCx', 'cx'], ['cvCy', 'cy']].forEach(([id, k]) => $('#' + id).addEventListener('input', e => { state.cover[k] = +e.target.value; scheduleOut(); }));
@@ -5323,7 +5351,7 @@ $('#presetCancel').addEventListener('click', closePresetSave);
 function savePresetNow(){
   const name = $('#presetName').value.trim(); if (!name){ toast('Ponele un nombre al diseño'); $('#presetName').focus(); return; }
   const d = {}; PRESET_FIELDS.forEach(k => d[k] = JSON.parse(JSON.stringify(state[k])));
-  const C = state.cover, cover = {on:C.on, look:C.look, bg:C.bg, color:C.color, size:C.size, frame:C.frame, tone:C.tone, sign:!!C.sign, foot:C.foot, shape:C.shape, ink:C.ink, inkColor:C.inkColor};
+  const C = state.cover, cover = {on:C.on, look:C.look, bg:C.bg, color:C.color, size:C.size, frame:C.frame, tone:C.tone, sign:!!C.sign, foot:C.foot, shape:C.shape, ink:C.ink, inkColor:C.inkColor, subInk:C.subInk, subInkColor:C.subInkColor};
   const i = PRESETS.findIndex(x => x.name.toLowerCase() === name.toLowerCase());
   if (i >= 0) PRESETS[i] = {name, d, cover}; else PRESETS.push({name, d, cover});
   lastPreset = name; savePresets(PRESETS); closePresetSave(); syncPresetSel(); toast((i >= 0 ? 'Actualizado: ' : 'Guardado: ') + name);
