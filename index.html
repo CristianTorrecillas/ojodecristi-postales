@@ -2179,13 +2179,16 @@ const NAMES = [
   // verdes
   ['#1F3A2B','Verde Bosque'],['#2E5A3C','Verde Pino'],['#3E7B4A','Verde'],['#5DA35E','Verde Pasto'],['#8DB84A','Verde Manzana'],
   ['#A8D8B9','Verde Menta'],['#6B7B3A','Verde Oliva'],['#4F5A2A','Verde Musgo'],['#4B5320','Verde Militar'],['#9CAF88','Verde Salvia'],
-  ['#BFC97E','Pistacho'],['#7FA35E','Verde Hoja'],['#2E8B57','Esmeralda']
+  ['#BFC97E','Pistacho'],['#7FA35E','Verde Hoja'],['#2E8B57','Esmeralda'],
+  // amarillo verdoso / oliva (el hueco entre los dorados y los verdes: hojas al sol, pasto seco, líquenes)
+  ['#BDBA5C','Oliva Claro'],['#A39F45','Aceituna'],['#8A8738','Oliva'],['#6F6C2E','Oliva Oscuro'],['#D3D27A','Lima Pálido'],
+  ['#CBCB4E','Verde Limón'],['#C4BC78','Caqui Verdoso'],['#9C9A62','Liquen'],['#B0AE7A','Salvia Seca'],['#7C7A44','Musgo Seco']
 ];
 /* un nombre no puede ser de otro tono: «Rosa Arena» para un beige verdoso. Penaliza la diferencia de matiz cuando los dos tienen color */
 function huePenalty(o, r){
   const c1 = Math.hypot(o[1], o[2]), c2 = Math.hypot(r[1], r[2]); if (c1 < 0.02 || c2 < 0.02) return 0;
   let dh = Math.abs(Math.atan2(o[2], o[1]) - Math.atan2(r[2], r[1]))*180/Math.PI; if (dh > 180) dh = 360 - dh;
-  return Math.max(0, dh - 20)/180 * 0.2 * Math.min(1, Math.min(c1, c2)/0.05);
+  return Math.max(0, dh - 12)/180 * 0.5 * Math.min(1, Math.min(c1, c2)/0.05);
 }
 let NAME_REFS = null;
 function nameCands(hex, k, pt){
