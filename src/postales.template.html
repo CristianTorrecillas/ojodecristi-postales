@@ -643,6 +643,8 @@ body[data-mode="marcos"] #marcos{display:flex}
 .mk-name{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}
 .mk-meta .ico{width:28px;height:28px;font-size:13px}
 .mk-meta .ico[disabled]{opacity:.35;cursor:default}
+.mk-from{align-self:flex-start;margin:4px 0 14px}
+#mkFromPostales[hidden],.mk-from[hidden]{display:none !important}
 .mk-empty{margin:0;color:var(--muted);font-size:14px}
 .mk-tints{display:flex;align-items:center;gap:5px;flex-wrap:nowrap}
 .mk-tints .lbl{font-size:11.5px;color:var(--muted);margin-right:2px}
@@ -1666,6 +1668,7 @@ textarea.inp.cap-text{width:100%;min-height:150px;font-family:var(--sans);font-s
           <button type="button" role="radio" data-v="arriba" title="Un poco más arriba que el centro, como en los libros de fotos">Un poco arriba</button>
         </div>
       </div>
+      <button type="button" id="mkFromPostales" class="btn btn-ghost" hidden title="Usar las mismas fotos que cargaste en Postales, en el mismo orden">Traer de Postales</button>
       <div class="mk-saves">
         <button type="button" id="mkOne" class="btn btn-ghost" title="Guardar las imágenes una por una">Una por una</button>
         <button type="button" id="mkZip" class="btn btn-stamp" title="Descargar todas en un .zip"><svg viewBox="0 0 256 256" aria-hidden="true"><path d="M224,144v64a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V144a8,8,0,0,1,16,0v56H208V144a8,8,0,0,1,16,0Zm-101.66,5.66a8,8,0,0,0,11.32,0l40-40a8,8,0,0,0-11.32-11.32L136,124.69V32a8,8,0,0,0-16,0v92.69L93.66,98.34a8,8,0,0,0-11.32,11.32Z"/></svg><span>Exportar</span></button>
@@ -1676,6 +1679,7 @@ textarea.inp.cap-text{width:100%;min-height:150px;font-family:var(--sans);font-s
       <div class="col-head"><h2>Carrusel</h2><span class="col-tools"><span id="mkCount" class="count"></span><button type="button" id="mkClear" class="linkbtn" hidden>Vaciar</button></span></div>
       <ol id="mkGrid" class="mk-grid"></ol>
       <p id="mkEmpty" class="mk-empty">Cargá las fotos y cada una sale con su marco, del mismo tamaño y lista para Instagram. Todas usan el mismo formato porque Instagram recorta el carrusel al formato de la primera.</p>
+      <button type="button" id="mkFromPostales2" class="btn btn-stamp mk-from" hidden>Usar las fotos de Postales</button>
       <div class="drop picker mk-drop"><svg class="drop-ico" viewBox="0 0 48 56" aria-hidden="true"><rect x="2" y="2" width="44" height="52" fill="none" stroke="currentColor" stroke-width="2.6" stroke-dasharray="0.1 5.15" stroke-linecap="round"/><rect x="8.5" y="8.5" width="31" height="39" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M11.5 43l8.5-10.5 6 7 4-4 7 7.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><circle cx="31" cy="18.5" r="3.4" fill="none" stroke="currentColor" stroke-width="1.4"/></svg><span id="mkDropTxt">Soltá las fotos acá o tocá para elegirlas<small>Verticales y horizontales mezcladas, en el orden del carrusel</small></span><input type="file" class="mk-pick" accept="image/*" multiple aria-label="Elegir fotos"></div>
     </div>
   </section>
@@ -2466,8 +2470,11 @@ async function loadFile(file){
   const p = await makePhoto(src, {date: ex.date || fmtDate(new Date(file.lastModified || Date.now())), file:file.name, tech, fuji:ex.fuji || null, ev:ex.ev == null ? null : ex.ev});
   if (src.close) src.close();
   p.colors = extractPalette(p.prev);
+  ORIG.set(p.id, file);
   return p;
 }
+/* archivo original de cada foto (solo en memoria): lo usa Marcos blancos al traer las fotos de Postales */
+const ORIG = new Map();
 const FULL = new Map(), PINNED = new Set();
 async function getFull(p){
   if (FULL.has(p.id)){ const b = FULL.get(p.id); FULL.delete(p.id); FULL.set(p.id, b); return b; }
@@ -6537,7 +6544,7 @@ async function mkAdd(files){
       const f = files[i], ex = await readExif(f), src = await decodeFile(f, ex, 1400);
       const thumb = downscale(src, 900); if (src.close) src.close();
       let cols = []; try { cols = extractPalette(thumb).map(c => c.hex); } catch(e){}
-      mk.photos.push({id:uid(), file:f, ex, name:f.name, w:thumb.width, h:thumb.height, thumb, cols, sug:mkSuggest(cols), color:null}); ok++;
+      mk.photos.push({id:uid(), src:f.__src || null, file:f, ex, name:f.name, w:thumb.width, h:thumb.height, thumb, cols, sug:mkSuggest(cols), color:null}); ok++;
       mkRender();
     } catch(e){ fails++; }
     await new Promise(r => setTimeout(r, 0));
@@ -6547,12 +6554,28 @@ async function mkAdd(files){
   else if (ok > 1) toast(`Listo: ${ok} fotos con marco`);
   if (mk.photos.length > 20) toast('Instagram permite hasta 20 imágenes por carrusel');
 }
+/* traer las fotos ya cargadas en Postales (mismo orden, sin repetir las que ya están) */
+async function mkFromPostales(){
+  const have = new Set(mk.photos.map(p => p.src).filter(Boolean));
+  const list = state.photos.filter(p => !have.has(p.id) && (ORIG.get(p.id) || p.fullBlob));
+  if (!list.length){ toast(state.photos.length ? 'Ya están todas las fotos de Postales' : 'Todavía no cargaste fotos en Postales'); return; }
+  const files = list.map((p, k) => { const o = ORIG.get(p.id); const f = o || new File([p.fullBlob], (p.file || `foto-${k + 1}`).replace(/\.[^.]+$/, '') + '.jpg', {type:'image/jpeg'}); f.__src = p.id; return f; });
+  await mkAdd(files);
+}
+function mkSyncFrom(){
+  const n = state.photos.length, have = new Set(mk.photos.map(p => p.src).filter(Boolean)), left = state.photos.filter(p => !have.has(p.id)).length;
+  const a = $('#mkFromPostales'), b = $('#mkFromPostales2');
+  a.hidden = !n || !left; a.textContent = `Traer de Postales (${left})`;
+  b.hidden = !n || mk.photos.length > 0; b.textContent = `Usar las ${n} ${n === 1 ? 'foto' : 'fotos'} de Postales`;
+}
+$('#mkFromPostales').addEventListener('click', mkFromPostales);
+$('#mkFromPostales2').addEventListener('click', mkFromPostales);
 let mkRaf = 0;
 function mkRender(){ cancelAnimationFrame(mkRaf); mkRaf = requestAnimationFrame(mkRenderNow); }
 function mkRenderNow(){
   const grid = $('#mkGrid'), n = mk.photos.length, [W, H] = mkDims(1080);
   $('#mkCount').textContent = n ? `${n} ${n === 1 ? 'imagen' : 'imágenes'} · ${mk.fmt} · ${mkDims()[0]}×${mkDims()[1]}` : '';
-  $('#mkClear').hidden = !n; $('#mkEmpty').hidden = !!n; $('#mkZip').disabled = !n; $('#mkOne').disabled = !n;
+  mkSyncFrom(); $('#mkClear').hidden = !n; $('#mkEmpty').hidden = !!n; $('#mkZip').disabled = !n; $('#mkOne').disabled = !n;
   const keep = new Map([...grid.children].map(li => [li.dataset.id, li]));
   mk.photos.forEach((p, k) => {
     let li = keep.get(p.id);
