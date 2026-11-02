@@ -452,6 +452,16 @@ textarea.inp{height:auto;padding:8px 10px;font-family:var(--mono);font-size:14px
 .design [hidden]{display:none !important}
 .presetbar,.presetsave{display:flex;gap:8px;align-items:center}
 .presetbar select,.presetsave .inp{flex:1;height:36px;min-width:0}
+.pmenu{position:relative;flex:1;min-width:0}
+.pmbtn{width:100%;height:36px;display:flex;align-items:center;justify-content:space-between;gap:8px;text-align:left;cursor:pointer}
+.pmbtn span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.pmbtn svg{width:14px;height:14px;flex:none;fill:currentColor;opacity:.6;transition:transform .15s}
+.pmbtn[aria-expanded="true"] svg{transform:rotate(180deg)}
+.pmlist{position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:40;max-height:min(55vh,340px);overflow:auto;margin:0;padding:4px;list-style:none;background:var(--panel);border:1px solid var(--rule);border-radius:var(--r-md);box-shadow:var(--shadow)}
+.pmlist li{margin:0}
+.pmlist button{display:block;width:100%;padding:9px 10px;border:0;background:none;color:var(--ink);font:inherit;font-size:14px;text-align:left;border-radius:6px;cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pmlist button:hover,.pmlist button:focus-visible{background:var(--rule);outline:none}
+.pmlist button[aria-selected="true"]{font-weight:500;color:var(--stamp)}
 .pane{display:flex;flex-direction:column}
 .opt{display:grid;grid-template-columns:82px minmax(0,1fr);align-items:center;gap:8px 12px;padding:10px 0;border-bottom:1px solid var(--rule)}
 .opt.stack{grid-template-columns:minmax(0,1fr)}
@@ -1067,7 +1077,11 @@ textarea.inp.cap-text{width:100%;min-height:150px;font-family:var(--sans);font-s
         <div class="col-head" style="margin-bottom:0"><h2 id="hDesign">Diseño</h2><span id="styleName" class="count"></span></div>
 
         <div class="presetbar">
-          <select id="presetSel" class="inp" aria-label="Diseño guardado"></select>
+          <div class="pmenu">
+            <button type="button" id="presetBtn" class="inp pmbtn" aria-haspopup="listbox" aria-expanded="false" aria-label="Diseño guardado"><span id="presetBtnTxt"></span><svg viewBox="0 0 256 256" aria-hidden="true"><path d="M213.66 101.66l-80 80a8 8 0 0 1-11.32 0l-80-80a8 8 0 0 1 11.32-11.32L128 164.69l74.34-74.35a8 8 0 0 1 11.32 11.32Z"/></svg></button>
+            <ul id="presetList" class="pmlist" role="listbox" aria-label="Diseños guardados" hidden></ul>
+          </div>
+          <select id="presetSel" hidden tabindex="-1" aria-hidden="true"></select>
           <button type="button" id="presetNew" class="btn btn-ghost mini">Guardar</button>
           <button type="button" id="presetDel" class="linkbtn" hidden>Borrar</button>
         </div>
@@ -1509,10 +1523,11 @@ textarea.inp.cap-text{width:100%;min-height:150px;font-family:var(--sans);font-s
           <div class="opt">
             <span class="lbl">Diseño</span>
             <div class="chips segc" role="radiogroup" aria-label="Diseño de la grilla" data-gradio="look">
-              <button type="button" role="radio" data-v="clasica">Clásica</button>
               <button type="button" role="radio" data-v="catalogo">Catálogo</button>
-              <button type="button" role="radio" data-v="cuaderno">Cuaderno</button>
+              <button type="button" role="radio" data-v="galeria">Galería</button>
+              <button type="button" role="radio" data-v="negativos">Negativos</button>
               <button type="button" role="radio" data-v="estampillas">Estampillas</button>
+              <button type="button" role="radio" data-v="aerea">Aérea</button>
             </div>
           </div>
           <p class="subhint" id="gdHint"></p>
@@ -2066,7 +2081,7 @@ const RECIPE_DEFAULT = {
 state.recipe = {...RECIPE_DEFAULT};
 const COVER_DEFAULT = {on:false, photo:0, look:'sola', bg:'blanco', color:'#F3EFE6', title:'', sub:'', size:'grande', frame:'ninguno', pick:-1, tone:'suave', sign:false, foot:'fotos', footText:'', shape:'entera', cz:1, cx:0, cy:0, ink:'auto', inkColor:'#1B1A18', subInk:'auto', subInkColor:'#1B1A18'};
 state.cover = {...COVER_DEFAULT};
-const GRID_DEFAULT = {look:'clasica', fromCover:false, ink:'portada', inkColor:'#D12F27', foot:'lugar', bg:'postales', bgColor:'#2F241F', tape:true, seal:true, pm:true};
+const GRID_DEFAULT = {look:'catalogo', fromCover:false, ink:'portada', inkColor:'#D12F27', foot:'lugar', bg:'postales', bgColor:'#2F241F', tape:true, seal:true, pm:true};
 state.grid = {...GRID_DEFAULT};
 const PENS = {azul:'#1F3A7A', negra:'#1E1D1B', sepia:'#5B3A22'};
 const PREF_KEY = 'postales-ojodecristi-v1';
@@ -3999,8 +4014,12 @@ function gridEstampillas(ctx, g, items, hi, H){
   /* 1) el papel troquelado de cada estampilla */
   const st = items.map((p, i) => { const c = cells[i], f = fits[i], sw = f.w + 2*pad, sh = f.h + pad + capH; return {x:c.x + (c.w - sw)/2, y:c.y, w:sw, h:sh, f}; });
   st.forEach(a => { ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.34)'; ctx.shadowBlur = 9*ds; ctx.shadowOffsetY = 4*ds; perforated(ctx, a.x, a.y, a.w, a.h, 3.7, 12.4); ctx.fillStyle = '#FBF7EE'; ctx.fill(); ctx.restore(); });
-  /* 2) el matasellos en la esquina de la primera, por debajo de la foto: se ve en el borde y en el fondo, nunca encima de la imagen */
-  if (G.pm && st.length){ const a = st[0], dm = gridDm(items); waveMark(ctx, a.x + a.w - 6, a.y + 8, 42, red, placeOf(items[0]) || '', dm || yr, dm ? yr : '', false); }
+  /* 2) el matasellos entero y a la vista, en la esquina inferior de la primera: cruza el borde de la estampilla pero no toca la foto */
+  if (G.pm && st.length){
+    const a = st[0], dm = gridDm(items), R = 33, bwid = (items[0].colors || []).slice(0, 3).length*40/2;
+    const px = Math.min(a.x + a.w + 12, Math.max(a.x + a.w - R - 8, a.x + a.w/2 + bwid + R + 6)), py = a.y + a.h + R - 2;
+    waveMark(ctx, px, py, R, red, placeOf(items[0]) || '', dm || yr, dm ? yr : '', false);
+  }
   /* 3) fotos, pie de la estampilla y barra de colores */
   items.forEach((p, i) => {
     const a = st[i], n = numOf(p, g*4 + i), r = {x:a.x + pad, y:a.y + pad, w:a.f.w, h:a.f.h};
@@ -4015,7 +4034,91 @@ function gridEstampillas(ctx, g, items, hi, H){
   });
   gridFootCover(ctx, H, items);
 }
-const GRID_LOOKS = {catalogo:gridCatalogo, cuaderno:gridCuaderno, estampillas:gridEstampillas};
+
+/* Galería: paspartú blanco con filete y una cartela de museo que asoma en la esquina */
+function gridGaleria(ctx, g, items, hi, H){
+  const G = state.grid, ink = gridInk(), top = gridHeadCover(ctx, g, ink, 50), foot = G.foot !== 'nada', ds = devScale(ctx);
+  const y0 = top + 34, y1 = H - (foot ? 84 : 42), cells = gridCells(items.length, 44, D - 44, y0, y1, 30, 30), mat = 15, metaH = 40;
+  const fits = items.map((p, i) => fitPhoto(p, cells[i].w - 2*mat - 6, cells[i].h - metaH - 2*mat)); settleRows(cells, fits.map(f => f.h + 2*mat + metaH), y0, y1, 30);
+  items.forEach((p, i) => {
+    const c = cells[i], n = numOf(p, g*4 + i), f = fits[i], mw = f.w + 2*mat, mh = f.h + 2*mat, mx = c.x + (c.w - mw)/2, my = c.y;
+    const r = {x:mx + mat, y:my + mat, w:f.w, h:f.h};
+    ctx.save(); ctx.shadowColor = 'rgba(40,30,20,.2)'; ctx.shadowBlur = 12*ds; ctx.shadowOffsetY = 4*ds; ctx.fillStyle = '#FBF8F1'; ctx.fillRect(mx, my, mw, mh); ctx.restore();
+    ctx.save(); ctx.strokeStyle = S.ink; ctx.globalAlpha = 0.5; ctx.lineWidth = 0.8; ctx.strokeRect(mx + 0.4, my + 0.4, mw - 0.8, mh - 0.8); ctx.globalAlpha = 0.28; ctx.strokeRect(r.x - 3.5, r.y - 3.5, r.w + 7, r.h + 7); ctx.restore();
+    drawCover(ctx, srcOf(p, hi), r, 0);
+    ctx.save(); ctx.strokeStyle = 'rgba(0,0,0,.22)'; ctx.lineWidth = 0.8; ctx.strokeRect(r.x, r.y, r.w, r.h); ctx.restore();
+    /* cartela */
+    const cw = 104, ch = 40, cx = mx + mw - cw + 10, cy = my + mh - 13;
+    ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.2)'; ctx.shadowBlur = 6*ds; ctx.shadowOffsetY = 2*ds; ctx.fillStyle = '#FFFFFF'; ctx.fillRect(cx, cy, cw, ch); ctx.restore();
+    ctx.save(); ctx.fillStyle = ink; ctx.fillRect(cx, cy, 3, ch); ctx.fillStyle = S.ink; ctx.textAlign = 'left';
+    ctx.font = `500 11.5px ${MONO}`; ctx.fillText('N.º ' + pad3(n), cx + 12, cy + 15);
+    ctx.globalAlpha = 0.78; ctx.font = `400 8.4px ${MONO}`; spacedAt(ctx, (placeOf(p) || '').toUpperCase().slice(0, 17), cx + 12, cy + 27, 1.1, 'left');
+    if (p.date) ctx.fillText(String(p.date), cx + 12, cy + 37); ctx.restore();
+    gridSwatches(ctx, p, n, mx + 74, my + mh + 12, 22, 16, 4, 0);
+  });
+  gridFootCover(ctx, H, items);
+}
+/* Negativos: tiras de película con perforaciones, números de cuadro y texto de borde */
+function gridNegativos(ctx, g, items, hi, H){
+  const G = state.grid, ink = gridInk(), top = gridHeadCover(ctx, g, ink, 50), foot = G.foot !== 'nada', ds = devScale(ctx);
+  const y0 = top + 30, y1 = H - (foot ? 84 : 42), rows = Math.ceil(items.length/2), sx = 36, sw = D - 72, band = 25, metaH = 38, gapR = 22;
+  const fh = Math.min((sw - 2*16 - 14)/2/1.5, (y1 - y0 - gapR*(rows - 1))/rows - 2*band - metaH - 6), fw = Math.min((sw - 2*16 - 14)/2, fh*1.5);
+  const used = rows*(fh + 2*band + metaH) + gapR*(rows - 1), yy = y0 + Math.max(0, (y1 - y0 - used)/2), orange = '#E39A32';
+  for (let r = 0; r < rows; r++){
+    const row = items.slice(r*2, r*2 + 2), sy = yy + r*(fh + 2*band + metaH + gapR), sh = fh + 2*band;
+    ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.3)'; ctx.shadowBlur = 10*ds; ctx.shadowOffsetY = 3.5*ds; ctx.fillStyle = '#1A1614'; ctx.fillRect(sx, sy, sw, sh); ctx.restore();
+    ctx.fillStyle = '#E8DFCB';
+    for (let x = sx + 7; x < sx + sw - 8; x += 14){ [sy + 3.5, sy + sh - 9.5].forEach(hy => { ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x, hy, 7, 6, 1.6) : ctx.rect(x, hy, 7, 6); ctx.fill(); }); }
+    const gapF = row.length > 1 ? Math.max(14, Math.min(60, sw - 2*16 - 2*fw)) : 0, rowW = row.length*fw + (row.length - 1)*gapF, fx0 = sx + (sw - rowW)/2;
+    ctx.save(); ctx.fillStyle = orange; ctx.globalAlpha = 0.9; ctx.font = `500 6.6px ${MONO}`; ctx.textAlign = 'left';
+    spacedAt(ctx, 'OJODECRISTI 400', sx + 16, sy + 20.4, 1.4, 'left'); ctx.restore();
+    row.forEach((p, k) => {
+      const i = r*2 + k, n = numOf(p, g*4 + i), fx = fx0 + k*(fw + gapF), fy = sy + band, f = fitPhoto(p, fw, fh);
+      ctx.fillStyle = '#0E0C0B'; ctx.fillRect(fx, fy, fw, fh);
+      drawCover(ctx, srcOf(p, hi), {x:fx + (fw - f.w)/2, y:fy + (fh - f.h)/2, w:f.w, h:f.h}, 0);
+      ctx.save(); ctx.fillStyle = orange; ctx.globalAlpha = 0.95; ctx.font = `500 7.4px ${MONO}`; ctx.textAlign = 'left';
+      ctx.fillText('▸ ' + (g*4 + i + 1), fx + 1, sy + sh - 14); ctx.textAlign = 'right'; ctx.fillText((g*4 + i + 1) + 'A', fx + fw - 1, sy + sh - 14); ctx.restore();
+      const my = sy + sh + 17, c = {x:fx, w:fw};
+      ctx.fillStyle = S.ink; ctx.textAlign = 'left'; ctx.font = `500 11.4px ${MONO}`; ctx.fillText('N.º ' + pad3(n), fx, my);
+      ctx.save(); ctx.globalAlpha = 0.72; ctx.font = `400 9.4px ${SANS}`; ctx.fillText([placeOf(p), p.date].filter(Boolean).join(' · '), fx, my + 14); ctx.restore();
+      gridSwatches(ctx, p, n, fx + fw, my - 12, 24, 17, 4, 0);
+    });
+  }
+  gridFootCover(ctx, H, items);
+}
+/* Aérea: tarjetas con borde de correo aéreo y una estampilla de color con el número */
+function airBorder(ctx, x, y, w, h, t, a, b){
+  ctx.save(); ctx.beginPath(); ctx.rect(x, y, w, h); ctx.clip(); ctx.fillStyle = '#FBF7EE'; ctx.fillRect(x, y, w, h);
+  const period = 26, bar = 9;
+  for (let k = -h; k < w + h; k += period){
+    [[0, a], [period/2, b]].forEach(([o, col]) => { ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(x + k + o, y); ctx.lineTo(x + k + o + bar, y); ctx.lineTo(x + k + o + bar - h, y + h); ctx.lineTo(x + k + o - h, y + h); ctx.closePath(); ctx.fill(); });
+  }
+  ctx.fillStyle = '#FBF7EE'; ctx.fillRect(x + t, y + t, w - 2*t, h - 2*t); ctx.restore();
+}
+function gridAerea(ctx, g, items, hi, H){
+  const G = state.grid, ink = gridInk(), top = gridHeadCover(ctx, g, ink, 50), foot = G.foot !== 'nada', ds = devScale(ctx);
+  const y0 = top + 32, y1 = H - (foot ? 84 : 42), cells = gridCells(items.length, 46, D - 46, y0, y1, 28, 28), bt = 7, pad = 9, capH = 46;
+  const red = '#C8352B', blue = '#2F5D9B', fits = items.map((p, i) => fitPhoto(p, cells[i].w - 2*(bt + pad), cells[i].h - capH - 2*(bt + pad)));
+  settleRows(cells, fits.map(f => f.h + 2*(bt + pad) + capH), y0, y1, 28);
+  items.forEach((p, i) => {
+    const c = cells[i], n = numOf(p, g*4 + i), f = fits[i], cw = f.w + 2*(bt + pad), ch = f.h + 2*(bt + pad) + capH, cx = c.x + (c.w - cw)/2, cy = c.y;
+    ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.26)'; ctx.shadowBlur = 9*ds; ctx.shadowOffsetY = 3.5*ds; ctx.fillStyle = '#FBF7EE'; ctx.fillRect(cx, cy, cw, ch); ctx.restore();
+    airBorder(ctx, cx, cy, cw, ch, bt, red, blue);
+    const r = {x:cx + bt + pad, y:cy + bt + pad, w:f.w, h:f.h}; drawCover(ctx, srcOf(p, hi), r, 0);
+    const by = r.y + r.h + 17, xl = r.x, xr = r.x + r.w;
+    ctx.save(); ctx.textAlign = 'left'; ctx.fillStyle = red; ctx.font = `500 7.2px ${MONO}`; spacedAt(ctx, 'POR AVIÓN', xl, by, 1.8, 'left');
+    ctx.fillStyle = '#2B221D'; ctx.globalAlpha = 0.85; ctx.font = `400 8.6px ${MONO}`; spacedAt(ctx, (placeOf(p) || '').toUpperCase().slice(0, 18), xl, by + 12, 1, 'left');
+    if (p.date){ ctx.globalAlpha = 0.6; ctx.font = `400 8px ${MONO}`; ctx.fillText(String(p.date), xl, by + 23); } ctx.restore();
+    /* estampilla de color */
+    const sw = 32, sh = 38, sx2 = xr - sw, sy2 = by - 22, col = ((p.colors || [])[0] || {}).hex || red;
+    ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.25)'; ctx.shadowBlur = 4*ds; ctx.shadowOffsetY = 1.5*ds; perforated(ctx, sx2, sy2, sw, sh, 2.1, 7.2); ctx.fillStyle = '#FFFDF8'; ctx.fill(); ctx.restore();
+    ctx.fillStyle = col; ctx.fillRect(sx2 + 4.5, sy2 + 4.5, sw - 9, sh - 9);
+    ctx.save(); ctx.fillStyle = lumOf(col) > 0.42 ? '#1B1A18' : '#FBF7EE'; ctx.textAlign = 'center'; ctx.font = `500 11px ${MONO}`; ctx.fillText(pad3(n), sx2 + sw/2, sy2 + sh/2 + 4); ctx.restore();
+    gridSwatches(ctx, p, n, sx2 - 10, by - 11, 24, 17, 4, 0);
+  });
+  gridFootCover(ctx, H, items);
+}
+const GRID_LOOKS = {catalogo:gridCatalogo, galeria:gridGaleria, negativos:gridNegativos, estampillas:gridEstampillas, aerea:gridAerea, cuaderno:gridCuaderno};
 /* ---------- recipe note: a handwritten sheet with the Fujifilm settings ---------- */
 function recipeDeco(){ return state.deco === 'cintas-clip' || state.deco === 'clips' ? 'clip' : postalDeco(); }
 function recipePhoto(){ const R = state.recipe; return R.photo >= 0 ? state.photos[R.photo] || null : null; }
@@ -5343,7 +5446,14 @@ function syncPresetSel(){
   const i = PRESETS.findIndex(presetMatches);
   sel.innerHTML = `<option value="-1">${i < 0 ? 'Diseño sin guardar' : 'Elegí un diseño…'}</option>` + PRESETS.map((pr, k) => `<option value="${k}">${esc(pr.name)}</option>`).join('');
   sel.value = String(i); $('#presetDel').hidden = i < 0; presetDelDisarm();
+  $('#presetBtnTxt').textContent = sel.options[sel.selectedIndex].textContent;
+  $('#presetList').innerHTML = [...sel.options].map(o => `<li role="presentation"><button type="button" role="option" data-v="${o.value}" aria-selected="${o.value === sel.value}">${esc(o.textContent)}</button></li>`).join('');
 }
+function presetMenu(open){ $('#presetList').hidden = !open; $('#presetBtn').setAttribute('aria-expanded', String(open)); }
+$('#presetBtn').addEventListener('click', () => presetMenu($('#presetList').hidden));
+$('#presetList').addEventListener('click', e => { const b = e.target.closest('[data-v]'); if (!b) return; const sel = $('#presetSel'); sel.value = b.dataset.v; presetMenu(false); sel.dispatchEvent(new Event('change')); $('#presetBtn').focus(); });
+document.addEventListener('click', e => { if (!e.target.closest('.pmenu')) presetMenu(false); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#presetList').hidden){ presetMenu(false); $('#presetBtn').focus(); } });
 function applyPreset(pr){
   for (const k of PRESET_FIELDS) if (k in pr.d){ if (k === 'extras') Object.assign(state.extras, pr.d.extras); else state[k] = JSON.parse(JSON.stringify(pr.d[k])); }
   if (pr.cover) Object.assign(state.cover, pr.cover);
@@ -5550,7 +5660,7 @@ $('#gridTitles').addEventListener('input', e => {
   const g = e.target.dataset.g; if (g === undefined) return; state.titles[+g] = e.target.value; scheduleOut();
 });
 /* pestaña Grilla: diseño, título, color, pie, fondo y detalles */
-const GRID_HINT = {clasica:'Las fichas de siempre, con la decoración elegida en «Detalles».', catalogo:'Como la portada: cabecera con OJODECRISTI, fotos derechas con borde blanco y el pie de lugar y fecha.', cuaderno:'Cuaderno de campo: título a mano, fotos un poco torcidas, cinta del color de cada foto y un sello de goma.', estampillas:'Cada foto como estampilla troquelada, con su barra de colores y un matasellos en la esquina.'};
+const GRID_HINT = {clasica:'Las fichas de siempre, con la decoración elegida en «Detalles».', catalogo:'Como la portada: cabecera con OJODECRISTI, fotos derechas con borde blanco y el pie de lugar y fecha.', cuaderno:'Cuaderno de campo: título a mano, fotos un poco torcidas, cinta del color de cada foto y un sello de goma.', estampillas:'Cada foto como estampilla troquelada, con su barra de colores y un matasellos en la esquina.', galeria:'Fotos con paspartú blanco y filete, y una cartela de museo con el número, el lugar y la fecha.', negativos:'Tiras de película con perforaciones y números de cuadro; debajo de cada foto, su número y sus colores.', aerea:'Tarjetas con borde de correo aéreo y una estampilla del color principal de cada foto, con su número.'};
 function syncGrid(){
   const G = state.grid, look = G.look, designed = !!GRID_LOOKS[look];
   document.querySelectorAll('.chips[data-gradio]').forEach(box => box.querySelectorAll('button').forEach(b => b.setAttribute('aria-checked', String(G[box.dataset.gradio] === b.dataset.v))));
