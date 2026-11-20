@@ -240,6 +240,13 @@ body.dragging .drop{border-color:var(--stamp);color:var(--ink);background:var(--
 .style-card span{font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;line-height:1.25;color:var(--muted)}
 .style-card[aria-checked="true"] canvas{outline:2px solid var(--ink);outline-offset:3px}
 .style-card[aria-checked="true"] span{color:var(--ink);font-weight:500}
+/* diseños de la grilla: miniaturas con las fotos de la primera grilla */
+.looks{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 10px}
+.look-card{display:flex;flex-direction:column;gap:6px;padding:0;border:0;background:transparent;cursor:pointer;text-align:left;min-width:0}
+.look-card canvas{display:block;width:100%;height:auto;box-shadow:var(--shadow);outline:1px solid var(--rule);background:var(--rule)}
+.look-card span{font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;line-height:1.25;color:var(--muted)}
+.look-card[aria-checked="true"] canvas{outline:2px solid var(--stamp);outline-offset:3px}
+.look-card[aria-checked="true"] span{color:var(--ink);font-weight:500}
 .shapes{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;flex:1;min-width:0}
 .shape-card{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 4px 5px;border:1px solid var(--rule);background:#EEE6CD;border-radius:2px;cursor:pointer;min-width:0}
 .shape-card canvas{display:block;width:100%;height:auto;max-width:100%}
@@ -452,6 +459,22 @@ textarea.inp{height:auto;padding:8px 10px;font-family:var(--mono);font-size:14px
 .design [hidden]{display:none !important}
 .presetbar,.presetsave{display:flex;gap:8px;align-items:center}
 .fmtrow{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 0 12px}
+/* título y subtítulo en contexto, arriba de la vista grande */
+.ctxbar{display:grid;gap:6px;margin:0 0 12px}
+.ctxbar[hidden]{display:none}
+.ctx-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.ctx-k{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.ctx-fields{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:8px}
+.ctx-fields textarea{resize:none;overflow:hidden;min-height:0;line-height:1.3}
+.ctx-t{font-weight:500}
+@media (max-width:640px){.ctx-fields{grid-template-columns:1fr}}
+.ctx-note{display:none}
+@media (min-width:1100px){.ctx-moved{display:none !important}.ctx-note{display:block}}
+/* forma de los colores, en la columna de fotos */
+.side-sect{margin-top:22px;display:grid;gap:10px}
+.side-sect .col-head{margin-bottom:0}
+.side-sect .shapes{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+@media (max-width:420px){.side-sect .shapes{grid-template-columns:repeat(3,minmax(0,1fr))}}
 .fmtrow .fmt-note{color:var(--muted);font-size:12.5px}
 .pane-intro{margin-bottom:4px}
 .presetbar select,.presetsave .inp{flex:1;height:36px;min-width:0}
@@ -1054,6 +1077,11 @@ textarea.inp.cap-text{width:100%;min-height:150px;font-family:var(--sans);font-s
       </div>
       <ol id="photoList" class="plist" aria-label="Fotos del carrusel, en orden"></ol>
       <div class="drop picker"><svg class="drop-ico" viewBox="0 0 48 56" aria-hidden="true"><rect x="2" y="2" width="44" height="52" fill="none" stroke="currentColor" stroke-width="2.6" stroke-dasharray="0.1 5.15" stroke-linecap="round"/><rect x="8.5" y="8.5" width="31" height="39" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M11.5 43l8.5-10.5 6 7 4-4 7 7.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><circle cx="31" cy="18.5" r="3.4" fill="none" stroke="currentColor" stroke-width="1.4"/></svg><span id="drop">Soltá las fotos acá o tocá para elegirlas<small>Hasta 16, en el orden del carrusel</small></span><input type="file" class="pick" accept="image/*" multiple aria-label="Elegir fotos"></div>
+      <div class="side-sect" id="shapeSide">
+        <div class="col-head"><h2>Forma de los colores</h2><span class="count" id="shapeName"></span></div>
+        <div id="shapes" class="shapes" role="radiogroup" aria-label="Forma de los colores"></div>
+        <p class="subhint">La misma forma en las postales y en la grilla.</p>
+      </div>
     </section>
 
     <div class="side">
@@ -1183,12 +1211,6 @@ textarea.inp.cap-text{width:100%;min-height:150px;font-family:var(--sans);font-s
               <button type="button" role="radio" data-v="slab">Slab</button>
             </div>
           </div>
-          <h3 class="sect">Colores de cada foto</h3>
-          <div class="opt stack">
-            <span class="lbl">Forma</span>
-            <div id="shapes" class="shapes" role="radiogroup" aria-label="Forma de los colores"></div>
-          </div>
-          <p class="subhint">La misma forma en las postales y en la grilla.</p>
         </div>
 
         <!-- Postales: solo para la imagen de postal de cada foto -->
@@ -1423,12 +1445,13 @@ textarea.inp.cap-text{width:100%;min-height:150px;font-family:var(--sans);font-s
                 <button type="button" role="radio" data-v="libro">Libro</button>
               </div>
             </div>
-            <div class="opt stack" id="cvTextRow">
+            <div class="opt stack ctx-moved" id="cvTextRow">
               <div class="rc-grid">
                 <label>Título<textarea id="cvTitle" class="inp ttl" rows="1" placeholder="Vacío = el lugar" autocomplete="off"></textarea></label>
                 <label>Subtítulo<textarea id="cvSub" class="inp ttl" rows="1" placeholder="Ej. Postales de primavera" autocomplete="off"></textarea></label>
               </div>
             </div>
+            <p class="subhint ctx-note" id="cvTextNote">El título y el subtítulo se escriben arriba de la vista grande, con la portada a la vista.</p>
             <div class="opt" id="cvFootRow">
               <label class="lbl" for="cvFootSel">Pie</label>
               <select id="cvFootSel" class="inp" data-csel="foot">
@@ -1533,20 +1556,33 @@ textarea.inp.cap-text{width:100%;min-height:150px;font-family:var(--sans);font-s
 
         <!-- Grilla: la última imagen, con las fotos de a 4 y sus colores -->
         <div class="pane" data-pane="grilla" id="gridBox">
-          <div class="opt">
-            <span class="lbl">Diseño</span>
-            <div class="chips segc" role="radiogroup" aria-label="Diseño de la grilla" data-gradio="look">
-              <button type="button" role="radio" data-v="catalogo">Catálogo</button>
-              <button type="button" role="radio" data-v="galeria">Galería</button>
-              <button type="button" role="radio" data-v="negativos">Negativos</button>
-              <button type="button" role="radio" data-v="estampillas">Estampillas</button>
-              <button type="button" role="radio" data-v="aerea">Aérea</button>
+          <div class="opt stack">
+            <span class="lbl">Diseño · <b id="lookName"></b></span>
+            <div class="looks" role="radiogroup" aria-label="Diseño de la grilla" data-gradio="look">
+              <button type="button" role="radio" class="look-card" data-v="catalogo"><canvas width="240" height="240" aria-hidden="true"></canvas><span>Catálogo</span></button>
+              <button type="button" role="radio" class="look-card" data-v="galeria"><canvas width="240" height="240" aria-hidden="true"></canvas><span>Galería</span></button>
+              <button type="button" role="radio" class="look-card" data-v="fichero"><canvas width="240" height="240" aria-hidden="true"></canvas><span>Fichero</span></button>
+              <button type="button" role="radio" class="look-card" data-v="muestrario"><canvas width="240" height="240" aria-hidden="true"></canvas><span>Muestrario</span></button>
+              <button type="button" role="radio" class="look-card" data-v="negativos"><canvas width="240" height="240" aria-hidden="true"></canvas><span>Negativos</span></button>
+              <button type="button" role="radio" class="look-card" data-v="diapositivas"><canvas width="240" height="240" aria-hidden="true"></canvas><span>Diapositivas</span></button>
+              <button type="button" role="radio" class="look-card" data-v="instantaneas"><canvas width="240" height="240" aria-hidden="true"></canvas><span>Instantáneas</span></button>
+              <button type="button" role="radio" class="look-card" data-v="estampillas"><canvas width="240" height="240" aria-hidden="true"></canvas><span>Estampillas</span></button>
+              <button type="button" role="radio" class="look-card" data-v="aerea"><canvas width="240" height="240" aria-hidden="true"></canvas><span>Aérea</span></button>
             </div>
           </div>
           <p class="subhint" id="gdHint"></p>
+          <div class="opt" id="gdCardRow">
+            <span class="lbl">Recuadro</span>
+            <div class="chips segc" role="radiogroup" aria-label="Recuadro de cada foto" data-gradio="card">
+              <button type="button" role="radio" data-v="diseno" title="El papel propio del diseño (blanco, crema, cartón…)">Del diseño</button>
+              <button type="button" role="radio" data-v="postal" title="La ficha, estampilla o tarjeta de cada foto con el papel de su postal">Papel de su postal</button>
+            </div>
+          </div>
+          <p class="subhint" id="gdCardHint" hidden>Ahora todas las postales tienen el mismo papel. Para que cada recuadro tenga el suyo, en «Estilo» elegí el papel «De la foto» y en Color, «Uno por postal».</p>
           <h3 class="sect">Título</h3>
           <label class="check"><input type="checkbox" id="gdFromCover"> Usar el título y el subtítulo de la portada</label>
-          <div id="gridTitles" class="gtitles"></div>
+          <div id="gridTitles" class="gtitles ctx-moved"></div>
+          <p class="subhint ctx-note">El título y el subtítulo de cada grilla se escriben arriba de la vista grande, con la grilla a la vista.</p>
           <div class="opt" id="gdInkRow">
             <span class="lbl">Color</span>
             <div class="optrow">
@@ -1642,6 +1678,13 @@ textarea.inp.cap-text{width:100%;min-height:150px;font-family:var(--sans);font-s
 
       <section class="out" aria-labelledby="hOut">
         <div class="col-head"><h2 id="hOut">Carrusel</h2><span id="outCount" class="count"></span></div>
+        <div class="ctxbar" id="ctxBar" hidden>
+          <div class="ctx-head"><span class="ctx-k" id="ctxKind"></span><button type="button" class="linkbtn" id="ctxPlace">Usar el lugar</button></div>
+          <div class="ctx-fields">
+            <textarea class="inp ctx-t" id="ctxTitle" rows="1" autocomplete="off" aria-label="Título"></textarea>
+            <textarea class="inp ctx-s" id="ctxSub" rows="1" autocomplete="off" aria-label="Subtítulo"></textarea>
+          </div>
+        </div>
         <div class="stage" id="stage">
           <div class="stage-box">
             <button type="button" class="stage-view" id="stageView" aria-label="Vista grande. Arrastrá la foto para reencuadrar o el título para moverlo; tocá para verla en tamaño real"><canvas id="stageC" width="900" height="900"></canvas></button>
@@ -2100,7 +2143,7 @@ const RECIPE_DEFAULT = {
 state.recipe = {...RECIPE_DEFAULT};
 const COVER_DEFAULT = {on:false, photo:0, look:'sola', bg:'blanco', color:'#F3EFE6', title:'', sub:'', size:'grande', frame:'ninguno', pick:-1, tone:'suave', sign:false, foot:'fotos', footText:'', shape:'entera', cz:1, cx:0, cy:0, ink:'auto', inkColor:'#1B1A18', subInk:'auto', subInkColor:'#1B1A18'};
 state.cover = {...COVER_DEFAULT};
-const GRID_DEFAULT = {look:'catalogo', fromCover:false, ink:'portada', inkColor:'#D12F27', foot:'lugar', bg:'postales', bgColor:'#2F241F', tape:true, seal:true, pm:true, ptitle:true, pten:false};
+const GRID_DEFAULT = {look:'catalogo', fromCover:false, ink:'portada', inkColor:'#D12F27', foot:'lugar', bg:'postales', bgColor:'#2F241F', tape:true, seal:true, pm:true, ptitle:true, pten:false, card:'diseno'};
 state.grid = {...GRID_DEFAULT};
 const PENS = {azul:'#1F3A7A', negra:'#1E1D1B', sepia:'#5B3A22'};
 const PREF_KEY = 'postales-ojodecristi-v1';
@@ -4011,13 +4054,16 @@ function gridTBDraw(ctx, b, x, top, align, ink, o){
   ctx.restore();
 }
 function gridCatalogo(ctx, g, items, hi, H){
-  const ink = gridInk(), top = gridHeadCover(ctx, g, ink, 50), foot = state.grid.foot !== 'nada';
+  const ink = gridInk(), top = gridHeadCover(ctx, g, ink, 50), foot = state.grid.foot !== 'nada', cardOn = gridCardOn();
   const y0 = top + 34, y1 = H - (foot ? 84 : 42), cells = gridCells(items.length, 40, D - 40, y0, y1, 29, 34), b = 6, ds = devScale(ctx);
   const TO = {size:13.6, min:10.6, max:2, family:SANS, weight:500}, TB = items.map((p, i) => gridTB(ctx, gridPT(p), cells[i].w, TO)), tH = gridTBH(TB, 5), metaH = 58 + tH;
   const fits = items.map((p, i) => fitPhoto(p, cells[i].w - 2*b, cells[i].h - metaH - 2*b)); settleRows(cells, fits.map(f => f.h + 2*b + metaH), y0, y1, 34);
   items.forEach((p, i) => {
     const c = cells[i], n = numOf(p, g*4 + i), f = fits[i];
-    const r = {x:c.x + (c.w - f.w)/2, y:c.y + b, w:f.w, h:f.h};
+    const r = {x:c.x + (c.w - f.w)/2, y:c.y + b, w:f.w, h:f.h}, keepS = S;
+    if (cardOn){ const hx = gridCardHex(p), cx0 = c.x - 9, cy0 = c.y - 9, cw0 = c.w + 18, ch0 = f.h + 2*b + metaH + 2;
+      ctx.save(); ctx.shadowColor = 'rgba(30,20,10,.18)'; ctx.shadowBlur = 10*ds; ctx.shadowOffsetY = 3*ds; ctx.fillStyle = hx; ctx.fillRect(cx0, cy0, cw0, ch0); ctx.restore();
+      cardFill(ctx, cx0, cy0, cw0, ch0, hx, hi, H); S = gridCardStyle(p); }
     ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.17)'; ctx.shadowBlur = 11*ds; ctx.shadowOffsetY = 3.2*ds; ctx.fillStyle = '#FFFFFF'; ctx.fillRect(r.x - b, r.y - b, r.w + 2*b, r.h + 2*b); ctx.restore();
     drawCover(ctx, srcOf(p, hi), r, 0);
     gridTBDraw(ctx, TB[i], c.x, r.y + r.h + b + 7, 'left', S.ink, TO);
@@ -4025,6 +4071,7 @@ function gridCatalogo(ctx, g, items, hi, H){
     ctx.fillStyle = S.ink; ctx.textAlign = 'left'; ctx.font = `500 12.4px ${MONO}`; ctx.fillText('N.º ' + pad3(n), c.x, my);
     ctx.save(); ctx.globalAlpha = 0.72; ctx.font = `400 10px ${SANS}`; ctx.fillText(placeOf(p), c.x, my + 16); if (p.date) ctx.fillText(String(p.date), c.x, my + 29); ctx.restore();
     gridSwatches(ctx, p, n, c.x + c.w, my - 13, 44, 33, 6, 6.8);
+    S = keepS;
   });
   gridFootCover(ctx, H, items);
 }
@@ -4062,14 +4109,15 @@ function gridCuaderno(ctx, g, items, hi, H){
   if (seal){ const words = (t || '').split(/\s+/).filter(w => w.length > 2), word = words.length ? words[words.length - 1] : 'ojodecristi'; rubberSeal(ctx, D - 92, H - 70, 58, ink, word, pl, yr, String(items[0].date || '')); }
 }
 function gridEstampillas(ctx, g, items, hi, H){
-  const G = state.grid, ink = gridInk(), top = gridHeadCover(ctx, g, ink, 50), foot = G.foot !== 'nada', ds = devScale(ctx);
+  const G = state.grid, ink = gridInk(), top = gridHeadCover(ctx, g, ink, 50), foot = G.foot !== 'nada', ds = devScale(ctx), cardOn = gridCardOn();
   const y0 = top + 30, y1 = H - (foot ? 84 : 42), cells = gridCells(items.length, 46, D - 46, y0, y1, 30, 30), pad = 12, barH = 40, yr = gridYear(items);
   const TO = {size:11, min:8.6, max:1, family:SLAB, weight:500}, tH = gridTBH(items.map((p, i) => gridTB(ctx, gridPT(p), cells[i].w - 2*pad, TO)), 3), capH = 22 + tH;
   const markInk = S.ink, red = G.ink === 'tinta' ? '#C8352B' : legibleOn(ink, '#FBF7EE', 3);
   const fits = items.map((p, i) => fitPhoto(p, cells[i].w - 2*pad, cells[i].h - barH - pad - capH)); settleRows(cells, fits.map(f => f.h + pad + capH + barH), y0, y1, 30);
   /* 1) el papel troquelado de cada estampilla */
   const st = items.map((p, i) => { const c = cells[i], f = fits[i], sw = f.w + 2*pad, sh = f.h + pad + capH; return {x:c.x + (c.w - sw)/2, y:c.y, w:sw, h:sh, f}; });
-  st.forEach(a => { ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.34)'; ctx.shadowBlur = 9*ds; ctx.shadowOffsetY = 4*ds; perforated(ctx, a.x, a.y, a.w, a.h, 3.7, 12.4); ctx.fillStyle = '#FBF7EE'; ctx.fill(); ctx.restore(); });
+  st.forEach((a, i) => { const hx = cardOn ? gridCardHex(items[i]) : '#FBF7EE'; ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.34)'; ctx.shadowBlur = 9*ds; ctx.shadowOffsetY = 4*ds; perforated(ctx, a.x, a.y, a.w, a.h, 3.7, 12.4); ctx.fillStyle = hx; ctx.fill(); ctx.restore();
+    if (cardOn){ ctx.save(); perforated(ctx, a.x, a.y, a.w, a.h, 3.7, 12.4); ctx.clip(); cardFill(ctx, a.x - 5, a.y - 5, a.w + 10, a.h + 10, hx, hi, H); ctx.restore(); } });
   /* 2) el matasellos entero y a la vista, en la esquina inferior de la primera: cruza el borde de la estampilla pero no toca la foto */
   if (G.pm && st.length){
     const a = st[0], dm = gridDm(items), R = 33, bwid = (items[0].colors || []).slice(0, 3).length*40/2;
@@ -4078,15 +4126,15 @@ function gridEstampillas(ctx, g, items, hi, H){
   }
   /* 3) fotos, pie de la estampilla y barra de colores */
   items.forEach((p, i) => {
-    const a = st[i], n = numOf(p, g*4 + i), r = {x:a.x + pad, y:a.y + pad, w:a.f.w, h:a.f.h};
+    const a = st[i], n = numOf(p, g*4 + i), r = {x:a.x + pad, y:a.y + pad, w:a.f.w, h:a.f.h}, hx = cardOn ? gridCardHex(p) : '', pen = cardOn ? penOn(hx) : '#2B221D', redC = cardOn ? legibleOn(ink, hx, 3) : red;
     drawCover(ctx, srcOf(p, hi), r, 0);
-    gridTBDraw(ctx, gridTB(ctx, gridPT(p), r.w - 6, TO), r.x + r.w/2, r.y + r.h + 5, 'center', '#2B221D', TO);
+    gridTBDraw(ctx, gridTB(ctx, gridPT(p), r.w - 6, TO), r.x + r.w/2, r.y + r.h + 5, 'center', pen, TO);
     ctx.save(); ctx.font = `500 9.6px ${MONO}`; const avail = r.w - 10 - ctx.measureText('N.º ' + pad3(n)).width;
     let cap = `${(placeOf(p) || '').toUpperCase()} · ${yr}`, cs = 7.4; ctx.font = `500 ${cs}px ${MONO}`;
     const capW = () => ctx.measureText(cap).width + 1.3*([...cap].length - 1);
     if (capW() > avail){ cs = Math.max(6, cs*avail/capW()); ctx.font = `500 ${cs}px ${MONO}`; if (capW() > avail){ cap = yr; cs = 7.4; ctx.font = `500 ${cs}px ${MONO}`; } }
-    ctx.fillStyle = '#2B221D'; spacedAt(ctx, cap, r.x + 1, a.y + a.h - 8.5, 1.3, 'left');
-    ctx.fillStyle = red; ctx.font = `500 9.6px ${MONO}`; ctx.textAlign = 'right'; ctx.fillText('N.º ' + pad3(n), r.x + r.w - 1, a.y + a.h - 8); ctx.restore();
+    ctx.fillStyle = pen; spacedAt(ctx, cap, r.x + 1, a.y + a.h - 8.5, 1.3, 'left');
+    ctx.fillStyle = redC; ctx.font = `500 9.6px ${MONO}`; ctx.textAlign = 'right'; ctx.fillText('N.º ' + pad3(n), r.x + r.w - 1, a.y + a.h - 8); ctx.restore();
     const cols = (p.colors || []).slice(0, 3), bw = 40, bh = 20, bx = a.x + (a.w - cols.length*bw)/2, by = a.y + a.h + 13;
     if (cols.length){
       cols.forEach((col, k) => { ctx.fillStyle = col.hex; ctx.fillRect(bx + k*bw, by, bw, bh); });
@@ -4098,15 +4146,17 @@ function gridEstampillas(ctx, g, items, hi, H){
 
 /* Galería: paspartú blanco con filete y una cartela de museo que asoma en la esquina */
 function gridGaleria(ctx, g, items, hi, H){
-  const G = state.grid, ink = gridInk(), top = gridHeadCover(ctx, g, ink, 50), foot = G.foot !== 'nada', ds = devScale(ctx);
+  const G = state.grid, ink = gridInk(), top = gridHeadCover(ctx, g, ink, 50), foot = G.foot !== 'nada', ds = devScale(ctx), cardOn = gridCardOn();
   const y0 = top + 34, y1 = H - (foot ? 84 : 42), cells = gridCells(items.length, 44, D - 44, y0, y1, 30, 30), mat = 15;
   const TO = {size:10.8, min:9, max:2, family:SLAB, weight:500}, CW = 142, TB = items.map(p => gridTB(ctx, gridPT(p), CW - 22, TO)), metaH = 40 + gridTBH(TB, 8);
   const fits = items.map((p, i) => fitPhoto(p, cells[i].w - 2*mat - 6, cells[i].h - metaH - 2*mat)); settleRows(cells, fits.map(f => f.h + 2*mat + metaH), y0, y1, 30);
   items.forEach((p, i) => {
     const c = cells[i], n = numOf(p, g*4 + i), f = fits[i], mw = f.w + 2*mat, mh = f.h + 2*mat, mx = c.x + (c.w - mw)/2, my = c.y;
     const r = {x:mx + mat, y:my + mat, w:f.w, h:f.h};
-    ctx.save(); ctx.shadowColor = 'rgba(40,30,20,.2)'; ctx.shadowBlur = 12*ds; ctx.shadowOffsetY = 4*ds; ctx.fillStyle = '#FBF8F1'; ctx.fillRect(mx, my, mw, mh); ctx.restore();
-    ctx.save(); ctx.strokeStyle = S.ink; ctx.globalAlpha = 0.5; ctx.lineWidth = 0.8; ctx.strokeRect(mx + 0.4, my + 0.4, mw - 0.8, mh - 0.8); ctx.globalAlpha = 0.28; ctx.strokeRect(r.x - 3.5, r.y - 3.5, r.w + 7, r.h + 7); ctx.restore();
+    const matHex = cardOn ? gridCardHex(p) : '#FBF8F1';
+    ctx.save(); ctx.shadowColor = 'rgba(40,30,20,.2)'; ctx.shadowBlur = 12*ds; ctx.shadowOffsetY = 4*ds; ctx.fillStyle = matHex; ctx.fillRect(mx, my, mw, mh); ctx.restore();
+    if (cardOn) cardFill(ctx, mx, my, mw, mh, matHex, hi, H);
+    ctx.save(); ctx.strokeStyle = cardOn ? penOn(matHex) : S.ink; ctx.globalAlpha = 0.5; ctx.lineWidth = 0.8; ctx.strokeRect(mx + 0.4, my + 0.4, mw - 0.8, mh - 0.8); ctx.globalAlpha = 0.28; ctx.strokeRect(r.x - 3.5, r.y - 3.5, r.w + 7, r.h + 7); ctx.restore();
     drawCover(ctx, srcOf(p, hi), r, 0);
     ctx.save(); ctx.strokeStyle = 'rgba(0,0,0,.22)'; ctx.lineWidth = 0.8; ctx.strokeRect(r.x, r.y, r.w, r.h); ctx.restore();
     /* cartela */
@@ -4156,30 +4206,33 @@ function gridNegativos(ctx, g, items, hi, H){
   gridFootCover(ctx, H, items);
 }
 /* Aérea: tarjetas con borde de correo aéreo y una estampilla de color con el número */
-function airBorder(ctx, x, y, w, h, t, a, b){
-  ctx.save(); ctx.beginPath(); ctx.rect(x, y, w, h); ctx.clip(); ctx.fillStyle = '#FBF7EE'; ctx.fillRect(x, y, w, h);
+function airBorder(ctx, x, y, w, h, t, a, b, fill){
+  fill = fill || '#FBF7EE';
+  ctx.save(); ctx.beginPath(); ctx.rect(x, y, w, h); ctx.clip(); ctx.fillStyle = fill; ctx.fillRect(x, y, w, h);
   const period = 26, bar = 9;
   for (let k = -h; k < w + h; k += period){
     [[0, a], [period/2, b]].forEach(([o, col]) => { ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(x + k + o, y); ctx.lineTo(x + k + o + bar, y); ctx.lineTo(x + k + o + bar - h, y + h); ctx.lineTo(x + k + o - h, y + h); ctx.closePath(); ctx.fill(); });
   }
-  ctx.fillStyle = '#FBF7EE'; ctx.fillRect(x + t, y + t, w - 2*t, h - 2*t); ctx.restore();
+  ctx.fillStyle = fill; ctx.fillRect(x + t, y + t, w - 2*t, h - 2*t); ctx.restore();
 }
 function gridAerea(ctx, g, items, hi, H){
-  const G = state.grid, ink = gridInk(), top = gridHeadCover(ctx, g, ink, 50), foot = G.foot !== 'nada', ds = devScale(ctx);
+  const G = state.grid, ink = gridInk(), top = gridHeadCover(ctx, g, ink, 50), foot = G.foot !== 'nada', ds = devScale(ctx), cardOn = gridCardOn();
   const y0 = top + 32, y1 = H - (foot ? 84 : 42), cells = gridCells(items.length, 46, D - 46, y0, y1, 28, 28), bt = 7, pad = 9;
   const TO = {size:11.4, min:9, max:1, family:SLAB, weight:500}, tH = gridTBH(items.map((p, i) => gridTB(ctx, gridPT(p), cells[i].w - 2*(bt + pad), TO)), 4), capH = 46 + tH;
   const red = '#C8352B', blue = '#2F5D9B', fits = items.map((p, i) => fitPhoto(p, cells[i].w - 2*(bt + pad), cells[i].h - capH - 2*(bt + pad)));
   settleRows(cells, fits.map(f => f.h + 2*(bt + pad) + capH), y0, y1, 28);
   items.forEach((p, i) => {
     const c = cells[i], n = numOf(p, g*4 + i), f = fits[i], cw = Math.max(f.w + 2*(bt + pad), Math.min(c.w, 222)), ch = f.h + 2*(bt + pad) + capH, cx = c.x + (c.w - cw)/2, cy = c.y;
-    ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.26)'; ctx.shadowBlur = 9*ds; ctx.shadowOffsetY = 3.5*ds; ctx.fillStyle = '#FBF7EE'; ctx.fillRect(cx, cy, cw, ch); ctx.restore();
-    airBorder(ctx, cx, cy, cw, ch, bt, red, blue);
+    const hx = cardOn ? gridCardHex(p) : '#FBF7EE', pen = cardOn ? penOn(hx) : '#2B221D';
+    ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.26)'; ctx.shadowBlur = 9*ds; ctx.shadowOffsetY = 3.5*ds; ctx.fillStyle = hx; ctx.fillRect(cx, cy, cw, ch); ctx.restore();
+    airBorder(ctx, cx, cy, cw, ch, bt, red, blue, hx);
+    if (cardOn) cardFill(ctx, cx + bt, cy + bt, cw - 2*bt, ch - 2*bt, hx, hi, H);
     const r = {x:cx + (cw - f.w)/2, y:cy + bt + pad, w:f.w, h:f.h}; drawCover(ctx, srcOf(p, hi), r, 0);
     const xl = cx + bt + pad, xr = cx + cw - bt - pad;
-    gridTBDraw(ctx, gridTB(ctx, gridPT(p), xr - xl, TO), xl, r.y + r.h + 5, 'left', '#2B221D', TO);
+    gridTBDraw(ctx, gridTB(ctx, gridPT(p), xr - xl, TO), xl, r.y + r.h + 5, 'left', pen, TO);
     const by = r.y + r.h + 17 + tH;
-    ctx.save(); ctx.textAlign = 'left'; ctx.fillStyle = red; ctx.font = `500 7.2px ${MONO}`; spacedAt(ctx, 'POR AVIÓN', xl, by, 1.8, 'left');
-    ctx.fillStyle = '#2B221D'; ctx.globalAlpha = 0.85; ctx.font = `400 8.6px ${MONO}`; spacedAt(ctx, (placeOf(p) || '').toUpperCase().slice(0, 18), xl, by + 12, 1, 'left');
+    ctx.save(); ctx.textAlign = 'left'; ctx.fillStyle = cardOn ? legibleOn(red, hx, 3) : red; ctx.font = `500 7.2px ${MONO}`; spacedAt(ctx, 'POR AVIÓN', xl, by, 1.8, 'left');
+    ctx.fillStyle = pen; ctx.globalAlpha = 0.85; ctx.font = `400 8.6px ${MONO}`; spacedAt(ctx, (placeOf(p) || '').toUpperCase().slice(0, 18), xl, by + 12, 1, 'left');
     if (p.date){ ctx.globalAlpha = 0.6; ctx.font = `400 8px ${MONO}`; ctx.fillText(String(p.date), xl, by + 23); } ctx.restore();
     /* estampilla de color */
     const sw = 32, sh = 38, sx2 = xr - sw, sy2 = by - 22, col = ((p.colors || [])[0] || {}).hex || red;
@@ -4190,7 +4243,169 @@ function gridAerea(ctx, g, items, hi, H){
   });
   gridFootCover(ctx, H, items);
 }
-const GRID_LOOKS = {catalogo:gridCatalogo, galeria:gridGaleria, negativos:gridNegativos, estampillas:gridEstampillas, aerea:gridAerea, cuaderno:gridCuaderno};
+/* ---------- «Recuadro de cada foto: papel de su postal» ----------
+   Con Estilo → Color «Uno por postal», cada postal tiene su papel; en la grilla, la ficha, estampilla, tarjeta o paspartú de cada foto lo repite. */
+function gridCardOn(){ return state.grid.card === 'postal'; }
+function gridCardHex(p){ return state.style === 'foto' && state.bgEach === 'cada' ? bgHexFor(p) : gridBgHex(); }
+function gridCardStyle(p){ return withStamp(fotoStyle(gridCardHex(p))); }
+/* pinta el papel (con su textura, si la hay) dentro de un rectángulo */
+function cardFill(ctx, x, y, w, h, hex, hi, H){
+  ctx.save(); ctx.beginPath(); ctx.rect(x, y, w, h); ctx.clip();
+  if (state.paperTex === 'liso'){ ctx.fillStyle = hex; ctx.fillRect(x, y, w, h); }
+  else { const pc = paperFor(fotoStyle(hex), hi), pw = pc.width, sw = pw * D / H; ctx.drawImage(pc, (pw - sw)/2, 0, sw, pw, 0, 0, D, H); }
+  ctx.restore();
+}
+const penOn = hex => lumOf(hex) > 0.42 ? '#2B2622' : '#F3EFE6';
+/* un renglón que se achica hasta `min` y, si no entra, se corta con «…» */
+function fitText(ctx, text, x, base, maxW, size, min, family, weight){
+  if (!text) return; const f = fitLines(ctx, text, maxW, size, min, 1, family, weight);
+  ctx.font = `${weight} ${f.size}px ${family}`; ctx.fillText(f.lines[0], x, base);
+}
+
+/* Instantáneas: copias instantáneas un poco torcidas, con el margen de abajo escrito a mano */
+function gridInstantaneas(ctx, g, items, hi, H){
+  const G = state.grid, ink = gridInk(), top = gridHeadCover(ctx, g, ink, 50), foot = G.foot !== 'nada', ds = devScale(ctx), cardOn = gridCardOn();
+  const y0 = top + 30, y1 = H - (foot ? 84 : 42), cells = gridCells(items.length, 50, D - 50, y0, y1, 36, 30), side = 10, topB = 10, bot = 60, tilts = [-1.6, 1.3, 1.1, -1.2];
+  const fits = items.map((p, i) => fitPhoto(p, cells[i].w - 2*side - 12, cells[i].h - topB - bot - 22)); settleRows(cells, fits.map(f => f.h + topB + bot + 22), y0, y1, 30);
+  items.forEach((p, i) => {
+    const c = cells[i], n = numOf(p, g*4 + i), f = fits[i], pw = f.w + 2*side, ph = f.h + topB + bot, px = c.x + (c.w - pw)/2, py = c.y + 10, cx = px + pw/2, cy = py + ph/2;
+    const card = cardOn ? gridCardHex(p) : '#FBFAF6', pen = penOn(card);
+    ctx.save(); ctx.translate(cx, cy); ctx.rotate(tilts[i]*Math.PI/180); ctx.translate(-cx, -cy);
+    ctx.save(); ctx.shadowColor = 'rgba(30,20,10,.26)'; ctx.shadowBlur = 12*ds; ctx.shadowOffsetY = 4*ds; ctx.fillStyle = card; ctx.fillRect(px, py, pw, ph); ctx.restore();
+    if (cardOn) cardFill(ctx, px, py, pw, ph, card, hi, H);
+    const r = {x:px + side, y:py + topB, w:f.w, h:f.h};
+    ctx.fillStyle = '#141110'; ctx.fillRect(r.x, r.y, r.w, r.h); drawCover(ctx, srcOf(p, hi), r, 0);
+    ctx.save(); const gl = ctx.createLinearGradient(r.x, r.y, r.x + r.w, r.y + r.h); gl.addColorStop(0, 'rgba(255,255,255,.08)'); gl.addColorStop(.45, 'rgba(255,255,255,0)'); ctx.fillStyle = gl; ctx.fillRect(r.x, r.y, r.w, r.h);
+    ctx.strokeStyle = 'rgba(0,0,0,.25)'; ctx.lineWidth = 0.8; ctx.strokeRect(r.x, r.y, r.w, r.h); ctx.restore();
+    const k = Math.min(3, (p.colors || []).length), swW = k ? k*18 + (k - 1)*3 : 0;
+    gridSwatches(ctx, p, n, px + pw - side, r.y + r.h + 13, 18, 14, 3, 0);
+    const pt = gridPT(p), l1 = r.y + r.h + 32, l2 = r.y + r.h + 50;
+    ctx.fillStyle = pen; ctx.textAlign = 'left';
+    fitText(ctx, pt ? pt.t : (placeOf(p) || 'N.º ' + pad3(n)), r.x + 1, l1, r.w - swW - 10, 21, 14, HAND, 700);
+    ctx.save(); ctx.globalAlpha = 0.78;
+    fitText(ctx, [pt && pt.en, 'N.º ' + pad3(n), pt ? placeOf(p) : '', p.date ? String(p.date).replace(/[-/.]/g, '·') : ''].filter(Boolean).join(' · '), r.x + 1, l2, r.w - 2, 15.5, 11, HAND, 400);
+    ctx.restore();
+    if (G.tape) colorTape(ctx, cx, py, -2 - tilts[i]*2.2, 80, 22, lightestOf(p));
+    ctx.restore();
+  });
+  gridFootCover(ctx, H, items);
+}
+
+/* Diapositivas: cada foto en su marco de diapositiva de 35 mm, con el título a mano y el lugar impreso al costado */
+function gridDiapositivas(ctx, g, items, hi, H){
+  const G = state.grid, ink = gridInk(), top = gridHeadCover(ctx, g, ink, 50), foot = G.foot !== 'nada', ds = devScale(ctx), cardOn = gridCardOn(), yr = gridYear(items);
+  const y0 = top + 30, y1 = H - (foot ? 84 : 42), cells = gridCells(items.length, 56, D - 56, y0, y1, 40, 30), below = 34;
+  const M = Math.min(...cells.map(c => Math.min(c.w, c.h - below))); settleRows(cells, cells.map(() => M + below), y0, y1, 30);
+  const red = legibleOn(ink, '#F8F6F1', 3);
+  items.forEach((p, i) => {
+    const c = cells[i], n = numOf(p, g*4 + i), mx = c.x + (c.w - M)/2, my = c.y, f = fitPhoto(p, M*0.72, M*0.72);
+    const card = cardOn ? gridCardHex(p) : '#F8F6F1', pen = penOn(card), R = M*0.045;
+    const wx = mx + (M - f.w)/2, wy = my + (M - f.h)/2 - M*0.02, r = {x:wx, y:wy, w:f.w, h:f.h};
+    /* el marco de cartón, con las esquinas redondeadas */
+    ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.34)'; ctx.shadowBlur = 12*ds; ctx.shadowOffsetY = 4*ds; ctx.fillStyle = card;
+    ctx.beginPath(); ctx.roundRect ? ctx.roundRect(mx, my, M, M, R) : ctx.rect(mx, my, M, M); ctx.fill(); ctx.restore();
+    if (cardOn){ ctx.save(); ctx.beginPath(); ctx.roundRect ? ctx.roundRect(mx, my, M, M, R) : ctx.rect(mx, my, M, M); ctx.clip(); cardFill(ctx, mx, my, M, M, card, hi, H); ctx.restore(); }
+    ctx.save(); ctx.strokeStyle = pen; ctx.globalAlpha = 0.16; ctx.lineWidth = 1; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(mx + 4.5, my + 4.5, M - 9, M - 9, R*0.7) : ctx.rect(mx + 4.5, my + 4.5, M - 9, M - 9); ctx.stroke(); ctx.restore();
+    /* la ventana con la foto y un bisel oscuro */
+    ctx.fillStyle = '#0F0D0C'; ctx.fillRect(r.x - 2, r.y - 2, r.w + 4, r.h + 4); drawCover(ctx, srcOf(p, hi), r, 0);
+    ctx.save(); ctx.strokeStyle = 'rgba(0,0,0,.45)'; ctx.lineWidth = 1.2; ctx.strokeRect(r.x - 2, r.y - 2, r.w + 4, r.h + 4); ctx.restore();
+    /* lo impreso en el marco */
+    const tb = r.y - 2 - my, bb = my + M - (r.y + r.h + 2), sm = r.x - 2 - mx;
+    ctx.save(); ctx.fillStyle = pen; ctx.globalAlpha = 0.6; ctx.font = `500 6.6px ${MONO}`;
+    spacedAt(ctx, 'OJODECRISTI', mx + 12, my + Math.min(tb/2 + 3, 16), 1.6, 'left'); spacedAt(ctx, yr, mx + M - 12, my + Math.min(tb/2 + 3, 16), 1.6, 'right');
+    if (sm >= 16){ const pl = [(placeOf(p) || '').toUpperCase(), p.date ? String(p.date) : ''].filter(Boolean).join(' · '); ctx.save(); ctx.translate(mx + sm/2 + 2.4, r.y + r.h/2); ctx.rotate(-Math.PI/2); ctx.font = `500 6.4px ${MONO}`; let t = pl; const tw = () => ctx.measureText(t).width + 1.3*([...t].length - 1); while (t.length > 3 && tw() > r.h + 2) t = t.slice(0, -1); if (t !== pl) t = t.replace(/[\s·.,-]+$/, '') + '…'; spacedAt(ctx, t, 0, 0, 1.3, 'center'); ctx.restore(); }
+    ctx.restore();
+    const pt = gridPT(p), lb = r.y + r.h + 2 + Math.max(15, bb/2 + 6);
+    ctx.save(); ctx.fillStyle = cardOn ? legibleOn(ink, card, 3) : red; ctx.textAlign = 'right'; ctx.font = `500 9.6px ${MONO}`; ctx.fillText('N.º ' + pad3(n), mx + M - 12, lb); ctx.restore();
+    ctx.save(); ctx.fillStyle = pen; ctx.textAlign = 'left';
+    fitText(ctx, pt ? pt.t : (sm < 16 ? placeOf(p) : ''), mx + 13, lb, M - 26 - 52, 18, 12, HAND, 700);
+    if (pt && pt.en && bb > 40){ ctx.globalAlpha = 0.7; fitText(ctx, pt.en, mx + 13, lb + 14, M - 26 - 52, 13.5, 10, HAND, 400); }
+    ctx.restore();
+    /* los colores, debajo del marco */
+    const k = Math.min(3, (p.colors || []).length), tot = k ? k*22 + (k - 1)*4 : 0;
+    gridSwatches(ctx, p, n, mx + M/2 + tot/2, my + M + 11, 22, 16, 4, 0);
+  });
+  gridFootCover(ctx, H, items);
+}
+
+/* Fichero: fichas de catálogo de archivo, con renglones, datos a máquina y el agujero de la ficha */
+function gridFichero(ctx, g, items, hi, H){
+  const G = state.grid, ink = gridInk(), top = gridHeadCover(ctx, g, ink, 50), foot = G.foot !== 'nada', ds = devScale(ctx), cardOn = gridCardOn(), yr = gridYear(items);
+  const y0 = top + 30, y1 = H - (foot ? 84 : 42), cells = gridCells(items.length, 42, D - 42, y0, y1, 24, 24), pad = 13, head = 26, lh = 14.5, holeH = 24;
+  const anyT = items.some(p => gridPT(p)), nl = (anyT ? 1 : 0) + 3, metaH = head + 10 + nl*lh + holeH;
+  const fits = items.map((p, i) => fitPhoto(p, cells[i].w - 2*pad, cells[i].h - metaH)), fh = Math.max(...fits.map(f => f.h));
+  settleRows(cells, cells.map(() => fh + metaH), y0, y1, 24);
+  items.forEach((p, i) => {
+    const c = cells[i], n = numOf(p, g*4 + i), f = fits[i], cw = c.w, ch = fh + metaH, x = c.x, y = c.y;
+    const card = cardOn ? gridCardHex(p) : '#FBF9F2', pen = penOn(card), dark = lumOf(card) <= 0.42;
+    ctx.save(); ctx.shadowColor = 'rgba(30,20,10,.2)'; ctx.shadowBlur = 9*ds; ctx.shadowOffsetY = 3*ds; ctx.fillStyle = card; ctx.fillRect(x, y, cw, ch); ctx.restore();
+    if (cardOn) cardFill(ctx, x, y, cw, ch, card, hi, H);
+    /* cabecera: número a máquina, año y la línea roja */
+    ctx.save(); ctx.fillStyle = pen; ctx.textAlign = 'left'; ctx.font = `500 11px ${MONO}`; ctx.fillText('N.º ' + pad3(n), x + pad, y + 17);
+    ctx.globalAlpha = 0.6; ctx.font = `400 8px ${MONO}`; spacedAt(ctx, 'ARCHIVO OJODECRISTI · ' + yr, x + cw - pad, y + 16.5, 1, 'right'); ctx.restore();
+    ctx.save(); ctx.fillStyle = dark ? '#E58C86' : '#C8463F'; ctx.globalAlpha = 0.75; ctx.fillRect(x + 6, y + head, cw - 12, 1.3); ctx.restore();
+    /* la foto, con esquineros */
+    const r = {x:x + (cw - f.w)/2, y:y + head + 8 + (fh - f.h)/2, w:f.w, h:f.h};
+    drawCover(ctx, srcOf(p, hi), r, 0);
+    ctx.save(); ctx.fillStyle = dark ? 'rgba(250,246,238,.85)' : 'rgba(30,26,22,.86)'; const e = 11;
+    [[r.x, r.y, 1, 1], [r.x + r.w, r.y, -1, 1], [r.x, r.y + r.h, 1, -1], [r.x + r.w, r.y + r.h, -1, -1]].forEach(([ax, ay, sx, sy]) => { ctx.beginPath(); ctx.moveTo(ax - sx*2, ay - sy*2); ctx.lineTo(ax + sx*e, ay - sy*2); ctx.lineTo(ax - sx*2, ay + sy*e); ctx.closePath(); ctx.fill(); });
+    ctx.restore();
+    /* renglones azules con los datos a máquina */
+    const ty = y + head + 8 + fh + 8, pt = gridPT(p);
+    const rows = []; if (anyT) rows.push(['TÍTULO', pt ? [pt.t, pt.en].filter(Boolean).join(' / ') : '—']);
+    rows.push(['LUGAR', placeOf(p) || '—']); rows.push(['FECHA', p.date ? String(p.date) : '—']); rows.push(['COLORES', '']);
+    rows.forEach((rw, k) => {
+      const b = ty + (k + 1)*lh - 3.5;
+      ctx.save(); ctx.fillStyle = dark ? '#9DB9DA' : '#7FA3CF'; ctx.globalAlpha = 0.5; ctx.fillRect(x + 6, b + 3.5, cw - 12, 0.8); ctx.restore();
+      ctx.save(); ctx.fillStyle = pen; ctx.textAlign = 'left'; ctx.globalAlpha = 0.55; ctx.font = `500 6.4px ${MONO}`; spacedAt(ctx, rw[0], x + pad, b, 0.9, 'left'); ctx.globalAlpha = 1;
+      if (rw[1]) fitText(ctx, rw[1], x + pad + 52, b, cw - 2*pad - 52, k === 0 && anyT ? 10.6 : 9.6, 7.6, MONO, k === 0 && anyT ? 500 : 400);
+      ctx.restore();
+      if (rw[0] === 'COLORES'){
+        const cols = (p.colors || []).slice(0, 3); let cx = x + pad + 52;
+        ctx.save(); ctx.font = `400 7.6px ${MONO}`; ctx.textAlign = 'left';
+        cols.forEach(col => { ctx.fillStyle = col.hex; ctx.fillRect(cx, b - 7.5, 9, 9); ctx.strokeStyle = 'rgba(0,0,0,.25)'; ctx.lineWidth = 0.6; ctx.strokeRect(cx, b - 7.5, 9, 9); ctx.fillStyle = pen; ctx.globalAlpha = 0.85; ctx.fillText(col.hex.slice(1).toUpperCase(), cx + 12, b); ctx.globalAlpha = 1; cx += 12 + ctx.measureText('000000').width + 8; });
+        ctx.restore();
+      }
+    });
+    /* el agujero de la ficha */
+    const hx = x + cw/2, hy = y + ch - 10;
+    ctx.save(); ctx.fillStyle = gridBgHex(); ctx.beginPath(); ctx.arc(hx, hy, 4.2, 0, Math.PI*2); ctx.fill(); ctx.strokeStyle = 'rgba(0,0,0,.22)'; ctx.lineWidth = 0.8; ctx.stroke(); ctx.restore();
+  });
+  gridFootCover(ctx, H, items);
+}
+
+/* Muestrario: cada foto con su tira de muestras de pintura, con el nombre y el código de cada color */
+function gridMuestrario(ctx, g, items, hi, H){
+  const G = state.grid, ink = gridInk(), top = gridHeadCover(ctx, g, ink, 50), foot = G.foot !== 'nada', ds = devScale(ctx), cardOn = gridCardOn();
+  const y0 = top + 32, y1 = H - (foot ? 84 : 42), cells = gridCells(items.length, 44, D - 44, y0, y1, 30, 30), fr = 6, stripW = 70;
+  const TO = {size:12.6, min:10, max:1, family:SANS, weight:500}, tH = gridTBH(items.map((p, i) => gridTB(ctx, gridPT(p), cells[i].w, TO)), 4), metaH = 34 + tH;
+  const fits = items.map((p, i) => fitPhoto(p, cells[i].w - stripW - 2*fr - 2, cells[i].h - metaH - 2*fr)); settleRows(cells, fits.map(f => f.h + 2*fr + metaH), y0, y1, 30);
+  items.forEach((p, i) => {
+    const c = cells[i], n = numOf(p, g*4 + i), f = fits[i], gw = f.w + stripW + 2*fr + 2, gh = f.h + 2*fr, gx = c.x + (c.w - gw)/2, gy = c.y;
+    const card = cardOn ? gridCardHex(p) : '#FFFFFF';
+    ctx.save(); ctx.shadowColor = 'rgba(30,20,10,.2)'; ctx.shadowBlur = 10*ds; ctx.shadowOffsetY = 3.5*ds; ctx.fillStyle = card; ctx.fillRect(gx, gy, gw, gh); ctx.restore();
+    if (cardOn) cardFill(ctx, gx, gy, gw, gh, card, hi, H);
+    const r = {x:gx + fr, y:gy + fr, w:f.w, h:f.h}; drawCover(ctx, srcOf(p, hi), r, 0);
+    /* la tira de muestras: un color debajo del otro, con su nombre y su código */
+    const cols = (p.colors || []).slice(0, 3), sx = r.x + r.w + 2, sh = cols.length ? f.h/cols.length : 0;
+    cols.forEach((col, k) => {
+      const yy = r.y + k*sh, tc = lumOf(col.hex) > 0.42 ? '#1B1A18' : '#FBF7EE';
+      ctx.fillStyle = col.hex; ctx.fillRect(sx, yy, stripW, sh - (k < cols.length - 1 ? 1.5 : 0));
+      ctx.save(); ctx.fillStyle = tc; ctx.textAlign = 'left';
+      if (sh >= 26){ ctx.font = `500 7.6px ${SANS}`; const nm = wrapWords(ctx, col.name || '', stripW - 10).slice(0, sh >= 40 ? 2 : 1); nm.forEach((t, j) => ctx.fillText(t, sx + 5, yy + 11 + j*8.6)); }
+      ctx.globalAlpha = 0.8; ctx.font = `400 6.4px ${MONO}`; ctx.fillText(col.hex.slice(1).toUpperCase(), sx + 5, yy + sh - (k < cols.length - 1 ? 6 : 4.5)); ctx.restore();
+    });
+    /* el pie: título, número, lugar y fecha */
+    const tb = gridTB(ctx, gridPT(p), gw, TO);
+    gridTBDraw(ctx, tb, gx, gy + gh + 7, 'left', S.ink, TO);
+    const my = gy + gh + 19 + tH;
+    ctx.save(); ctx.fillStyle = S.ink; ctx.textAlign = 'left'; ctx.font = `500 10px ${MONO}`; ctx.fillText('N.º ' + pad3(n), gx, my);
+    const nw = ctx.measureText('N.º ' + pad3(n)).width; ctx.globalAlpha = 0.72;
+    fitText(ctx, [placeOf(p), p.date ? String(p.date) : ''].filter(Boolean).join(' · '), gx + nw + 10, my, gw - nw - 10, 9.4, 7.6, SANS, 400); ctx.restore();
+  });
+  gridFootCover(ctx, H, items);
+}
+const GRID_LOOKS = {catalogo:gridCatalogo, galeria:gridGaleria, negativos:gridNegativos, estampillas:gridEstampillas, aerea:gridAerea, cuaderno:gridCuaderno, instantaneas:gridInstantaneas, diapositivas:gridDiapositivas, fichero:gridFichero, muestrario:gridMuestrario};
 /* ---------- recipe note: a handwritten sheet with the Fujifilm settings ---------- */
 function recipeDeco(){ return state.deco === 'cintas-clip' || state.deco === 'clips' ? 'clip' : postalDeco(); }
 function recipePhoto(){ const R = state.recipe; return R.photo >= 0 ? state.photos[R.photo] || null : null; }
@@ -5111,6 +5326,7 @@ const INSP_KEY = 'postales-ojodecristi-insp';
 function setInsp(t){
   if (t !== 'todas') t = 'foto';
   $('#insp').dataset.tab = t;
+  if (t === 'todas') renderLookThumbsSoon();
   document.querySelectorAll('.insp-tabs [data-insp]').forEach(b => { const on = b.dataset.insp === t; b.setAttribute('aria-selected', String(on)); b.tabIndex = on ? 0 : -1; });
   try { localStorage.setItem(INSP_KEY, t); } catch(e){}
   if (t === 'foto'){ inksSig = ''; refreshEditorBits(); }
@@ -5342,6 +5558,7 @@ function syncDesign(){
   $('#pmIconRow').hidden = state.pm !== 'ilustrado'; $('#pmPosRow').hidden = state.pm === 'ninguno'; $('#linePosRow').hidden = state.lineStyle === 'ninguna' || state.comp === 'ficha';
   $('#counterInkRow').hidden = !state.extras.counter;
   syncMoreSums();
+  { const sh = SHAPES.find(x => x[0] === state.shape); $('#shapeName').textContent = sh ? sh[1] : ''; }
   document.querySelectorAll('select[data-sel]').forEach(x => x.value = state[x.dataset.sel]);
   $('#datosSum').textContent = datosSummary();
   state.photos.forEach(p => { const el = document.getElementById('laysum-' + p.id); if (el) el.textContent = laySummary(p); });
@@ -5733,22 +5950,42 @@ $('#gridTitles').addEventListener('input', e => {
   const g = e.target.dataset.g; if (g === undefined) return; state.titles[+g] = e.target.value; scheduleOut();
 });
 /* pestaña Grilla: diseño, título, color, pie, fondo y detalles */
-const GRID_HINT = {clasica:'Las fichas de siempre, con la decoración elegida en «Postales» → «Marco y decoración».', catalogo:'Como la portada: cabecera con OJODECRISTI, fotos derechas con borde blanco y el pie de lugar y fecha.', cuaderno:'Cuaderno de campo: título a mano, fotos un poco torcidas, cinta del color de cada foto y un sello de goma.', estampillas:'Cada foto como estampilla troquelada, con su barra de colores y un matasellos en la esquina.', galeria:'Fotos con paspartú blanco y filete, y una cartela de museo con el número, el lugar y la fecha.', negativos:'Tiras de película con perforaciones y números de cuadro; debajo de cada foto, su número y sus colores.', aerea:'Tarjetas con borde de correo aéreo y una estampilla del color principal de cada foto, con su número.'};
+const GRID_HINT = {clasica:'Las fichas de siempre, con la decoración elegida en «Postales» → «Marco y decoración».', catalogo:'Como la portada: cabecera con OJODECRISTI, fotos derechas con borde blanco y el pie de lugar y fecha.', cuaderno:'Cuaderno de campo: título a mano, fotos un poco torcidas, cinta del color de cada foto y un sello de goma.', estampillas:'Cada foto como estampilla troquelada, con su barra de colores y un matasellos en la esquina.', galeria:'Fotos con paspartú blanco y filete, y una cartela de museo con el número, el lugar y la fecha.', negativos:'Tiras de película con perforaciones y números de cuadro; debajo de cada foto, su número y sus colores.', aerea:'Tarjetas con borde de correo aéreo y una estampilla del color principal de cada foto, con su número.', instantaneas:'Copias instantáneas un poco torcidas: el título escrito a mano en el margen de abajo, con el número, el lugar y los colores.', diapositivas:'Cada foto en un marco de diapositiva de 35 mm: el título a mano, el número impreso y el lugar al costado. Los colores van debajo.', fichero:'Fichas de catálogo de archivo: número a máquina, la foto con esquineros y los datos en renglones, con los códigos de color.', muestrario:'Cada foto con su tira de muestras de pintura: los tres colores con su nombre y su código, al lado de la foto.'};
 function syncGrid(){
   const G = state.grid, look = G.look, designed = !!GRID_LOOKS[look];
-  document.querySelectorAll('.chips[data-gradio]').forEach(box => box.querySelectorAll('button').forEach(b => b.setAttribute('aria-checked', String(G[box.dataset.gradio] === b.dataset.v))));
+  document.querySelectorAll('[data-gradio]').forEach(box => box.querySelectorAll('button').forEach(b => b.setAttribute('aria-checked', String(G[box.dataset.gradio] === b.dataset.v))));
   document.querySelectorAll('select[data-gsel]').forEach(x => x.value = G[x.dataset.gsel]);
   $('#gdHint').textContent = GRID_HINT[look] || '';
+  { const lb = document.querySelector(`.looks [data-v="${look}"] span`); $('#lookName').textContent = lb ? lb.textContent : ''; }
+  renderLookThumbsSoon();
   $('#gdFromCover').checked = G.fromCover; $('#gridTitles').hidden = G.fromCover;
   document.querySelectorAll('#gridTitles .gsub').forEach(el => el.hidden = !designed);
   $('#gdInkRow').hidden = $('#gdFootRow').hidden = !designed;
   $('#gdInkColor').value = G.inkColor; $('#gdBgColor').value = G.bgColor;
   $('#gdTape').checked = G.tape; $('#gdSeal').checked = G.seal; $('#gdPm').checked = G.pm;
   $('#gdPTitle').checked = G.ptitle; $('#gdPTEn').checked = G.pten; $('#gdPTEnRow').hidden = !G.ptitle; $('#gdPTBox').hidden = !designed;
-  $('#gdTapeRow').hidden = $('#gdSealRow').hidden = look !== 'cuaderno'; $('#gdPmRow').hidden = look !== 'estampillas'; $('#gdDecoBox').hidden = look !== 'cuaderno' && look !== 'estampillas';
+  $('#gdTapeRow').hidden = look !== 'cuaderno' && look !== 'instantaneas'; $('#gdSealRow').hidden = look !== 'cuaderno'; $('#gdPmRow').hidden = look !== 'estampillas'; $('#gdDecoBox').hidden = !['cuaderno', 'estampillas', 'instantaneas'].includes(look);
+  $('#gdCardRow').hidden = !designed || look === 'negativos' || look === 'cuaderno'; $('#gdCardHint').hidden = $('#gdCardRow').hidden || G.card !== 'postal' || (state.style === 'foto' && state.bgEach === 'cada');
 }
+/* las miniaturas de los diseños se dibujan con las mismas fotos, papel y formato que la grilla real */
+var lookSig = '', lookT = 0;
+function renderLookThumbs(){
+  const box = $('.looks'); if (!box || box.closest('.pane-off') || $('#insp').dataset.tab === 'foto' || !state.photos.length) return;
+  const sig = [state.format, state.style, state.bgEach, state.bgTone, state.custom, state.paperTex, state.shape, state.stampMode, state.stampColor, JSON.stringify(state.grid), gridTitle(0), state.cover.title,
+    state.photos.slice(0, 4).map(p => p.id + (p.lay && p.lay.bg != null ? p.lay.bg : '') + (p.colors || []).map(c => c.hex).join('')).join(',')].join('|');
+  if (sig === lookSig) return; lookSig = sig;
+  const keepLook = state.grid.look, keepS = S, tmp = document.createElement('canvas');
+  try {
+    box.querySelectorAll('button[data-v]').forEach(b => {
+      const c = $('canvas', b); state.grid.look = b.dataset.v; renderTo(tmp, {kind:'grid', g:0}, 240, false);
+      if (c.width !== tmp.width || c.height !== tmp.height){ c.width = tmp.width; c.height = tmp.height; }
+      const x = c.getContext('2d'); x.clearRect(0, 0, c.width, c.height); x.drawImage(tmp, 0, 0);
+    });
+  } finally { state.grid.look = keepLook; S = keepS; releaseCanvas(tmp); }
+}
+function renderLookThumbsSoon(){ clearTimeout(lookT); lookT = setTimeout(renderLookThumbs, 80); }
 function gridChanged(){ syncGrid(); showOut(o => o.kind === 'grid'); scheduleOut(); }
-document.querySelectorAll('.chips[data-gradio]').forEach(box => box.addEventListener('click', e => { const b = e.target.closest('button[data-v]'); if (!b) return; state.grid[box.dataset.gradio] = b.dataset.v; gridChanged(); }));
+document.querySelectorAll('[data-gradio]').forEach(box => box.addEventListener('click', e => { const b = e.target.closest('button[data-v]'); if (!b) return; state.grid[box.dataset.gradio] = b.dataset.v; gridChanged(); }));
 document.querySelectorAll('select[data-gsel]').forEach(x => x.addEventListener('change', () => { state.grid[x.dataset.gsel] = x.value; gridChanged(); }));
 $('#gdFromCover').addEventListener('change', e => { state.grid.fromCover = e.target.checked; gridChanged(); });
 $('#gdInkColor').addEventListener('input', e => { state.grid.inkColor = e.target.value; state.grid.ink = 'otro'; gridChanged(); });
@@ -5848,7 +6085,42 @@ function revealSoft(o){
   if (o.kind === 'postal'){ const p = state.photos[o.i]; const li = p && document.querySelector(`.prow[data-id="${p.id}"]`); if (li){ li.scrollIntoView({block:'nearest', behavior:'smooth'}); flash(li); } }
   else revealEditor(o);
 }
+['ctxTitle', 'ctxSub'].forEach(id => {
+  const el = document.getElementById(id);
+  el.addEventListener('input', () => {
+    const bar = $('#ctxBar'), to = document.getElementById(id === 'ctxTitle' ? bar.dataset.t : bar.dataset.s); if (!to) return;
+    if (bar.dataset.one) el.value = el.value.replace(/\n/g, ' ');
+    fitRows(el); to.value = el.value; to.dispatchEvent(new Event('input', {bubbles:true}));
+  });
+  el.addEventListener('keydown', e => { if (e.key === 'Enter' && $('#ctxBar').dataset.one) e.preventDefault(); });
+});
+$('#ctxPlace').addEventListener('click', () => { const b = document.querySelector(`#gridTitles [data-useplace="${$('#ctxPlace').dataset.g}"]`); if (b) b.click(); const t = $('#ctxTitle'); t.blur(); syncCtxBar(); });
+/* qué título y subtítulo corresponden a la imagen que se ve: los campos de arriba escriben en los de su pestaña */
+function ctxTarget(){
+  const o = outputs()[selK]; if (!o) return null;
+  const cov = {t:'cvTitle', s:'cvSub', ph:['Título (vacío = el lugar)', 'Subtítulo'], place:false};
+  if (o.kind === 'cover') return state.cover.look === 'sola' ? null : Object.assign({kind:'Portada · título y subtítulo'}, cov);
+  if (o.kind === 'grid'){
+    if (state.grid.fromCover) return Object.assign({kind:`Grilla ${o.g + 1} · usa el título de la portada`}, cov);
+    const a = o.g*4 + 1, b = Math.min(state.photos.length, a + 3);
+    return {kind:`Grilla ${o.g + 1} · fotos ${a}–${b}`, t:'gtitle-' + o.g, s:'gsub-' + o.g, ph:['Título de la grilla (vacío = sin título)', 'Subtítulo (ej. en inglés)'], place:true, g:o.g, one:true};
+  }
+  return null;
+}
+function fitRows(el){ el.rows = Math.min(3, Math.max(1, el.value.split('\n').length)); }
+function syncCtxBar(){
+  const bar = $('#ctxBar'); if (!bar) return; const T = ctxTarget(); bar.hidden = !T; if (!T) return;
+  bar.dataset.t = T.t; bar.dataset.s = T.s; bar.dataset.one = T.one ? '1' : '';
+  $('#ctxKind').textContent = T.kind;
+  const ti = $('#ctxTitle'), si = $('#ctxSub'), ot = document.getElementById(T.t), os = document.getElementById(T.s);
+  if (document.activeElement !== ti){ ti.value = ot ? ot.value : ''; fitRows(ti); }
+  if (document.activeElement !== si){ si.value = os ? os.value : ''; fitRows(si); }
+  ti.placeholder = T.ph[0]; si.placeholder = T.ph[1];
+  si.hidden = !os || (T.one && !GRID_LOOKS[state.grid.look]);
+  $('#ctxPlace').hidden = !T.place; $('#ctxPlace').dataset.g = T.place ? T.g : '';
+}
 function renderStage(){
+  syncCtxBar();
   const outs = outputs();
   document.querySelectorAll('#outList .ocard').forEach((li, k) => li.classList.toggle('sel', k === selK));
   const vn = $('#vnOut'); if (vn) vn.textContent = outs.length || ''; const vf = $('#vnFotos'); if (vf) vf.textContent = state.photos.length || '';
