@@ -19,5 +19,6 @@ Página: https://cristiantorrecillas.github.io/ojodecristi-postales/
 - **De la web**: trae fotos de `../pagina-web/` por número (título, lugar, año, cámara y colores). Vienen a 1600 px; «Reemplazar imagen» cambia la imagen por la original sin perder los datos.
 - **Exportar** abre la revisión: ancho (1080 / 2160), avisos (sin título, sin lugar, colores casi iguales, números repetidos, poca resolución), el texto del posteo con los hashtags guardados, y .zip, una por una, Drive o compartir (celu). Las imágenes se van armando mientras revisás.
 - **Vista previa → En tu perfil**: la portada nueva en la grilla de 3 con los posteos anteriores (se guardan al exportar; también se suman capturas).
+- **Grilla → Título de cada foto**: cada diseño (Catálogo, Galería, Negativos, Estampillas, Aérea) muestra el título de la foto con la tipografía y el lugar que le corresponde; se puede apagar, y con «También en inglés» suma lo que va después de « / ». Las fotos sin título quedan como antes.
 - **Receta**: «Completar con la foto» lee la simulación y los ajustes que guarda la cámara Fujifilm en sus JPG (MakerNote).
 - **⚙**: colores de la herramienta y conexión con Drive.

@@ -1552,6 +1552,12 @@ textarea.inp.cap-text{width:100%;min-height:150px;font-family:var(--sans);font-s
               <option value="nada">Sin pie</option>
             </select>
           </div>
+          <div id="gdPTBox">
+            <h3 class="sect">Título de cada foto</h3>
+            <label class="check"><input type="checkbox" id="gdPTitle"> Mostrar el título de cada foto</label>
+            <label class="check" id="gdPTEnRow"><input type="checkbox" id="gdPTEn"> También en inglés (lo que va después de « / »)</label>
+            <p class="subhint">Sale del título de cada foto («Esta foto» → Título). Las fotos sin título van sin título.</p>
+          </div>
           <h3 class="sect">Fondo</h3>
           <div class="opt">
             <span class="lbl">Fondo</span>
@@ -2081,7 +2087,7 @@ const RECIPE_DEFAULT = {
 state.recipe = {...RECIPE_DEFAULT};
 const COVER_DEFAULT = {on:false, photo:0, look:'sola', bg:'blanco', color:'#F3EFE6', title:'', sub:'', size:'grande', frame:'ninguno', pick:-1, tone:'suave', sign:false, foot:'fotos', footText:'', shape:'entera', cz:1, cx:0, cy:0, ink:'auto', inkColor:'#1B1A18', subInk:'auto', subInkColor:'#1B1A18'};
 state.cover = {...COVER_DEFAULT};
-const GRID_DEFAULT = {look:'catalogo', fromCover:false, ink:'portada', inkColor:'#D12F27', foot:'lugar', bg:'postales', bgColor:'#2F241F', tape:true, seal:true, pm:true};
+const GRID_DEFAULT = {look:'catalogo', fromCover:false, ink:'portada', inkColor:'#D12F27', foot:'lugar', bg:'postales', bgColor:'#2F241F', tape:true, seal:true, pm:true, ptitle:true, pten:false};
 state.grid = {...GRID_DEFAULT};
 const PENS = {azul:'#1F3A7A', negra:'#1E1D1B', sepia:'#5B3A22'};
 const PREF_KEY = 'postales-ojodecristi-v1';
@@ -3959,16 +3965,50 @@ function gridDm(items){
   }
   return '';
 }
+/* título de cada foto en la grilla: el renglón principal (español) y, si se pide, lo que sigue a « / » (en inglés) */
+function gridPT(p){
+  if (!state.grid.ptitle) return null;
+  const raw = splitLines(p.title).join(' '), i = raw.search(/\s\/\s/), t = (i < 0 ? raw : raw.slice(0, i)).trim();
+  if (!t) return null;
+  return {t, en:state.grid.pten && i >= 0 ? raw.slice(i).replace(/^\s\/\s*/, '').trim() : ''};
+}
+/* parte el texto en hasta `max` renglones del ancho dado; achica la letra hasta `min` y, si aun así no entra, corta con «…» */
+function fitLines(ctx, text, maxW, size, min, max, family, weight){
+  let s = size, lines;
+  const ok = () => lines.length <= max && lines.every(l => ctx.measureText(l).width <= maxW);
+  for (;;){ ctx.font = `${weight} ${s}px ${family}`; lines = wrapWords(ctx, text, maxW); if (ok() || s - 0.4 < min) break; s -= 0.4; }
+  if (lines.length > max) lines.splice(max - 1, lines.length, lines.slice(max - 1).join(' '));
+  lines = lines.map(l => { if (ctx.measureText(l).width <= maxW) return l; while (l.length > 1 && ctx.measureText(l + '…').width > maxW) l = l.slice(0, -1); return l.replace(/[\s,.;:–-]+$/, '') + '…'; });
+  return {lines, size:s};
+}
+/* el bloque del título (con su renglón en inglés opcional): lo que mide, para reservar el lugar antes de acomodar las fotos */
+function gridTB(ctx, pt, maxW, o){
+  if (!pt) return null;
+  const f = fitLines(ctx, pt.t, maxW, o.size, o.min, o.max, o.family, o.weight), lh = f.size*1.2; let en = null;
+  if (pt.en){ const es = Math.max(8, f.size*0.82); en = fitLines(ctx, pt.en, maxW, es, Math.max(7.2, es - 1.4), 1, o.family, 400); }
+  return {lines:f.lines, size:f.size, lh, en, h:lh*f.lines.length + (en ? en.size*1.3 : 0)};
+}
+/* alto que se reserva en la imagen: el del título más alto, así las fichas de cada fila quedan parejas */
+function gridTBH(blocks, after){ const h = Math.max(0, ...blocks.map(b => b ? b.h : 0)); return h ? Math.ceil(h) + after : 0; }
+function gridTBDraw(ctx, b, x, top, align, ink, o){
+  if (!b) return;
+  ctx.save(); ctx.fillStyle = ink; ctx.textAlign = align; ctx.font = `${o.weight} ${b.size}px ${o.family}`;
+  b.lines.forEach((l, i) => ctx.fillText(l, x, top + b.size*0.84 + i*b.lh));
+  if (b.en){ ctx.globalAlpha = 0.68; ctx.font = `400 ${b.en.size}px ${o.family}`; ctx.fillText(b.en.lines[0], x, top + b.lh*b.lines.length + b.en.size*0.9); }
+  ctx.restore();
+}
 function gridCatalogo(ctx, g, items, hi, H){
   const ink = gridInk(), top = gridHeadCover(ctx, g, ink, 50), foot = state.grid.foot !== 'nada';
-  const y0 = top + 34, y1 = H - (foot ? 84 : 42), cells = gridCells(items.length, 40, D - 40, y0, y1, 29, 34), b = 6, metaH = 58, ds = devScale(ctx);
+  const y0 = top + 34, y1 = H - (foot ? 84 : 42), cells = gridCells(items.length, 40, D - 40, y0, y1, 29, 34), b = 6, ds = devScale(ctx);
+  const TO = {size:13.6, min:10.6, max:2, family:SANS, weight:500}, TB = items.map((p, i) => gridTB(ctx, gridPT(p), cells[i].w, TO)), tH = gridTBH(TB, 5), metaH = 58 + tH;
   const fits = items.map((p, i) => fitPhoto(p, cells[i].w - 2*b, cells[i].h - metaH - 2*b)); settleRows(cells, fits.map(f => f.h + 2*b + metaH), y0, y1, 34);
   items.forEach((p, i) => {
     const c = cells[i], n = numOf(p, g*4 + i), f = fits[i];
     const r = {x:c.x + (c.w - f.w)/2, y:c.y + b, w:f.w, h:f.h};
     ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.17)'; ctx.shadowBlur = 11*ds; ctx.shadowOffsetY = 3.2*ds; ctx.fillStyle = '#FFFFFF'; ctx.fillRect(r.x - b, r.y - b, r.w + 2*b, r.h + 2*b); ctx.restore();
     drawCover(ctx, srcOf(p, hi), r, 0);
-    const my = r.y + r.h + b + 19;
+    gridTBDraw(ctx, TB[i], c.x, r.y + r.h + b + 7, 'left', S.ink, TO);
+    const my = r.y + r.h + b + 19 + tH;
     ctx.fillStyle = S.ink; ctx.textAlign = 'left'; ctx.font = `500 12.4px ${MONO}`; ctx.fillText('N.º ' + pad3(n), c.x, my);
     ctx.save(); ctx.globalAlpha = 0.72; ctx.font = `400 10px ${SANS}`; ctx.fillText(placeOf(p), c.x, my + 16); if (p.date) ctx.fillText(String(p.date), c.x, my + 29); ctx.restore();
     gridSwatches(ctx, p, n, c.x + c.w, my - 13, 44, 33, 6, 6.8);
@@ -3987,7 +4027,8 @@ function gridCuaderno(ctx, g, items, hi, H){
   }
   if (SL.length){ ctx.save(); ctx.globalAlpha = 0.72; ctx.fillStyle = S.ink; ctx.font = `400 22px ${HAND}`; SL.forEach((x, i) => ctx.fillText(x, D/2, y + 38 + i*22)); ctx.restore(); y += 38 + (SL.length - 1)*22; }
   const foot = G.foot !== 'nada', seal = G.seal, bottom = H - (seal ? 112 : foot ? 72 : 40);
-  const y0 = y + 40, cells = gridCells(items.length, 44, D - 44, y0, bottom, 36, 30), tilts = [-1.4, 1.1, 0.9, -1.0], b = 8, metaH = 72, ds = devScale(ctx);
+  const y0 = y + 40, cells = gridCells(items.length, 44, D - 44, y0, bottom, 36, 30), tilts = [-1.4, 1.1, 0.9, -1.0], b = 8, ds = devScale(ctx);
+  const TO = {size:21, min:15, max:1, family:HAND, weight:700}, TB = items.map((p, i) => gridTB(ctx, gridPT(p), cells[i].w - 16, TO)), tH = gridTBH(TB, 2), metaH = 72 + tH;
   const fits = items.map((p, i) => fitPhoto(p, cells[i].w - 2*b - 8, cells[i].h - metaH - 2*b - 6)); settleRows(cells, fits.map(f => f.h + 2*b + 6 + metaH), y0, bottom, 30);
   items.forEach((p, i) => {
     const c = cells[i], n = numOf(p, g*4 + i), f = fits[i];
@@ -3996,7 +4037,8 @@ function gridCuaderno(ctx, g, items, hi, H){
     ctx.save(); ctx.shadowColor = 'rgba(40,25,15,.2)'; ctx.shadowBlur = 12*ds; ctx.shadowOffsetY = 3.5*ds; ctx.fillStyle = '#FCFAF5'; ctx.fillRect(r.x - b, r.y - b, r.w + 2*b, r.h + 2*b + 2); ctx.restore();
     drawCover(ctx, srcOf(p, hi), r, 0);
     if (G.tape) colorTape(ctx, r.x + r.w/2, r.y - b, -2 - tilts[i]*2.2, 86, 23, lightestOf(p));
-    const my = r.y + r.h + b + 27;
+    gridTBDraw(ctx, TB[i], c.x + 2, r.y + r.h + b + 2, 'left', S.ink, TO);
+    const my = r.y + r.h + b + 27 + tH;
     ctx.fillStyle = S.ink; ctx.textAlign = 'left'; ctx.font = `700 20px ${HAND}`; ctx.fillText('N.º ' + pad3(n), c.x + 2, my);
     ctx.save(); ctx.globalAlpha = 0.8; ctx.font = `400 15.5px ${HAND}`; ctx.fillText(placeOf(p), c.x + 2, my + 17); if (p.date) ctx.fillText(String(p.date).replace(/[-/.]/g, '·'), c.x + 2, my + 33); ctx.restore();
     gridSwatches(ctx, p, n, c.x + c.w - 2, my - 16, 44, 33, 6, 6.8);
@@ -4008,7 +4050,8 @@ function gridCuaderno(ctx, g, items, hi, H){
 }
 function gridEstampillas(ctx, g, items, hi, H){
   const G = state.grid, ink = gridInk(), top = gridHeadCover(ctx, g, ink, 50), foot = G.foot !== 'nada', ds = devScale(ctx);
-  const y0 = top + 30, y1 = H - (foot ? 84 : 42), cells = gridCells(items.length, 46, D - 46, y0, y1, 30, 30), pad = 12, capH = 22, barH = 40, yr = gridYear(items);
+  const y0 = top + 30, y1 = H - (foot ? 84 : 42), cells = gridCells(items.length, 46, D - 46, y0, y1, 30, 30), pad = 12, barH = 40, yr = gridYear(items);
+  const TO = {size:11, min:8.6, max:1, family:SLAB, weight:500}, tH = gridTBH(items.map((p, i) => gridTB(ctx, gridPT(p), cells[i].w - 2*pad, TO)), 3), capH = 22 + tH;
   const markInk = S.ink, red = G.ink === 'tinta' ? '#C8352B' : legibleOn(ink, '#FBF7EE', 3);
   const fits = items.map((p, i) => fitPhoto(p, cells[i].w - 2*pad, cells[i].h - barH - pad - capH)); settleRows(cells, fits.map(f => f.h + pad + capH + barH), y0, y1, 30);
   /* 1) el papel troquelado de cada estampilla */
@@ -4024,6 +4067,7 @@ function gridEstampillas(ctx, g, items, hi, H){
   items.forEach((p, i) => {
     const a = st[i], n = numOf(p, g*4 + i), r = {x:a.x + pad, y:a.y + pad, w:a.f.w, h:a.f.h};
     drawCover(ctx, srcOf(p, hi), r, 0);
+    gridTBDraw(ctx, gridTB(ctx, gridPT(p), r.w - 6, TO), r.x + r.w/2, r.y + r.h + 5, 'center', '#2B221D', TO);
     ctx.save(); ctx.fillStyle = '#2B221D'; ctx.font = `500 7.4px ${MONO}`; spacedAt(ctx, `${(placeOf(p) || '').toUpperCase()} · ${yr}`, r.x + 1, a.y + a.h - 8.5, 1.3, 'left');
     ctx.fillStyle = red; ctx.font = `500 9.6px ${MONO}`; ctx.textAlign = 'right'; ctx.fillText('N.º ' + pad3(n), r.x + r.w - 1, a.y + a.h - 8); ctx.restore();
     const cols = (p.colors || []).slice(0, 3), bw = 40, bh = 20, bx = a.x + (a.w - cols.length*bw)/2, by = a.y + a.h + 13;
@@ -4038,7 +4082,8 @@ function gridEstampillas(ctx, g, items, hi, H){
 /* Galería: paspartú blanco con filete y una cartela de museo que asoma en la esquina */
 function gridGaleria(ctx, g, items, hi, H){
   const G = state.grid, ink = gridInk(), top = gridHeadCover(ctx, g, ink, 50), foot = G.foot !== 'nada', ds = devScale(ctx);
-  const y0 = top + 34, y1 = H - (foot ? 84 : 42), cells = gridCells(items.length, 44, D - 44, y0, y1, 30, 30), mat = 15, metaH = 40;
+  const y0 = top + 34, y1 = H - (foot ? 84 : 42), cells = gridCells(items.length, 44, D - 44, y0, y1, 30, 30), mat = 15;
+  const TO = {size:10.8, min:9, max:2, family:SLAB, weight:500}, CW = 142, TB = items.map(p => gridTB(ctx, gridPT(p), CW - 22, TO)), metaH = 40 + gridTBH(TB, 8);
   const fits = items.map((p, i) => fitPhoto(p, cells[i].w - 2*mat - 6, cells[i].h - metaH - 2*mat)); settleRows(cells, fits.map(f => f.h + 2*mat + metaH), y0, y1, 30);
   items.forEach((p, i) => {
     const c = cells[i], n = numOf(p, g*4 + i), f = fits[i], mw = f.w + 2*mat, mh = f.h + 2*mat, mx = c.x + (c.w - mw)/2, my = c.y;
@@ -4048,12 +4093,14 @@ function gridGaleria(ctx, g, items, hi, H){
     drawCover(ctx, srcOf(p, hi), r, 0);
     ctx.save(); ctx.strokeStyle = 'rgba(0,0,0,.22)'; ctx.lineWidth = 0.8; ctx.strokeRect(r.x, r.y, r.w, r.h); ctx.restore();
     /* cartela */
-    const cw = 104, ch = 40, cx = mx + mw - cw + 10, cy = my + mh - 13;
+    const hasT = !!gridPT(p), cw = hasT ? Math.max(104, Math.min(CW, mw - 64)) : 104, cx = mx + mw - cw + 10, cy = my + mh - 13;
+    const tb = hasT ? gridTB(ctx, gridPT(p), cw - 22, TO) : null, dy = tb ? Math.ceil(tb.h) + 8 : 0, ch = 40 + dy, oy = cy + dy;
     ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.2)'; ctx.shadowBlur = 6*ds; ctx.shadowOffsetY = 2*ds; ctx.fillStyle = '#FFFFFF'; ctx.fillRect(cx, cy, cw, ch); ctx.restore();
     ctx.save(); ctx.fillStyle = ink; ctx.fillRect(cx, cy, 3, ch); ctx.fillStyle = S.ink; ctx.textAlign = 'left';
-    ctx.font = `500 11.5px ${MONO}`; ctx.fillText('N.º ' + pad3(n), cx + 12, cy + 15);
-    ctx.globalAlpha = 0.78; ctx.font = `400 8.4px ${MONO}`; spacedAt(ctx, (placeOf(p) || '').toUpperCase().slice(0, 17), cx + 12, cy + 27, 1.1, 'left');
-    if (p.date) ctx.fillText(String(p.date), cx + 12, cy + 37); ctx.restore();
+    if (tb){ gridTBDraw(ctx, tb, cx + 12, cy + 6, 'left', S.ink, TO); ctx.globalAlpha = 0.22; ctx.fillRect(cx + 12, oy - 4, cw - 22, 0.8); ctx.globalAlpha = 1; }
+    ctx.font = `500 11.5px ${MONO}`; ctx.fillText('N.º ' + pad3(n), cx + 12, oy + 15);
+    ctx.globalAlpha = 0.78; ctx.font = `400 8.4px ${MONO}`; spacedAt(ctx, (placeOf(p) || '').toUpperCase().slice(0, 17), cx + 12, oy + 27, 1.1, 'left');
+    if (p.date) ctx.fillText(String(p.date), cx + 12, oy + 37); ctx.restore();
     gridSwatches(ctx, p, n, mx + 74, my + mh + 12, 22, 16, 4, 0);
   });
   gridFootCover(ctx, H, items);
@@ -4061,7 +4108,8 @@ function gridGaleria(ctx, g, items, hi, H){
 /* Negativos: tiras de película con perforaciones, números de cuadro y texto de borde */
 function gridNegativos(ctx, g, items, hi, H){
   const G = state.grid, ink = gridInk(), top = gridHeadCover(ctx, g, ink, 50), foot = G.foot !== 'nada', ds = devScale(ctx);
-  const y0 = top + 30, y1 = H - (foot ? 84 : 42), rows = Math.ceil(items.length/2), sx = 36, sw = D - 72, band = 25, metaH = 38, gapR = 22;
+  const y0 = top + 30, y1 = H - (foot ? 84 : 42), rows = Math.ceil(items.length/2), sx = 36, sw = D - 72, band = 25, gapR = 22;
+  const TO = {size:11.6, min:9.4, max:1, family:SANS, weight:500}, tH = gridTBH(items.map(p => gridTB(ctx, gridPT(p), (sw - 46)/2, TO)), 5), metaH = 38 + tH;
   const fh = Math.min((sw - 2*16 - 14)/2/1.5, (y1 - y0 - gapR*(rows - 1))/rows - 2*band - metaH - 6), fw = Math.min((sw - 2*16 - 14)/2, fh*1.5);
   const used = rows*(fh + 2*band + metaH) + gapR*(rows - 1), yy = y0 + Math.max(0, (y1 - y0 - used)/2), orange = '#E39A32';
   for (let r = 0; r < rows; r++){
@@ -4078,7 +4126,8 @@ function gridNegativos(ctx, g, items, hi, H){
       drawCover(ctx, srcOf(p, hi), {x:fx + (fw - f.w)/2, y:fy + (fh - f.h)/2, w:f.w, h:f.h}, 0);
       ctx.save(); ctx.fillStyle = orange; ctx.globalAlpha = 0.95; ctx.font = `500 7.4px ${MONO}`; ctx.textAlign = 'left';
       ctx.fillText('▸ ' + (g*4 + i + 1), fx + 1, sy + sh - 14); ctx.textAlign = 'right'; ctx.fillText((g*4 + i + 1) + 'A', fx + fw - 1, sy + sh - 14); ctx.restore();
-      const my = sy + sh + 17, c = {x:fx, w:fw};
+      gridTBDraw(ctx, gridTB(ctx, gridPT(p), fw, TO), fx, sy + sh + 5, 'left', S.ink, TO);
+      const my = sy + sh + 17 + tH, c = {x:fx, w:fw};
       ctx.fillStyle = S.ink; ctx.textAlign = 'left'; ctx.font = `500 11.4px ${MONO}`; ctx.fillText('N.º ' + pad3(n), fx, my);
       ctx.save(); ctx.globalAlpha = 0.72; ctx.font = `400 9.4px ${SANS}`; ctx.fillText([placeOf(p), p.date].filter(Boolean).join(' · '), fx, my + 14); ctx.restore();
       gridSwatches(ctx, p, n, fx + fw, my - 12, 24, 17, 4, 0);
@@ -4097,7 +4146,8 @@ function airBorder(ctx, x, y, w, h, t, a, b){
 }
 function gridAerea(ctx, g, items, hi, H){
   const G = state.grid, ink = gridInk(), top = gridHeadCover(ctx, g, ink, 50), foot = G.foot !== 'nada', ds = devScale(ctx);
-  const y0 = top + 32, y1 = H - (foot ? 84 : 42), cells = gridCells(items.length, 46, D - 46, y0, y1, 28, 28), bt = 7, pad = 9, capH = 46;
+  const y0 = top + 32, y1 = H - (foot ? 84 : 42), cells = gridCells(items.length, 46, D - 46, y0, y1, 28, 28), bt = 7, pad = 9;
+  const TO = {size:11.4, min:9, max:1, family:SLAB, weight:500}, tH = gridTBH(items.map((p, i) => gridTB(ctx, gridPT(p), cells[i].w - 2*(bt + pad), TO)), 4), capH = 46 + tH;
   const red = '#C8352B', blue = '#2F5D9B', fits = items.map((p, i) => fitPhoto(p, cells[i].w - 2*(bt + pad), cells[i].h - capH - 2*(bt + pad)));
   settleRows(cells, fits.map(f => f.h + 2*(bt + pad) + capH), y0, y1, 28);
   items.forEach((p, i) => {
@@ -4105,7 +4155,8 @@ function gridAerea(ctx, g, items, hi, H){
     ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.26)'; ctx.shadowBlur = 9*ds; ctx.shadowOffsetY = 3.5*ds; ctx.fillStyle = '#FBF7EE'; ctx.fillRect(cx, cy, cw, ch); ctx.restore();
     airBorder(ctx, cx, cy, cw, ch, bt, red, blue);
     const r = {x:cx + bt + pad, y:cy + bt + pad, w:f.w, h:f.h}; drawCover(ctx, srcOf(p, hi), r, 0);
-    const by = r.y + r.h + 17, xl = r.x, xr = r.x + r.w;
+    gridTBDraw(ctx, gridTB(ctx, gridPT(p), r.w, TO), r.x, r.y + r.h + 5, 'left', '#2B221D', TO);
+    const by = r.y + r.h + 17 + tH, xl = r.x, xr = r.x + r.w;
     ctx.save(); ctx.textAlign = 'left'; ctx.fillStyle = red; ctx.font = `500 7.2px ${MONO}`; spacedAt(ctx, 'POR AVIÓN', xl, by, 1.8, 'left');
     ctx.fillStyle = '#2B221D'; ctx.globalAlpha = 0.85; ctx.font = `400 8.6px ${MONO}`; spacedAt(ctx, (placeOf(p) || '').toUpperCase().slice(0, 18), xl, by + 12, 1, 'left');
     if (p.date){ ctx.globalAlpha = 0.6; ctx.font = `400 8px ${MONO}`; ctx.fillText(String(p.date), xl, by + 23); } ctx.restore();
@@ -5671,6 +5722,7 @@ function syncGrid(){
   $('#gdInkRow').hidden = $('#gdFootRow').hidden = !designed;
   $('#gdInkColor').value = G.inkColor; $('#gdBgColor').value = G.bgColor;
   $('#gdTape').checked = G.tape; $('#gdSeal').checked = G.seal; $('#gdPm').checked = G.pm;
+  $('#gdPTitle').checked = G.ptitle; $('#gdPTEn').checked = G.pten; $('#gdPTEnRow').hidden = !G.ptitle; $('#gdPTBox').hidden = !designed;
   $('#gdTapeRow').hidden = $('#gdSealRow').hidden = look !== 'cuaderno'; $('#gdPmRow').hidden = look !== 'estampillas'; $('#gdDecoBox').hidden = look !== 'cuaderno' && look !== 'estampillas';
 }
 function gridChanged(){ syncGrid(); showOut(o => o.kind === 'grid'); scheduleOut(); }
@@ -5679,7 +5731,7 @@ document.querySelectorAll('select[data-gsel]').forEach(x => x.addEventListener('
 $('#gdFromCover').addEventListener('change', e => { state.grid.fromCover = e.target.checked; gridChanged(); });
 $('#gdInkColor').addEventListener('input', e => { state.grid.inkColor = e.target.value; state.grid.ink = 'otro'; gridChanged(); });
 $('#gdBgColor').addEventListener('input', e => { state.grid.bgColor = e.target.value; state.grid.bg = 'otro'; gridChanged(); });
-[['gdTape', 'tape'], ['gdSeal', 'seal'], ['gdPm', 'pm']].forEach(([id, k]) => $('#' + id).addEventListener('change', e => { state.grid[k] = e.target.checked; gridChanged(); }));
+[['gdTape', 'tape'], ['gdSeal', 'seal'], ['gdPm', 'pm'], ['gdPTitle', 'ptitle'], ['gdPTEn', 'pten']].forEach(([id, k]) => $('#' + id).addEventListener('change', e => { state.grid[k] = e.target.checked; gridChanged(); }));
 $('#gridTitles').addEventListener('click', e => {
   const b = e.target.closest('[data-useplace]'); if (!b) return; const g = +b.dataset.useplace;
   const pl = (state.photos[g*4] ? placeOf(state.photos[g*4]) : state.place).trim();
