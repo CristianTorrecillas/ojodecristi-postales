@@ -451,6 +451,9 @@ textarea.inp{height:auto;padding:8px 10px;font-family:var(--mono);font-size:14px
 /* panel de diseño ordenado (15/10/2026) */
 .design [hidden]{display:none !important}
 .presetbar,.presetsave{display:flex;gap:8px;align-items:center}
+.fmtrow{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 0 12px}
+.fmtrow .fmt-note{color:var(--muted);font-size:12.5px}
+.pane-intro{margin-bottom:4px}
 .presetbar select,.presetsave .inp{flex:1;height:36px;min-width:0}
 .pmenu{position:relative;flex:1;min-width:0}
 .pmbtn{width:100%;height:36px;display:flex;align-items:center;justify-content:space-between;gap:8px;text-align:left;cursor:pointer}
@@ -1091,15 +1094,25 @@ textarea.inp.cap-text{width:100%;min-height:150px;font-family:var(--sans);font-s
           <button type="button" id="presetCancel" class="linkbtn">Cancelar</button>
         </div>
 
+        <div class="fmtrow" id="fmtRow">
+          <span class="lbl">Formato</span>
+          <div class="chips segc" role="radiogroup" aria-label="Formato" data-radio="format" title="Es uno solo para todo el carrusel: Instagram recorta todas las imágenes a la proporción de la primera">
+            <button type="button" role="radio" data-v="1:1">1:1</button>
+            <button type="button" role="radio" data-v="4:5">4:5</button>
+            <button type="button" role="radio" data-v="3:4">3:4</button>
+          </div>
+          <span class="fmt-note">Uno para todo el carrusel</span>
+        </div>
+
         <div class="tabs" role="tablist" aria-label="Ajustes">
-          <button type="button" role="tab" data-tab="estilo" aria-selected="true">Estilo</button>
-          <button type="button" role="tab" data-tab="postal" aria-selected="false">Postal</button>
-          <button type="button" role="tab" data-tab="detalles" aria-selected="false">Detalles</button>
-          <button type="button" role="tab" data-tab="portada" aria-selected="false">Portada</button>
+          <button type="button" role="tab" data-tab="portada" aria-selected="true">Portada</button>
           <button type="button" role="tab" data-tab="grilla" aria-selected="false">Grilla</button>
+          <button type="button" role="tab" data-tab="estilo" aria-selected="false">Estilo</button>
+          <button type="button" role="tab" data-tab="postal" aria-selected="false">Postales</button>
           <button type="button" role="tab" data-tab="receta" aria-selected="false">Receta</button>
         </div>
 
+        <!-- Estilo: lo que vale para todas las imágenes (papel, fondo, sello, letra y forma de los colores) -->
         <!-- Estilo: cómo se ve el papel -->
         <div class="pane" data-pane="estilo">
           <div class="opt stack">
@@ -1161,7 +1174,7 @@ textarea.inp.cap-text{width:100%;min-height:150px;font-family:var(--sans);font-s
           </div>
           <p class="subhint dup" id="stampHint">En cada postal elige una tinta de sello que contraste con el fondo y repita un tono de la foto. Foto por foto lo podés cambiar en «Esta foto».</p>
           <div class="opt">
-            <span class="lbl">Títulos</span>
+            <span class="lbl">Letra</span>
             <div class="chips segc" role="radiogroup" aria-label="Letra de los títulos" data-radio="titleFont">
               <button type="button" role="radio" data-v="mono">Máquina</button>
               <button type="button" role="radio" data-v="hand">A mano</button>
@@ -1170,16 +1183,44 @@ textarea.inp.cap-text{width:100%;min-height:150px;font-family:var(--sans);font-s
               <button type="button" role="radio" data-v="slab">Slab</button>
             </div>
           </div>
-          <div class="opt" data-ifpostal>
-            <span class="lbl">Tamaño</span>
-            <div class="chips segc" role="radiogroup" aria-label="Tamaño del título" data-radio="titleSize">
-              <button type="button" role="radio" data-v="chico">Chico</button>
-              <button type="button" role="radio" data-v="medio">Medio</button>
-              <button type="button" role="radio" data-v="grande">Grande</button>
+          <h3 class="sect">Colores de cada foto</h3>
+          <div class="opt stack">
+            <span class="lbl">Forma</span>
+            <div id="shapes" class="shapes" role="radiogroup" aria-label="Forma de los colores"></div>
+          </div>
+          <p class="subhint">La misma forma en las postales y en la grilla.</p>
+        </div>
+
+        <!-- Postales: solo para la imagen de postal de cada foto -->
+        <div class="pane" data-pane="postal">
+          <p class="subhint pane-intro">La imagen de postal de cada foto. La portada y la grilla se arman en sus pestañas.</p>
+          <div class="opt">
+            <span class="lbl">Tipo</span>
+            <div class="chips segc" role="radiogroup" aria-label="Tipo de postal" data-radio="comp">
+              <button type="button" role="radio" data-v="postal">Postal</button>
+              <button type="button" role="radio" data-v="ficha">Ficha</button>
+              <button type="button" role="radio" data-v="sola" title="Solo la foto con su marco sobre el fondo, sin colores ni sello">Solo foto</button>
             </div>
-            <div class="chips segc" role="radiogroup" aria-label="Mayúsculas en el título" data-radio="titleCaps">
-              <button type="button" role="radio" data-v="normal">Abc</button>
-              <button type="button" role="radio" data-v="mayus">ABC</button>
+          </div>
+          <div class="opt" data-ifpostal>
+            <span class="lbl">Foto</span>
+            <div class="chips segc" role="radiogroup" aria-label="Tamaño de la foto" data-radio="photoSize">
+              <button type="button" role="radio" data-v="grande">Grande</button>
+              <button type="button" role="radio" data-v="normal">Pequeña</button>
+            </div>
+          </div>
+          <div class="opt" data-ifpostal>
+            <span class="lbl">Título</span>
+            <div class="optrow">
+              <div class="chips segc" role="radiogroup" aria-label="Tamaño del título" data-radio="titleSize">
+                <button type="button" role="radio" data-v="chico">Chico</button>
+                <button type="button" role="radio" data-v="medio">Medio</button>
+                <button type="button" role="radio" data-v="grande">Grande</button>
+              </div>
+              <div class="chips segc" role="radiogroup" aria-label="Mayúsculas en el título" data-radio="titleCaps">
+                <button type="button" role="radio" data-v="normal">Abc</button>
+                <button type="button" role="radio" data-v="mayus">ABC</button>
+              </div>
             </div>
           </div>
           <div class="opt dup" data-ifpostal>
@@ -1217,38 +1258,6 @@ textarea.inp.cap-text{width:100%;min-height:150px;font-family:var(--sans);font-s
             </select>
           </div>
           <p class="subhint dup" data-ifpostal>Foto por foto la podés mover distinto, y ajustar fino, en «Esta foto».</p>
-        </div>
-
-        <!-- Postal: tamaño y orden de las cosas -->
-        <div class="pane" data-pane="postal">
-          <div class="opt">
-            <span class="lbl">Formato</span>
-            <div class="chips segc" role="radiogroup" aria-label="Formato" data-radio="format" title="Es uno solo para todo el carrusel: Instagram recorta todas las imágenes a la proporción de la primera">
-              <button type="button" role="radio" data-v="1:1">1:1</button>
-              <button type="button" role="radio" data-v="4:5">4:5</button>
-              <button type="button" role="radio" data-v="3:4">3:4</button>
-            </div>
-          </div>
-          <div class="opt">
-            <span class="lbl">Tipo</span>
-            <div class="chips segc" role="radiogroup" aria-label="Tipo de postal" data-radio="comp">
-              <button type="button" role="radio" data-v="postal">Postal</button>
-              <button type="button" role="radio" data-v="ficha">Ficha</button>
-              <button type="button" role="radio" data-v="sola" title="Solo la foto con su marco sobre el fondo, sin colores ni sello">Solo foto</button>
-            </div>
-          </div>
-          <div class="opt" data-ifpostal>
-            <span class="lbl">Foto</span>
-            <div class="chips segc" role="radiogroup" aria-label="Tamaño de la foto" data-radio="photoSize">
-              <button type="button" role="radio" data-v="grande">Grande</button>
-              <button type="button" role="radio" data-v="normal">Pequeña</button>
-            </div>
-          </div>
-          <h3 class="sect">Colores</h3>
-          <div class="opt stack">
-            <span class="lbl">Forma</span>
-            <div id="shapes" class="shapes" role="radiogroup" aria-label="Forma de los colores"></div>
-          </div>
           <div class="opt dup" data-ifpostal>
             <span class="lbl">Tamaño</span>
             <div class="chips segc" role="radiogroup" aria-label="Tamaño de los colores" data-radio="swSize">
@@ -1268,117 +1277,121 @@ textarea.inp.cap-text{width:100%;min-height:150px;font-family:var(--sans);font-s
             </div>
           </div>
           <p class="subhint dup" data-ifpostal>Vale para todas las fotos. <b>Auto</b> pone los colores al costado en las verticales y abajo en las horizontales. Para cambiar una sola, hacelo en «Esta foto».</p>
-        </div>
-
-        <!-- Detalles: adornos y extras -->
-        <div class="pane" data-pane="detalles">
-          <div class="opt">
-            <label class="lbl" for="frameSel">Marco</label>
-            <select id="frameSel" class="inp" data-sel="frame">
-              <option value="fina">Línea fina</option>
-              <option value="blanca">Borde blanco</option>
-              <option value="sombra">Copia con sombra</option>
-              <option value="negativo">Negativo</option>
-              <option value="ninguno">Sin marco</option>
-            </select>
-          </div>
-          <div class="opt">
-            <label class="lbl" for="decoSel">Decoración</label>
-            <select id="decoSel" class="inp">
-              <optgroup label="Nuevas">
-                <option value="troquelado">Estampilla troquelada</option>
-                <option value="cortes">Marcas de imprenta</option>
-                <option value="cinta-color">Cinta del color de la foto</option>
-                <option value="paspartu">Paspartú de galería</option>
-              </optgroup>
-              <optgroup label="Anteriores">
-                <option value="cintas-clip">Cintas y clips (original)</option>
-                <option value="cintas">Solo cintas</option>
-                <option value="clips">Solo clips</option>
-                <option value="esquineros">Esquineros de álbum</option>
-                <option value="chinches">Chinches</option>
-                <option value="broches">Broches de madera e hilo</option>
-              </optgroup>
-              <option value="ninguno">Sin decoración</option>
-            </select>
-          </div>
-          <div class="opt" id="decoPostalRow">
-            <span class="lbl"></span>
-            <label class="check"><input type="checkbox" id="decoPostal"> También en las postales</label>
-          </div>
-          <div class="opt">
-            <label class="lbl" for="lineSel">Líneas</label>
-            <select id="lineSel" class="inp" data-sel="lineStyle">
-              <option value="tinta">Las de siempre (tinta)</option>
-              <option value="ondas">Onduladas</option>
-              <option value="renglones">Renglones de carta</option>
-              <option value="trazos">Trazos cortados</option>
-              <option value="ninguna">Sin líneas</option>
-            </select>
-          </div>
-          <div class="opt" id="linePosRow">
-            <label class="lbl" for="linePosSel">Dónde</label>
-            <select id="linePosSel" class="inp" data-sel="linePos">
-              <option value="auto">Automático</option>
-              <option value="izquierda">A la izquierda</option>
-              <option value="sello">Debajo del sello</option>
-              <option value="arriba">Arriba a la derecha</option>
-            </select>
-          </div>
-          <div class="opt">
-            <label class="lbl" for="pmSel">Matasellos</label>
-            <select id="pmSel" class="inp" data-sel="pm">
-              <option value="ninguno">Sin matasellos</option>
-              <option value="circular">Circular de doble aro</option>
-              <option value="rodillo">De rodillo, con barras</option>
-              <option value="octogono">Octogonal</option>
-              <option value="ilustrado">Ilustrado según el lugar</option>
-            </select>
-          </div>
-          <div class="opt dup" id="pmPosRow">
-            <label class="lbl" for="pmPosSel">Dónde</label>
-            <select id="pmPosSel" class="inp" data-sel="pmPos">
-              <option value="libre">Automático: lugar libre cerca del sello</option>
-              <option value="abajo-izq">Abajo a la izquierda</option>
-              <option value="abajo-centro">Abajo al centro</option>
-              <option value="abajo-der">Abajo a la derecha</option>
-              <option value="arriba-izq">Arriba a la izquierda</option>
-              <option value="arriba-der">Arriba a la derecha</option>
-              <option value="sello">Mordiendo el borde del sello</option>
-              <option value="foto-si">Sobre la foto: esquina de arriba a la izquierda</option>
-              <option value="foto-sd">Sobre la foto: esquina de arriba a la derecha</option>
-              <option value="foto-ii">Sobre la foto: esquina de abajo a la izquierda</option>
-              <option value="foto-id">Sobre la foto: esquina de abajo a la derecha</option>
-            </select>
-          </div>
-          <div class="opt" id="pmIconRow">
-            <label class="lbl" for="pmIconSel">Dibujo</label>
-            <select id="pmIconSel" class="inp" data-sel="pmIcon">
-              <option value="auto">Según el lugar de cada foto</option>
-              <option value="mar">Olas</option>
-              <option value="faro">Faro</option>
-              <option value="montana">Montañas</option>
-              <option value="cactus">Cactus</option>
-              <option value="ciudad">Ciudad</option>
-              <option value="bosque">Bosque</option>
-              <option value="sol">Sol en el horizonte</option>
-            </select>
-          </div>
-          <h3 class="sect">Extras</h3>
-          <div class="checks">
-            <label class="check"><input type="checkbox" id="exCounter"> Numeración a fibrón (1/4, 2/4…)</label>
-            <div class="optsub" id="counterInkRow">
-              <div class="chips segc" role="radiogroup" aria-label="Color del fibrón" data-radio="counterInk">
-                <button type="button" role="radio" data-v="tinta">Tinta</button>
-                <button type="button" role="radio" data-v="sello">Color del sello</button>
-              </div>
-              <label class="colorpick" for="counterColorPick" title="Otro color"><input type="color" id="counterColorPick" value="#1E4595" aria-label="Otro color para la numeración"></label>
+          <details class="more">
+            <summary><span>Marco y decoración</span><span class="more-sum" id="sumMarco"></span></summary>
+            <div class="opt">
+              <label class="lbl" for="frameSel">Marco</label>
+              <select id="frameSel" class="inp" data-sel="frame">
+                <option value="fina">Línea fina</option>
+                <option value="blanca">Borde blanco</option>
+                <option value="sombra">Copia con sombra</option>
+                <option value="negativo">Negativo</option>
+                <option value="ninguno">Sin marco</option>
+              </select>
             </div>
-            <label class="check"><input type="checkbox" id="exFilmdate"> Fecha de rollo sobre la foto</label>
-            <label class="check"><input type="checkbox" id="exIcons"> Íconos en los datos (lugar, fecha, cámara…)</label>
-            <label class="check"><input type="checkbox" id="exBorder"> Borde de correo aéreo</label>
-            <label class="check"><input type="checkbox" id="tilt"> Fotos inclinadas en la grilla</label>
-          </div>
+            <div class="opt">
+              <label class="lbl" for="decoSel">Decoración</label>
+              <select id="decoSel" class="inp">
+                <optgroup label="Nuevas">
+                  <option value="troquelado">Estampilla troquelada</option>
+                  <option value="cortes">Marcas de imprenta</option>
+                  <option value="cinta-color">Cinta del color de la foto</option>
+                  <option value="paspartu">Paspartú de galería</option>
+                </optgroup>
+                <optgroup label="Anteriores">
+                  <option value="cintas-clip">Cintas y clips (original)</option>
+                  <option value="cintas">Solo cintas</option>
+                  <option value="clips">Solo clips</option>
+                  <option value="esquineros">Esquineros de álbum</option>
+                  <option value="chinches">Chinches</option>
+                  <option value="broches">Broches de madera e hilo</option>
+                </optgroup>
+                <option value="ninguno">Sin decoración</option>
+              </select>
+            </div>
+            <div class="opt" id="decoPostalRow">
+              <span class="lbl"></span>
+              <label class="check"><input type="checkbox" id="decoPostal"> También en las postales</label>
+            </div>
+          </details>
+          <details class="more">
+            <summary><span>Líneas y matasellos</span><span class="more-sum" id="sumLineas"></span></summary>
+            <div class="opt">
+              <label class="lbl" for="lineSel">Líneas</label>
+              <select id="lineSel" class="inp" data-sel="lineStyle">
+                <option value="tinta">Las de siempre (tinta)</option>
+                <option value="ondas">Onduladas</option>
+                <option value="renglones">Renglones de carta</option>
+                <option value="trazos">Trazos cortados</option>
+                <option value="ninguna">Sin líneas</option>
+              </select>
+            </div>
+            <div class="opt" id="linePosRow">
+              <label class="lbl" for="linePosSel">Dónde</label>
+              <select id="linePosSel" class="inp" data-sel="linePos">
+                <option value="auto">Automático</option>
+                <option value="izquierda">A la izquierda</option>
+                <option value="sello">Debajo del sello</option>
+                <option value="arriba">Arriba a la derecha</option>
+              </select>
+            </div>
+            <div class="opt">
+              <label class="lbl" for="pmSel">Matasellos</label>
+              <select id="pmSel" class="inp" data-sel="pm">
+                <option value="ninguno">Sin matasellos</option>
+                <option value="circular">Circular de doble aro</option>
+                <option value="rodillo">De rodillo, con barras</option>
+                <option value="octogono">Octogonal</option>
+                <option value="ilustrado">Ilustrado según el lugar</option>
+              </select>
+            </div>
+            <div class="opt dup" id="pmPosRow">
+              <label class="lbl" for="pmPosSel">Dónde</label>
+              <select id="pmPosSel" class="inp" data-sel="pmPos">
+                <option value="libre">Automático: lugar libre cerca del sello</option>
+                <option value="abajo-izq">Abajo a la izquierda</option>
+                <option value="abajo-centro">Abajo al centro</option>
+                <option value="abajo-der">Abajo a la derecha</option>
+                <option value="arriba-izq">Arriba a la izquierda</option>
+                <option value="arriba-der">Arriba a la derecha</option>
+                <option value="sello">Mordiendo el borde del sello</option>
+                <option value="foto-si">Sobre la foto: esquina de arriba a la izquierda</option>
+                <option value="foto-sd">Sobre la foto: esquina de arriba a la derecha</option>
+                <option value="foto-ii">Sobre la foto: esquina de abajo a la izquierda</option>
+                <option value="foto-id">Sobre la foto: esquina de abajo a la derecha</option>
+              </select>
+            </div>
+            <div class="opt" id="pmIconRow">
+              <label class="lbl" for="pmIconSel">Dibujo</label>
+              <select id="pmIconSel" class="inp" data-sel="pmIcon">
+                <option value="auto">Según el lugar de cada foto</option>
+                <option value="mar">Olas</option>
+                <option value="faro">Faro</option>
+                <option value="montana">Montañas</option>
+                <option value="cactus">Cactus</option>
+                <option value="ciudad">Ciudad</option>
+                <option value="bosque">Bosque</option>
+                <option value="sol">Sol en el horizonte</option>
+              </select>
+            </div>
+          </details>
+          <details class="more">
+            <summary><span>Extras</span><span class="more-sum" id="sumExtras"></span></summary>
+            <div class="checks">
+              <label class="check"><input type="checkbox" id="exCounter"> Numeración a fibrón (1/4, 2/4…)</label>
+              <div class="optsub" id="counterInkRow">
+                <div class="chips segc" role="radiogroup" aria-label="Color del fibrón" data-radio="counterInk">
+                  <button type="button" role="radio" data-v="tinta">Tinta</button>
+                  <button type="button" role="radio" data-v="sello">Color del sello</button>
+                </div>
+                <label class="colorpick" for="counterColorPick" title="Otro color"><input type="color" id="counterColorPick" value="#1E4595" aria-label="Otro color para la numeración"></label>
+              </div>
+              <label class="check"><input type="checkbox" id="exFilmdate"> Fecha de rollo sobre la foto</label>
+              <label class="check"><input type="checkbox" id="exIcons"> Íconos en los datos (lugar, fecha, cámara…)</label>
+              <label class="check"><input type="checkbox" id="exBorder"> Borde de correo aéreo</label>
+              <label class="check"><input type="checkbox" id="tilt"> Fotos inclinadas en la grilla</label>
+            </div>
+          </details>
           <details class="more">
             <summary><span>Datos que se ven</span><span class="more-sum" id="datosSum"></span></summary>
             <div class="opt stack">
@@ -1575,7 +1588,7 @@ textarea.inp.cap-text{width:100%;min-height:150px;font-family:var(--sans);font-s
             <label class="check" id="gdSealRow"><input type="checkbox" id="gdSeal"> Sello de goma con el título</label>
             <label class="check" id="gdPmRow"><input type="checkbox" id="gdPm"> Matasellos en la esquina de la primera</label>
           </div>
-          <p class="subhint">Los colores usan la forma elegida en «Postal» → «Colores».</p>
+          <p class="subhint">Los colores usan la forma elegida en «Estilo» → «Colores de cada foto».</p>
         </div>
 
         <!-- Receta -->
@@ -5328,6 +5341,7 @@ function syncDesign(){
   document.body.classList.toggle('pm-on', state.pm !== 'ninguno');
   $('#pmIconRow').hidden = state.pm !== 'ilustrado'; $('#pmPosRow').hidden = state.pm === 'ninguno'; $('#linePosRow').hidden = state.lineStyle === 'ninguna' || state.comp === 'ficha';
   $('#counterInkRow').hidden = !state.extras.counter;
+  syncMoreSums();
   document.querySelectorAll('select[data-sel]').forEach(x => x.value = state[x.dataset.sel]);
   $('#datosSum').textContent = datosSummary();
   state.photos.forEach(p => { const el = document.getElementById('laysum-' + p.id); if (el) el.textContent = laySummary(p); });
@@ -5719,7 +5733,7 @@ $('#gridTitles').addEventListener('input', e => {
   const g = e.target.dataset.g; if (g === undefined) return; state.titles[+g] = e.target.value; scheduleOut();
 });
 /* pestaña Grilla: diseño, título, color, pie, fondo y detalles */
-const GRID_HINT = {clasica:'Las fichas de siempre, con la decoración elegida en «Detalles».', catalogo:'Como la portada: cabecera con OJODECRISTI, fotos derechas con borde blanco y el pie de lugar y fecha.', cuaderno:'Cuaderno de campo: título a mano, fotos un poco torcidas, cinta del color de cada foto y un sello de goma.', estampillas:'Cada foto como estampilla troquelada, con su barra de colores y un matasellos en la esquina.', galeria:'Fotos con paspartú blanco y filete, y una cartela de museo con el número, el lugar y la fecha.', negativos:'Tiras de película con perforaciones y números de cuadro; debajo de cada foto, su número y sus colores.', aerea:'Tarjetas con borde de correo aéreo y una estampilla del color principal de cada foto, con su número.'};
+const GRID_HINT = {clasica:'Las fichas de siempre, con la decoración elegida en «Postales» → «Marco y decoración».', catalogo:'Como la portada: cabecera con OJODECRISTI, fotos derechas con borde blanco y el pie de lugar y fecha.', cuaderno:'Cuaderno de campo: título a mano, fotos un poco torcidas, cinta del color de cada foto y un sello de goma.', estampillas:'Cada foto como estampilla troquelada, con su barra de colores y un matasellos en la esquina.', galeria:'Fotos con paspartú blanco y filete, y una cartela de museo con el número, el lugar y la fecha.', negativos:'Tiras de película con perforaciones y números de cuadro; debajo de cada foto, su número y sus colores.', aerea:'Tarjetas con borde de correo aéreo y una estampilla del color principal de cada foto, con su número.'};
 function syncGrid(){
   const G = state.grid, look = G.look, designed = !!GRID_LOOKS[look];
   document.querySelectorAll('.chips[data-gradio]').forEach(box => box.querySelectorAll('button').forEach(b => b.setAttribute('aria-checked', String(G[box.dataset.gradio] === b.dataset.v))));
@@ -5951,6 +5965,16 @@ document.addEventListener('keydown', e => {
   else if (e.key === 'ArrowLeft'){ selectOut((selK - 1 + n) % n); scrollStrip(selK); e.preventDefault(); }
 });
 const TAB_KEY = 'postales-ojodecristi-tab';
+/* lo que muestra cada sección plegada de «Postales» cuando está cerrada */
+function syncMoreSums(){
+  const opt = id => { const el = $('#' + id); return el && el.selectedIndex >= 0 ? el.options[el.selectedIndex].text.replace(/\s*\(original\)$/, '') : ''; };
+  const set = (id, t) => { const el = $('#' + id); if (el) el.textContent = t; };
+  set('sumMarco', [opt('frameSel'), opt('decoSel')].join(' · '));
+  set('sumLineas', [opt('lineSel'), opt('pmSel')].join(' · '));
+  const n = ['exCounter', 'exFilmdate', 'exIcons', 'exBorder', 'tilt'].filter(id => $('#' + id).checked).length;
+  set('sumExtras', n ? (n === 1 ? '1 activo' : n + ' activos') : 'ninguno');
+}
+document.querySelector('.design').addEventListener('change', () => syncMoreSums());
 function setTab(t){
   document.querySelectorAll('.tabs [data-tab]').forEach(b => { const on = b.dataset.tab === t; b.setAttribute('aria-selected', String(on)); b.tabIndex = on ? 0 : -1; });
   document.querySelectorAll('.design [data-pane]').forEach(el => el.classList.toggle('pane-off', el.dataset.pane !== t));
@@ -5966,7 +5990,7 @@ document.querySelector('.tabs').addEventListener('keydown', e => {
   const bs = [...document.querySelectorAll('.tabs [data-tab]')], i = bs.findIndex(b => b.getAttribute('aria-selected') === 'true');
   const nb = bs[(i + (e.key === 'ArrowRight' ? 1 : -1) + bs.length) % bs.length]; setTab(nb.dataset.tab); nb.focus(); e.preventDefault();
 });
-{ let t = 'estilo'; try { t = localStorage.getItem(TAB_KEY) || t; } catch(e){} if (!['estilo','postal','detalles','portada','grilla','receta'].includes(t)) t = 'estilo'; setTab(t); }
+{ let t = 'portada'; try { t = localStorage.getItem(TAB_KEY) || t; } catch(e){} if (t === 'detalles') t = 'postal'; if (!['portada','grilla','estilo','postal','receta'].includes(t)) t = 'portada'; setTab(t); }
 function placeBar(){
   const bar = $('.bar'), top = $('.top'), views = $('.views');
   if (isWide()){ if (bar.parentNode !== top) top.appendChild(bar); }
