@@ -317,8 +317,9 @@ body.lb-open .mbar{display:none}
 .tabs{display:none;gap:2px;border-bottom:1px solid var(--rule);position:sticky;top:0;background:var(--paper);z-index:3}
 .tabs button{border:0;background:transparent;padding:10px 12px 9px;font-family:var(--sans);font-size:14.5px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
 .tabs button:hover{color:var(--ink)}
-#cvSw button{width:34px;height:30px;padding:0;border-radius:6px}
-#cvSw button[aria-pressed="true"]{outline:2px solid var(--ink);outline-offset:2px}
+#cvSw button,#cvInkSw button,#cvSubInkSw button{width:34px;height:30px;padding:0;border-radius:6px}
+#cvSw button[aria-pressed="true"],#cvInkSw button[aria-pressed="true"],#cvSubInkSw button[aria-pressed="true"]{outline:2px solid var(--ink);outline-offset:2px}
+#cvInkSw button.low,#cvSubInkSw button.low{border-style:dashed}
 .presets .chips button .x{margin-left:8px;opacity:.55;font-size:12px}
 .presets .chips button .x:hover{opacity:1}
 .tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--stamp)}
@@ -460,14 +461,17 @@ textarea.inp{height:auto;padding:8px 10px;font-family:var(--mono);font-size:14px
 .presetbar,.presetsave{display:flex;gap:8px;align-items:center}
 .fmtrow{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 0 12px}
 /* título y subtítulo en contexto, arriba de la vista grande */
-.ctxbar{display:grid;gap:6px;margin:0 0 12px}
+.ctxbar{display:flex;align-items:center;gap:8px;flex:1;min-width:0}
 .ctxbar[hidden]{display:none}
-.ctx-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
-.ctx-k{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-.ctx-fields{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:8px}
-.ctx-fields textarea{resize:none;overflow:hidden;min-height:0;line-height:1.3}
+.ctx-k{flex:none;display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink);white-space:nowrap}
+.ctx-k::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--stamp)}
+.ctxbar textarea{flex:1 1 0;min-width:90px;resize:none;overflow:hidden;min-height:0;line-height:1.3;padding:5px 9px;font-size:13px}
+.ctxbar .linkbtn{flex:none;white-space:nowrap}
+.ctxbar textarea[hidden]{display:none}
 .ctx-t{font-weight:500}
-@media (max-width:640px){.ctx-fields{grid-template-columns:1fr}}
+.out-head.has-ctx{align-items:center}
+.out .out-head.has-ctx>h2,.out .out-head.has-ctx>.count{display:none}
+@media (max-width:640px){.ctxbar{flex-wrap:wrap}.ctxbar textarea{flex-basis:100%}}
 .ctx-note{display:none}
 @media (min-width:1100px){.ctx-moved{display:none !important}.ctx-note{display:block}}
 /* forma de los colores, en la columna de fotos */
@@ -1527,7 +1531,7 @@ textarea.inp.cap-text{width:100%;min-height:150px;font-family:var(--sans);font-s
                   <button type="button" role="radio" data-v="auto">Auto</button>
                   <button type="button" role="radio" data-v="blanco">Blanco</button>
                 </div>
-                <div class="chips" id="cvInkSw" role="group" aria-label="Colores sugeridos para el título"></div>
+                <div class="chips" id="cvInkSw" role="group" aria-label="Colores de la foto para el título"></div>
                 <label class="colorpick" for="cvInkColor"><input type="color" id="cvInkColor" value="#1B1A18"> Elegir</label>
               </div>
             </div>
@@ -1539,7 +1543,7 @@ textarea.inp.cap-text{width:100%;min-height:150px;font-family:var(--sans);font-s
                   <button type="button" role="radio" data-v="titulo">Igual título</button>
                   <button type="button" role="radio" data-v="blanco">Blanco</button>
                 </div>
-                <div class="chips" id="cvSubInkSw" role="group" aria-label="Colores sugeridos para el subtítulo"></div>
+                <div class="chips" id="cvSubInkSw" role="group" aria-label="Colores de la foto para el subtítulo"></div>
                 <label class="colorpick" for="cvSubInkColor"><input type="color" id="cvSubInkColor" value="#1B1A18"> Elegir</label>
               </div>
             </div>
@@ -1677,14 +1681,14 @@ textarea.inp.cap-text{width:100%;min-height:150px;font-family:var(--sans);font-s
       </aside>
 
       <section class="out" aria-labelledby="hOut">
-        <div class="col-head"><h2 id="hOut">Carrusel</h2><span id="outCount" class="count"></span></div>
-        <div class="ctxbar" id="ctxBar" hidden>
-          <div class="ctx-head"><span class="ctx-k" id="ctxKind"></span><button type="button" class="linkbtn" id="ctxPlace">Usar el lugar</button></div>
-          <div class="ctx-fields">
+        <div class="col-head out-head" id="outHead"><h2 id="hOut">Carrusel</h2>
+          <div class="ctxbar" id="ctxBar" hidden>
+            <span class="ctx-k" id="ctxKind"></span>
             <textarea class="inp ctx-t" id="ctxTitle" rows="1" autocomplete="off" aria-label="Título"></textarea>
             <textarea class="inp ctx-s" id="ctxSub" rows="1" autocomplete="off" aria-label="Subtítulo"></textarea>
+            <button type="button" class="linkbtn" id="ctxPlace">Usar el lugar</button>
           </div>
-        </div>
+          <span id="outCount" class="count"></span></div>
         <div class="stage" id="stage">
           <div class="stage-box">
             <button type="button" class="stage-view" id="stageView" aria-label="Vista grande. Arrastrá la foto para reencuadrar o el título para moverlo; tocá para verla en tamaño real"><canvas id="stageC" width="900" height="900"></canvas></button>
@@ -4547,6 +4551,7 @@ function coverTitleInk(p, bgHex, def){
   if (k === 'blanco') return '#FFFFFF';
   if (k === 'otro') return C.inkColor || def;
   if (k === 's1' || k === 's2') return coverInkChoices(p, bgHex)[k === 's1' ? 0 : 1];
+  if (/^c\d+$/.test(k)){ const c = p && p.colors && p.colors[+k.slice(1)]; return c ? c.hex : def; }
   return def;
 }
 /* color del subtítulo: null = automático (tinta de la portada, algo translúcida) */
@@ -4556,6 +4561,7 @@ function coverSubInk(p, bgHex, tink){
   if (k === 'blanco') return '#FFFFFF';
   if (k === 'otro') return C.subInkColor || null;
   if (k === 's1' || k === 's2') return coverInkChoices(p, bgHex)[k === 's1' ? 0 : 1];
+  if (/^c\d+$/.test(k)){ const c = p && p.colors && p.colors[+k.slice(1)]; return c ? c.hex : null; }
   return null;
 }
 const COVER_FRAME = {ninguno:0, sombra:6, fina:5, blanca:11, negativo:26, paspartu:17, troquelado:13};
@@ -5676,12 +5682,13 @@ function renderCoverInk(){
   const box = $('#cvInkSw'); if (!box) return; const C = state.cover, p = coverPhoto();
   $('#cvInkRow').hidden = !C.on || C.look === 'sola';
   if (!p) { box.innerHTML = ''; return; }
-  const bgHex = coverBg(p) || (S && S.paper ? rgbHex(...S.paper) : paperAvg), cs = coverInkChoices(p, bgHex);
-  box.innerHTML = cs.map((h, i) => `<button type="button" data-ink="s${i + 1}" aria-pressed="${C.ink === 's' + (i + 1)}" title="Sugerido ${i + 1}" style="background:${h}"></button>`).join('');
+  const bgHex = coverBg(p) || (S && S.paper ? rgbHex(...S.paper) : paperAvg), cols = p.colors || [];
+  const inkBtns = cur => cols.map((c, i) => { const low = contrastOf(c.hex, bgHex) < 3; return `<button type="button" data-ink="c${i}" aria-pressed="${cur === 'c' + i}"${low ? ' class="low"' : ''} title="${esc(c.name || c.hex)}${low ? ' · poco contraste con el fondo' : ''}" style="background:${c.hex}"></button>`; }).join('');
+  box.innerHTML = inkBtns(C.ink);
   $('#cvInkColor').value = C.ink === 'otro' ? C.inkColor : (C.ink === 'blanco' ? '#FFFFFF' : $('#cvInkColor').value);
   /* subtítulo: solo si hay subtítulo en el diseño con título */
   const sbox = $('#cvSubInkSw'); $('#cvSubInkRow').hidden = $('#cvInkRow').hidden;
-  sbox.innerHTML = cs.map((h, i) => `<button type="button" data-ink="s${i + 1}" aria-pressed="${C.subInk === 's' + (i + 1)}" title="Sugerido ${i + 1}" style="background:${h}"></button>`).join('');
+  sbox.innerHTML = inkBtns(C.subInk);
   $('#cvSubInkColor').value = C.subInk === 'otro' ? C.subInkColor : (C.subInk === 'blanco' ? '#FFFFFF' : $('#cvSubInkColor').value);
 }
 $('#cvSubInkSw').addEventListener('click', e => { const b = e.target.closest('[data-ink]'); if (!b) return; state.cover.subInk = b.dataset.ink; syncCover(); scheduleOut(); });
@@ -6099,19 +6106,19 @@ $('#ctxPlace').addEventListener('click', () => { const b = document.querySelecto
 function ctxTarget(){
   const o = outputs()[selK]; if (!o) return null;
   const cov = {t:'cvTitle', s:'cvSub', ph:['Título (vacío = el lugar)', 'Subtítulo'], place:false};
-  if (o.kind === 'cover') return state.cover.look === 'sola' ? null : Object.assign({kind:'Portada · título y subtítulo'}, cov);
+  if (o.kind === 'cover') return state.cover.look === 'sola' ? null : Object.assign({kind:'Portada'}, cov);
   if (o.kind === 'grid'){
-    if (state.grid.fromCover) return Object.assign({kind:`Grilla ${o.g + 1} · usa el título de la portada`}, cov);
+    if (state.grid.fromCover) return Object.assign({kind:`Grilla ${o.g + 1} · de la portada`}, cov);
     const a = o.g*4 + 1, b = Math.min(state.photos.length, a + 3);
-    return {kind:`Grilla ${o.g + 1} · fotos ${a}–${b}`, t:'gtitle-' + o.g, s:'gsub-' + o.g, ph:['Título de la grilla (vacío = sin título)', 'Subtítulo (ej. en inglés)'], place:true, g:o.g, one:true};
+    return {kind:`Grilla ${o.g + 1}`, tip:`Fotos ${a}–${b}`, t:'gtitle-' + o.g, s:'gsub-' + o.g, ph:['Título de la grilla (vacío = sin título)', 'Subtítulo (ej. en inglés)'], place:true, g:o.g, one:true};
   }
   return null;
 }
 function fitRows(el){ el.rows = Math.min(3, Math.max(1, el.value.split('\n').length)); }
 function syncCtxBar(){
-  const bar = $('#ctxBar'); if (!bar) return; const T = ctxTarget(); bar.hidden = !T; if (!T) return;
+  const bar = $('#ctxBar'); if (!bar) return; const T = ctxTarget(); bar.hidden = !T; $('#outHead').classList.toggle('has-ctx', !!T); if (!T) return;
   bar.dataset.t = T.t; bar.dataset.s = T.s; bar.dataset.one = T.one ? '1' : '';
-  $('#ctxKind').textContent = T.kind;
+  $('#ctxKind').textContent = T.kind; $('#ctxKind').title = T.tip || '';
   const ti = $('#ctxTitle'), si = $('#ctxSub'), ot = document.getElementById(T.t), os = document.getElementById(T.s);
   if (document.activeElement !== ti){ ti.value = ot ? ot.value : ''; fitRows(ti); }
   if (document.activeElement !== si){ si.value = os ? os.value : ''; fitRows(si); }
