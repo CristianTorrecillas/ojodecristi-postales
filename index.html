@@ -4062,13 +4062,15 @@ function gridTBDraw(ctx, b, x, top, align, ink, o){
 }
 function gridCatalogo(ctx, g, items, hi, H){
   const ink = gridInk(), top = gridHeadCover(ctx, g, ink, 50), foot = state.grid.foot !== 'nada', cardOn = gridCardOn();
-  const y0 = top + 34, y1 = H - (foot ? 84 : 42), cells = gridCells(items.length, 40, D - 40, y0, y1, 29, 34), b = 6, ds = devScale(ctx);
+  const y0 = top + 34 + (cardOn ? 10 : 0), y1 = H - (foot ? 84 : 42), cells = gridCells(items.length, 40, D - 40, y0, y1, 29, 34), b = 6, ds = devScale(ctx);
+  /* con recuadro: el contenido se achica un poco para que la cartulina tenga aire alrededor (15 a los lados y arriba, ~20 abajo) */
+  const ext = cardOn ? 18 : 0; if (cardOn) cells.forEach(c => { c.x += 6; c.w -= 12; });
   const TO = {size:13.6, min:10.6, max:2, family:SANS, weight:500}, TB = items.map((p, i) => gridTB(ctx, gridPT(p), cells[i].w, TO)), tH = gridTBH(TB, 5), metaH = 58 + tH;
-  const fits = items.map((p, i) => fitPhoto(p, cells[i].w - 2*b, cells[i].h - metaH - 2*b)); settleRows(cells, fits.map(f => f.h + 2*b + metaH), y0, y1, 34);
+  const fits = items.map((p, i) => fitPhoto(p, cells[i].w - 2*b, cells[i].h - metaH - 2*b - ext)); settleRows(cells, fits.map(f => f.h + 2*b + metaH + ext), y0, y1, 34);
   items.forEach((p, i) => {
     const c = cells[i], n = numOf(p, g*4 + i), f = fits[i];
     const r = {x:c.x + (c.w - f.w)/2, y:c.y + b, w:f.w, h:f.h}, keepS = S;
-    if (cardOn){ const hx = gridCardHex(p), cx0 = c.x - 9, cy0 = c.y - 9, cw0 = c.w + 18, ch0 = f.h + 2*b + metaH + 2;
+    if (cardOn){ const hx = gridCardHex(p), cx0 = c.x - 15, cy0 = c.y - 15, cw0 = c.w + 30, ch0 = f.h + 2*b + metaH + 27;
       ctx.save(); ctx.shadowColor = 'rgba(30,20,10,.18)'; ctx.shadowBlur = 10*ds; ctx.shadowOffsetY = 3*ds; ctx.fillStyle = hx; ctx.fillRect(cx0, cy0, cw0, ch0); ctx.restore();
       cardFill(ctx, cx0, cy0, cw0, ch0, hx, hi, H, true); S = gridCardStyle(p); }
     ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.17)'; ctx.shadowBlur = 11*ds; ctx.shadowOffsetY = 3.2*ds; ctx.fillStyle = '#FFFFFF'; ctx.fillRect(r.x - b, r.y - b, r.w + 2*b, r.h + 2*b); ctx.restore();
