@@ -1533,6 +1533,7 @@ textarea.inp.cap-text{width:100%;min-height:150px;font-family:var(--sans);font-s
                 </div>
                 <div class="chips" id="cvInkSw" role="group" aria-label="Colores de la foto para el título"></div>
                 <label class="colorpick" for="cvInkColor"><input type="color" id="cvInkColor" value="#1B1A18"> Elegir</label>
+                <button type="button" class="btn btn-ghost mini eyedrop" data-eyedrop="ink" title="Tocá cualquier punto de la foto y el título toma ese color">Tomar de la foto</button>
               </div>
             </div>
             <div class="opt" id="cvSubInkRow">
@@ -1545,6 +1546,7 @@ textarea.inp.cap-text{width:100%;min-height:150px;font-family:var(--sans);font-s
                 </div>
                 <div class="chips" id="cvSubInkSw" role="group" aria-label="Colores de la foto para el subtítulo"></div>
                 <label class="colorpick" for="cvSubInkColor"><input type="color" id="cvSubInkColor" value="#1B1A18"> Elegir</label>
+                <button type="button" class="btn btn-ghost mini eyedrop" data-eyedrop="subInk" title="Tocá cualquier punto de la foto y el subtítulo toma ese color">Tomar de la foto</button>
               </div>
             </div>
             <div class="opt" id="cvSignRow">
@@ -1553,7 +1555,8 @@ textarea.inp.cap-text{width:100%;min-height:150px;font-family:var(--sans);font-s
             </div>
             <div class="opt" id="cvColorRow">
               <span class="lbl"></span>
-              <label class="colorpick" for="cvColor"><input type="color" id="cvColor" value="#F3EFE6"> Elegir color</label>
+              <div class="optrow"><label class="colorpick" for="cvColor"><input type="color" id="cvColor" value="#F3EFE6"> Elegir color</label>
+              <button type="button" class="btn btn-ghost mini eyedrop" data-eyedrop="bg" title="Tocá cualquier punto de la foto y el fondo toma ese color">Tomar de la foto</button></div>
             </div>
           </div>
         </div>
@@ -4893,14 +4896,14 @@ function pickSample(fx, fy){
   return rgbHex(R/n, G/n, B/n);
 }
 function pickShow(hex){ $('#pickSw').style.background = hex; $('#pickHex').textContent = hex; }
-function openPicker(p, k){
-  const d = $('#pickDlg'), c = $('#pickC'), src = p.prev; PICK = {p, k, down:false};
-  $('#pickTitle').textContent = `Color ${k + 1} · ${p.colors[k].name || ''}`.trim();
+function openPicker(p, k, opt){
+  const d = $('#pickDlg'), c = $('#pickC'), src = p.prev; PICK = {p, k, down:false, cb:opt && opt.cb};
+  $('#pickTitle').textContent = opt ? opt.title : `Color ${k + 1} · ${p.colors[k].name || ''}`.trim();
   const maxW = Math.min(window.innerWidth - 40, 1200), maxH = window.innerHeight - 190, s = Math.min(maxW/src.width, maxH/src.height), dpr = Math.min(2, window.devicePixelRatio || 1);
   c.style.width = Math.round(src.width*s) + 'px'; c.style.height = Math.round(src.height*s) + 'px';
   c.width = Math.round(src.width*s*dpr); c.height = Math.round(src.height*s*dpr);
   const x = c.getContext('2d'); x.imageSmoothingQuality = 'high'; x.drawImage(src, 0, 0, c.width, c.height);
-  pickShow(p.colors[k].hex); $('#pickLoupe').hidden = true;
+  pickShow(opt ? opt.cur : p.colors[k].hex); $('#pickLoupe').hidden = true;
   if (d.showModal) d.showModal(); else d.setAttribute('open', '');
 }
 function pickAt(e){
@@ -4915,7 +4918,9 @@ function pickAt(e){
   return {fx, fy, hex};
 }
 function pickChoose(e){
-  const {fx, fy, hex} = pickAt(e), {p, k} = PICK, col = p.colors[k];
+  const {fx, fy, hex} = pickAt(e), {p, k, cb} = PICK;
+  if (cb){ $('#pickDlg').close(); cb(hex); toast('Color tomado de la foto: ' + hex.toUpperCase()); return; }
+  const col = p.colors[k];
   col.hex = hex; col.pt = {x:fx, y:fy}; col.sugg = null; col.name = freshName(p, k); col.auto = true;
   const nameEl = document.getElementById(`name-${p.id}-${k}`); if (nameEl) nameEl.value = col.name;
   const chipEl = document.getElementById(`chip-${p.id}-${k}`); if (chipEl){ chipEl.style.setProperty('--c', col.hex); chipEl.title = col.hex; }
@@ -5695,6 +5700,12 @@ $('#cvSubInkSw').addEventListener('click', e => { const b = e.target.closest('[d
 $('#cvSubInkColor').addEventListener('input', e => { state.cover.subInkColor = e.target.value; state.cover.subInk = 'otro'; syncCover(); scheduleOut(); });
 $('#cvInkSw').addEventListener('click', e => { const b = e.target.closest('[data-ink]'); if (!b) return; state.cover.ink = b.dataset.ink; syncCover(); scheduleOut(); });
 $('#cvInkColor').addEventListener('input', e => { state.cover.inkColor = e.target.value; state.cover.ink = 'otro'; syncCover(); scheduleOut(); });
+/* cuentagotas: tocar cualquier punto de la foto de la portada */
+document.querySelectorAll('[data-eyedrop]').forEach(b => b.addEventListener('click', () => {
+  const C = state.cover, p = coverPhoto(), w = b.dataset.eyedrop; if (!p || !p.prev) return;
+  const T = {ink:['el título', 'inkColor', 'ink', C.inkColor], subInk:['el subtítulo', 'subInkColor', 'subInk', C.subInkColor], bg:['el fondo', 'color', 'bg', C.color]}[w];
+  openPicker(p, 0, {title:`Color para ${T[0]} · tocá la foto`, cur:T[3], cb:hex => { C[T[1]] = hex; C[T[2]] = 'otro'; syncCover(); scheduleOut(); }});
+}));
 [['cvCz', 'cz'], ['cvCx', 'cx'], ['cvCy', 'cy']].forEach(([id, k]) => $('#' + id).addEventListener('input', e => { state.cover[k] = +e.target.value; scheduleOut(); }));
 function syncCover(){
   const C = state.cover; renderCoverSwatches(); renderCoverInk();
