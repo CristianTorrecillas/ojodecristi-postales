@@ -319,7 +319,16 @@ body.lb-open .mbar{display:none}
 .tabs button:hover{color:var(--ink)}
 #cvSw button,#cvInkSw button,#cvSubInkSw button{width:34px;height:30px;padding:0;border-radius:6px}
 #cvSw button[aria-pressed="true"],#cvInkSw button[aria-pressed="true"],#cvSubInkSw button[aria-pressed="true"]{outline:2px solid var(--ink);outline-offset:2px}
-#cvInkSw button.low,#cvSubInkSw button.low{border-style:dashed}
+#cvInkSw button.low,#cvSubInkSw button.low,#gdInkSw button.low{border-style:dashed}
+#gdInkSw{flex-wrap:wrap;gap:5px}
+#gdInkSw button{width:26px;height:24px;min-height:0;padding:0;border-radius:5px}
+#gdInkSw button[aria-pressed="true"]{outline:2px solid var(--ink);outline-offset:2px}
+.ed-paper{margin:10px 0 4px}
+.ed-paper .chips{flex-wrap:wrap;gap:6px}
+.ed-paper .chips button.swb{width:34px;height:30px;min-height:0;padding:0;border-radius:6px}
+.ed-paper .chips button.swb-auto{width:auto;padding:0 11px 0 31px !important;position:relative;font-size:13px;background:var(--paper);color:var(--ink)}
+.ed-paper .chips button.swb-auto::before{content:"";position:absolute;left:6px;top:6px;width:18px;height:16px;border-radius:4px;background:var(--c);border:1px solid rgba(0,0,0,.12)}
+.ed-paper .chips button.swb[aria-pressed="true"]{outline:2px solid var(--ink);outline-offset:2px}
 .presets .chips button .x{margin-left:8px;opacity:.55;font-size:12px}
 .presets .chips button .x:hover{opacity:1}
 .tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--stamp)}
@@ -642,6 +651,7 @@ body::before{content:"";position:fixed;top:0;left:0;right:0;height:5px;z-index:5
 .swb[aria-pressed="true"]{outline:2px solid var(--ink);outline-offset:2px}
 .lay-bg{display:none !important}
 body.bg-cada .lay-bg{display:flex !important}
+body.bg-cada .ed-paper.lay-bg{display:block !important}
 .lay-row .chips button.swb{width:32px;height:28px}
 .swpick{display:inline-flex;align-items:center}
 .swpick input{width:30px;height:26px;padding:0;border:1px solid var(--rule);border-radius:6px;background:var(--paper);cursor:pointer}
@@ -1171,7 +1181,8 @@ textarea.inp.cap-text{width:100%;min-height:150px;font-family:var(--sans);font-s
           </div>
           <div class="opt" id="fotoPickRow">
             <span class="lbl">De la foto 1</span>
-            <div class="chips" id="bgSw" role="group" aria-label="Color de la foto 1"></div>
+            <div class="optrow"><div class="chips" id="bgSw" role="group" aria-label="Color de la foto 1"></div>
+            <button type="button" class="btn btn-ghost mini eyedrop" id="bgDrop" title="Tocá cualquier punto de la foto 1: el papel toma ese color exacto">Tomar de la foto</button></div>
           </div>
           <div class="opt" id="fotoToneRow">
             <span class="lbl">Intensidad</span>
@@ -1597,8 +1608,11 @@ textarea.inp.cap-text{width:100%;min-height:150px;font-family:var(--sans);font-s
                 <button type="button" role="radio" data-v="portada" title="El mismo color que el título de la portada">Como la portada</button>
                 <button type="button" role="radio" data-v="tinta" title="El color de la tinta del papel">Tinta</button>
               </div>
+              <div class="chips" id="gdInkSw" role="group" aria-label="Colores de las fotos de la grilla para el título"></div>
               <label class="colorpick" for="gdInkColor"><input type="color" id="gdInkColor" value="#D12F27"> Elegir</label>
+              <button type="button" class="btn btn-ghost mini eyedrop" id="gdInkDrop" title="Tocá cualquier punto de la foto elegida en la lista: el título de la grilla toma ese color">Tomar de la foto</button>
             </div>
+            <p class="subhint" id="gdInkHint" hidden>La portada está apagada: «Como la portada» usa la tinta del papel.</p>
           </div>
           <div class="opt" id="gdFootRow">
             <label class="lbl" for="gdFoot">Pie</label>
@@ -2111,11 +2125,12 @@ function currentStyle(){ return withStamp(baseStyle()); }
 function vividOf(cols){ let best = cols[0].hex, bc = -1; cols.forEach(c => { const o = hex2ok(c.hex), ch = Math.hypot(o[1], o[2]) * (o[0] > 0.35 ? 1 : 0.5); if (ch > bc){ bc = ch; best = c.hex; } }); return best; }
 function toneOf(hex, tone){ if (tone === 'intenso') return hex; const k = tone === 'medio' ? 0.3 : 0.55, [r, g, b] = hexRgb(hex); return rgbHex(r + (255 - r)*k, g + (255 - g)*k, b + (255 - b)*k); }
 const BG_NONE = '#E8DFC8';
-function sharedBgHex(){ if (state.bgEach === 'portada'){ const cp = coverPhoto(), cb = cp ? coverBg(cp) : null; if (cb) return cb; const h = coverPick(cp); if (h) return toneOf(h, state.cover.tone); } const cols = (state.photos[0] && state.photos[0].colors) || []; if (!cols.length) return BG_NONE; return toneOf(state.bgPick >= 0 && cols[state.bgPick] ? cols[state.bgPick].hex : vividOf(cols), state.bgTone); }
+function sharedBgHex(){ if (state.bgEach === 'portada'){ const cp = coverPhoto(), cb = cp ? coverBg(cp) : null; if (cb) return cb; const h = coverPick(cp); if (h) return toneOf(h, state.cover.tone); } const cols = (state.photos[0] && state.photos[0].colors) || []; if (typeof state.bgPick === 'string' && state.bgPick[0] === '#') return state.bgPick; if (!cols.length) return BG_NONE; return toneOf(state.bgPick >= 0 && cols[state.bgPick] ? cols[state.bgPick].hex : vividOf(cols), state.bgTone); }
 function bgHexFor(p){
   if (state.bgEach === 'una' || state.bgEach === 'portada') return sharedBgHex();
   const cols = (p && p.colors) || []; if (!cols.length) return BG_NONE;
-  const L = p.lay || {}, k = L.bg != null && L.bg !== '' ? +L.bg : -1;
+  const L = p.lay || {}; if (typeof L.bg === 'string' && L.bg[0] === '#') return L.bg;
+  const k = L.bg != null && L.bg !== '' ? +L.bg : -1;
   return toneOf(k >= 0 && cols[k] ? cols[k].hex : vividOf(cols), state.bgTone);
 }
 function fotoStyle(hex){ return Object.assign(customStyle(hex), {id:'foto', name:'De la foto'}); }
@@ -3921,7 +3936,8 @@ function gridInk(){
   if (G.ink === 'otro') return G.inkColor;
   if (G.ink === 'portada' && state.cover.on){
     const p = coverPhoto();
-    if (p){ const cb = coverBg(p) || paperAvg, def = hex2ok(cb)[0] < 0.55 ? '#F3EFE6' : '#1B1A18', t = coverTitleInk(p, cb, def); if (t) return legibleOn(t, bg, 3); }
+    /* el mismo color con que se dibuja el título de la portada; solo se corrige si en este papel no se leería */
+    if (p){ const cb = coverBg(p), st = currentStyle(), bgHex = cb || (st.paper ? rgbHex(...st.paper) : paperAvg), dark = hex2ok(bgHex)[0] < 0.55, def = dark ? '#F3EFE6' : (cb ? '#1B1A18' : st.ink), t = coverTitleInk(p, bgHex, def); if (t) return contrastOf(t, bg) >= 1.8 ? t : legibleOn(t, bg, 2.2); }
   }
   return S.ink;
 }
@@ -4944,7 +4960,7 @@ function pickChoose(e){
   col.hex = hex; col.pt = {x:fx, y:fy}; col.sugg = null; col.name = freshName(p, k); col.auto = true;
   const nameEl = document.getElementById(`name-${p.id}-${k}`); if (nameEl) nameEl.value = col.name;
   const chipEl = document.getElementById(`chip-${p.id}-${k}`); if (chipEl){ chipEl.style.setProperty('--c', col.hex); chipEl.title = col.hex; }
-  const lbg = document.getElementById(`laybg-${p.id}-${k}`); if (lbg) lbg.style.background = col.hex;
+  const lbg = document.getElementById(`laybg-${p.id}-${k}`); if (lbg) lbg.style.background = toneOf(col.hex, state.bgTone);
   $('#pickDlg').close(); scheduleOut(); toast('Color elegido: ' + col.name);
 }
 function thumbToPhoto(p, fx, fy){
@@ -5190,7 +5206,7 @@ function layDiffs(p){
   if (+L.tdx || +L.tdy) out.push({k:'tdx,tdy', t:'Título movido a mano'});
   if (L.pos) out.push({k:'pos', t:'Colores ' + (POS_TXT[L.pos] || (POS_LABEL[L.pos] || L.pos).toLowerCase())});
   if (L.size) out.push({k:'size', t:'Colores ' + (SIZE_TXT[L.size] || L.size)});
-  if (L.bg != null && L.bg !== '' && state.style === 'foto' && state.bgEach === 'cada') out.push({k:'bg', t:'Papel del color ' + (+L.bg + 1), c: p.colors[+L.bg] ? p.colors[+L.bg].hex : null});
+  if (L.bg != null && L.bg !== '' && state.style === 'foto' && state.bgEach === 'cada') out.push(L.bg[0] === '#' ? {k:'bg', t:'Papel elegido en la foto', c:L.bg} : {k:'bg', t:'Papel del color ' + (+L.bg + 1), c: p.colors[+L.bg] ? toneOf(p.colors[+L.bg].hex, state.bgTone) : null});
   if (L.stamp) out.push({k:'stamp', t: L.stamp === 'auto' ? 'Sello sugerido' : 'Sello de otro color', c: L.stamp[0] === '#' ? L.stamp : null});
   if (L.pm) out.push({k:'pm', t: L.pm === 'no' ? 'Sin matasellos' : 'Matasellos: ' + pmLabelOf(L.pm).toLowerCase()});
   return out;
@@ -5231,6 +5247,13 @@ function refreshRow(p){
 }
 function renderPhotos(){ renderList(); renderEditor(); }
 
+/* papel de esta postal (Estilo «De la foto» + «Uno por postal»): sugeridos de la paleta, ya en la intensidad elegida, o tomado de la foto */
+function paperRowHTML(p){
+  const L = p.lay || {}, id = p.id, cols = p.colors || [], own = typeof L.bg === 'string' && L.bg[0] === '#';
+  const auto = cols.length ? toneOf(vividOf(cols), state.bgTone) : BG_NONE;
+  return `<div class="ed-paper lay-bg"><div class="ed-sec-h"><span class="ed-l">Papel de esta postal</span><button type="button" class="linkbtn" data-act="bgdrop" title="Tocá cualquier punto de la foto: el papel toma ese color exacto">Tomar de la foto</button></div>
+    <div class="chips" data-lay="bg"><button type="button" class="swb swb-auto" data-v="" aria-pressed="${L.bg == null}" title="Sugerido: el color más vivo de la paleta" style="--c:${auto}">Auto</button>${cols.map((cc, k) => `<button type="button" class="swb" id="laybg-${id}-${k}" data-v="${k}" aria-pressed="${L.bg === String(k)}" title="${esc(cc.name || cc.hex)} en papel" style="background:${toneOf(cc.hex, state.bgTone)}"></button>`).join('')}${own ? `<button type="button" class="swb" data-v="${L.bg}" aria-pressed="true" title="Elegido en la foto · ${L.bg}" style="background:${L.bg}"></button>` : ''}</div></div>`;
+}
 /* ---------- el panel de la foto activa ---------- */
 function pedWhere(p){
   const i = state.photos.indexOf(p), n = state.photos.length;
@@ -5272,6 +5295,7 @@ function renderEditor(){
         </div>`).join('')}
       </div>
     </div>
+    ${paperRowHTML(p)}
     <div class="ed-diff" id="diff-${id}" aria-live="polite">${diffHTML(p)}</div>
     <div class="pc-secs">
       ${sec('encuadre', 'Encuadre', cropSummary(p), `
@@ -5302,7 +5326,6 @@ function renderEditor(){
           <div class="lay-head"><h4>Colores</h4><button type="button" class="lay-all" data-layall="colores" title="Usar esta ubicación y tamaño en todas las fotos">Usar en todas</button></div>
           <div class="lay-row"><label class="lbl" for="lp-${id}">Ubicación</label><select class="inp" id="lp-${id}" data-laysel="pos" aria-label="Ubicación de los colores de esta postal"><option value="">Como todas (${esc(POS_LABEL[state.swPos] || 'Auto')})</option>${Object.entries(POS_LABEL).map(([v, l]) => `<option value="${v}"${L.pos === v ? ' selected' : ''}>${l}</option>`).join('')}</select></div>
           <div class="lay-row"><span class="lbl">Tamaño</span><div class="chips" data-lay="size">${[['','Como todas'],['chicos','Chicos'],['medianos','Medianos'],['grandes','Grandes']].map(([v, l]) => `<button type="button" data-v="${v}" aria-pressed="${(L.size || '') === v}">${l}</button>`).join('')}</div></div>
-          <div class="lay-row lay-bg"><span class="lbl">Fondo</span><div class="chips" data-lay="bg"><button type="button" data-v="" aria-pressed="${L.bg == null}">Auto</button>${p.colors.map((cc, k) => `<button type="button" class="swb" id="laybg-${id}-${k}" data-v="${k}" aria-pressed="${L.bg === String(k)}" title="${esc(cc.name || cc.hex)}" style="background:${cc.hex}"></button>`).join('')}</div></div>
         </section>
         <section class="lay-sec">
           <div class="lay-head"><h4>Sello</h4><button type="button" class="lay-all" data-layall="sello" title="Usar este color de sello en todas las fotos">Usar en todas</button></div>
@@ -5545,6 +5568,7 @@ pedBody.addEventListener('click', e => {
   if (ait){ suggestTitle(p, ait); return; }
   if (chip){ openPicker(p, +chip.dataset.chip); return; }
   if (!act) return;
+  if (act.dataset.act === 'bgdrop'){ openPicker(p, 0, {title:'Papel de esta postal · tocá la foto', cur:bgHexFor(p), cb:hex => { setLay(p, 'bg', hex); renderEditor(); refreshEditorBits(); scheduleOut(); }}); return; }
   const i = state.photos.indexOf(p);
   if (act.dataset.act === 'cropreset'){ p.crop = null; p.focus = 0; syncCropUI(p); scheduleOut(); return; }
   if (act.dataset.act === 'layreset'){ commitNow(); p.lay = null; renderEditor(); scheduleOut(); commitSoon(); toast('Esta foto vuelve a seguir el diseño de todas'); return; }
@@ -5601,9 +5625,12 @@ function syncDesign(){
 function renderBgSwatches(){
   const box = $('#bgSw'); if (!box) return; const cols = (state.photos[0] && state.photos[0].colors) || [];
   const cur = state.bgPick >= 0 && cols[state.bgPick] ? state.bgPick : (cols.length ? cols.findIndex(c => c.hex === vividOf(cols)) : -1);
-  box.innerHTML = cols.map((c, i) => `<button type="button" class="swb" data-bgpick="${i}" aria-pressed="${i === cur}" title="${esc(c.name || c.hex)}" style="background:${c.hex}"></button>`).join('');
+  const own = typeof state.bgPick === 'string' && state.bgPick[0] === '#';
+  box.innerHTML = cols.map((c, i) => `<button type="button" class="swb" data-bgpick="${i}" aria-pressed="${!own && i === cur}" title="${esc(c.name || c.hex)} en papel" style="background:${toneOf(c.hex, state.bgTone)}"></button>`).join('')
+    + (own ? `<button type="button" class="swb" data-bgpick="${state.bgPick}" aria-pressed="true" title="Elegido en la foto · ${state.bgPick}" style="background:${state.bgPick}"></button>` : '');
 }
-$('#bgSw').addEventListener('click', e => { const b = e.target.closest('[data-bgpick]'); if (!b) return; state.bgPick = +b.dataset.bgpick; syncDesign(); scheduleOut(); });
+$('#bgDrop').addEventListener('click', () => { const p = state.photos[0]; if (!p || !p.prev) return; openPicker(p, 0, {title:'Papel de todas las postales · tocá la foto', cur:sharedBgHex(), cb:hex => { state.bgPick = hex; syncDesign(); scheduleOut(); }}); });
+$('#bgSw').addEventListener('click', e => { const b = e.target.closest('[data-bgpick]'); if (!b) return; const v = b.dataset.bgpick; state.bgPick = v[0] === '#' ? v : +v; syncDesign(); scheduleOut(); });
 function renderFotoThumb(){
   const c = document.querySelector('.style-card canvas[data-style="foto"]'), p = state.photos[0]; if (!c) return;
   const keep = S; S = withStamp(fotoStyle(p ? bgHexFor(p) : BG_NONE));
@@ -5999,7 +6026,7 @@ function syncGrid(){
   $('#gdFromCover').checked = G.fromCover; $('#gridTitles').hidden = G.fromCover;
   document.querySelectorAll('#gridTitles .gsub').forEach(el => el.hidden = !designed);
   $('#gdInkRow').hidden = $('#gdFootRow').hidden = !designed;
-  $('#gdInkColor').value = G.inkColor; $('#gdBgColor').value = G.bgColor;
+  $('#gdInkColor').value = G.inkColor; $('#gdBgColor').value = G.bgColor; renderGridInk();
   $('#gdTape').checked = G.tape; $('#gdSeal').checked = G.seal; $('#gdPm').checked = G.pm;
   $('#gdPTitle').checked = G.ptitle; $('#gdPTEn').checked = G.pten; $('#gdPTEnRow').hidden = !G.ptitle; $('#gdPTBox').hidden = !designed;
   $('#gdTapeRow').hidden = look !== 'cuaderno' && look !== 'instantaneas'; $('#gdSealRow').hidden = look !== 'cuaderno'; $('#gdPmRow').hidden = look !== 'estampillas'; $('#gdDecoBox').hidden = !['cuaderno', 'estampillas', 'instantaneas'].includes(look);
@@ -6022,6 +6049,17 @@ function renderLookThumbs(){
   } finally { state.grid.look = keepLook; S = keepS; releaseCanvas(tmp); }
 }
 function renderLookThumbsSoon(){ clearTimeout(lookT); lookT = setTimeout(renderLookThumbs, 80); }
+function gridInkPhotos(){ const o = outputs()[selK], g = o && o.kind === 'grid' ? o.g : 0; return state.photos.slice(g*4, g*4 + 4); }
+function renderGridInk(){
+  const box = $('#gdInkSw'); if (!box) return; const G = state.grid, seen = new Set(), cols = [];
+  gridInkPhotos().forEach(p => (p.colors || []).forEach(c => { const h = c.hex.toUpperCase(); if (!seen.has(h)){ seen.add(h); cols.push(c); } }));
+  const bg = gridBgHex(), cur = G.ink === 'otro' ? String(G.inkColor).toUpperCase() : '';
+  box.innerHTML = cols.map(c => { const low = contrastOf(c.hex, bg) < 3; return `<button type="button" data-gink="${c.hex}" aria-pressed="${cur === c.hex.toUpperCase()}"${low ? ' class="low"' : ''} title="${esc(c.name || c.hex)}${low ? ' · poco contraste con el papel' : ''}" style="background:${c.hex}"></button>`; }).join('');
+  $('#gdInkHint').hidden = !(G.ink === 'portada' && !state.cover.on);
+}
+$('#gdInkSw').addEventListener('click', e => { const b = e.target.closest('[data-gink]'); if (!b) return; state.grid.inkColor = b.dataset.gink; state.grid.ink = 'otro'; gridChanged(); });
+$('#gdInkDrop').addEventListener('click', () => { const p = activePhoto(); if (!p || !p.prev) return; const i = state.photos.indexOf(p);
+  openPicker(p, 0, {title:`Título de la grilla · foto ${i + 1} · tocá la foto`, cur:gridInk(), cb:hex => { state.grid.inkColor = hex; state.grid.ink = 'otro'; gridChanged(); }}); });
 function gridChanged(){ syncGrid(); showOut(o => o.kind === 'grid'); scheduleOut(); }
 document.querySelectorAll('[data-gradio]').forEach(box => box.addEventListener('click', e => { const b = e.target.closest('button[data-v]'); if (!b) return; state.grid[box.dataset.gradio] = b.dataset.v; gridChanged(); }));
 document.querySelectorAll('select[data-gsel]').forEach(x => x.addEventListener('change', () => { state.grid[x.dataset.gsel] = x.value; gridChanged(); }));
@@ -6158,7 +6196,7 @@ function syncCtxBar(){
   $('#ctxPlace').hidden = !T.place; $('#ctxPlace').dataset.g = T.place ? T.g : '';
 }
 function renderStage(){
-  syncCtxBar();
+  syncCtxBar(); if (typeof renderGridInk === 'function') renderGridInk();
   const outs = outputs();
   document.querySelectorAll('#outList .ocard').forEach((li, k) => li.classList.toggle('sel', k === selK));
   const vn = $('#vnOut'); if (vn) vn.textContent = outs.length || ''; const vf = $('#vnFotos'); if (vf) vf.textContent = state.photos.length || '';
