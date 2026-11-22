@@ -4070,7 +4070,7 @@ function gridCatalogo(ctx, g, items, hi, H){
     const r = {x:c.x + (c.w - f.w)/2, y:c.y + b, w:f.w, h:f.h}, keepS = S;
     if (cardOn){ const hx = gridCardHex(p), cx0 = c.x - 9, cy0 = c.y - 9, cw0 = c.w + 18, ch0 = f.h + 2*b + metaH + 2;
       ctx.save(); ctx.shadowColor = 'rgba(30,20,10,.18)'; ctx.shadowBlur = 10*ds; ctx.shadowOffsetY = 3*ds; ctx.fillStyle = hx; ctx.fillRect(cx0, cy0, cw0, ch0); ctx.restore();
-      cardFill(ctx, cx0, cy0, cw0, ch0, hx, hi, H); S = gridCardStyle(p); }
+      cardFill(ctx, cx0, cy0, cw0, ch0, hx, hi, H, true); S = gridCardStyle(p); }
     ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.17)'; ctx.shadowBlur = 11*ds; ctx.shadowOffsetY = 3.2*ds; ctx.fillStyle = '#FFFFFF'; ctx.fillRect(r.x - b, r.y - b, r.w + 2*b, r.h + 2*b); ctx.restore();
     drawCover(ctx, srcOf(p, hi), r, 0);
     gridTBDraw(ctx, TB[i], c.x, r.y + r.h + b + 7, 'left', S.ink, TO);
@@ -4162,7 +4162,7 @@ function gridGaleria(ctx, g, items, hi, H){
     const r = {x:mx + mat, y:my + mat, w:f.w, h:f.h};
     const matHex = cardOn ? gridCardHex(p) : '#FBF8F1';
     ctx.save(); ctx.shadowColor = 'rgba(40,30,20,.2)'; ctx.shadowBlur = 12*ds; ctx.shadowOffsetY = 4*ds; ctx.fillStyle = matHex; ctx.fillRect(mx, my, mw, mh); ctx.restore();
-    if (cardOn) cardFill(ctx, mx, my, mw, mh, matHex, hi, H);
+    if (cardOn) cardFill(ctx, mx, my, mw, mh, matHex, hi, H, true);
     ctx.save(); ctx.strokeStyle = cardOn ? penOn(matHex) : S.ink; ctx.globalAlpha = 0.5; ctx.lineWidth = 0.8; ctx.strokeRect(mx + 0.4, my + 0.4, mw - 0.8, mh - 0.8); ctx.globalAlpha = 0.28; ctx.strokeRect(r.x - 3.5, r.y - 3.5, r.w + 7, r.h + 7); ctx.restore();
     drawCover(ctx, srcOf(p, hi), r, 0);
     ctx.save(); ctx.strokeStyle = 'rgba(0,0,0,.22)'; ctx.lineWidth = 0.8; ctx.strokeRect(r.x, r.y, r.w, r.h); ctx.restore();
@@ -4256,11 +4256,29 @@ function gridCardOn(){ return state.grid.card === 'postal'; }
 function gridCardHex(p){ return state.style === 'foto' && state.bgEach === 'cada' ? bgHexFor(p) : gridBgHex(); }
 function gridCardStyle(p){ return withStamp(fotoStyle(gridCardHex(p))); }
 /* pinta el papel (con su textura, si la hay) dentro de un rectángulo */
-function cardFill(ctx, x, y, w, h, hex, hi, H){
+function cardFill(ctx, x, y, w, h, hex, hi, H, lift){
+  if (lift) cardLift(ctx, x, y, w, h, hex);
   ctx.save(); ctx.beginPath(); ctx.rect(x, y, w, h); ctx.clip();
   if (state.paperTex === 'liso'){ ctx.fillStyle = hex; ctx.fillRect(x, y, w, h); }
   else { const pc = paperFor(fotoStyle(hex), hi), pw = pc.width, sw = pw * D / H; ctx.drawImage(pc, (pw - sw)/2, 0, sw, pw, 0, 0, D, H); }
+  cardFinish(ctx, x, y, w, h, hex);
   ctx.restore();
+}
+/* sombra de contacto, corta y nítida, debajo de la sombra larga que ya pone cada diseño: el recuadro se apoya en la hoja */
+function cardLift(ctx, x, y, w, h, hex){
+  const ds = devScale(ctx), near = Math.abs(hex2ok(hex)[0] - hex2ok(gridBgHex())[0]) < 0.07;
+  ctx.save(); ctx.shadowColor = `rgba(35,22,12,${near ? 0.34 : 0.24})`; ctx.shadowBlur = 2.2*ds; ctx.shadowOffsetY = 1.1*ds; ctx.fillStyle = hex; ctx.fillRect(x, y, w, h); ctx.restore();
+}
+/* terminación de cartulina impresa: luz arriba, sombra abajo, canto claro y un filo un poco más oscuro.
+   Si el papel se parece mucho al fondo de la grilla, el filo se marca más para que el recuadro no se pierda. */
+function cardFinish(ctx, x, y, w, h, hex){
+  const px = Math.max(0.6, 1/devScale(ctx)), ok = hex2ok(hex), near = Math.abs(ok[0] - hex2ok(gridBgHex())[0]) < 0.07, dark = ok[0] < 0.5;
+  const g = ctx.createLinearGradient(x, y, x, y + h);
+  g.addColorStop(0, dark ? 'rgba(255,255,255,.06)' : 'rgba(255,255,255,.16)'); g.addColorStop(0.45, 'rgba(255,255,255,0)'); g.addColorStop(1, dark ? 'rgba(0,0,0,.12)' : 'rgba(60,40,20,.07)');
+  ctx.fillStyle = g; ctx.fillRect(x, y, w, h);
+  ctx.fillStyle = dark ? 'rgba(255,255,255,.14)' : 'rgba(255,255,255,.5)'; ctx.fillRect(x, y, w, 1.2*px); ctx.fillRect(x, y, 1.2*px, h);
+  ctx.strokeStyle = shade(hex, dark ? -0.1 : -0.16); ctx.globalAlpha = near ? 0.9 : 0.55; ctx.lineWidth = (near ? 1.6 : 1.1)*px;
+  ctx.strokeRect(x + ctx.lineWidth/2, y + ctx.lineWidth/2, w - ctx.lineWidth, h - ctx.lineWidth); ctx.globalAlpha = 1;
 }
 const penOn = hex => lumOf(hex) > 0.42 ? '#2B2622' : '#F3EFE6';
 /* un renglón que se achica hasta `min` y, si no entra, se corta con «…» */
@@ -4279,7 +4297,7 @@ function gridInstantaneas(ctx, g, items, hi, H){
     const card = cardOn ? gridCardHex(p) : '#FBFAF6', pen = penOn(card);
     ctx.save(); ctx.translate(cx, cy); ctx.rotate(tilts[i]*Math.PI/180); ctx.translate(-cx, -cy);
     ctx.save(); ctx.shadowColor = 'rgba(30,20,10,.26)'; ctx.shadowBlur = 12*ds; ctx.shadowOffsetY = 4*ds; ctx.fillStyle = card; ctx.fillRect(px, py, pw, ph); ctx.restore();
-    if (cardOn) cardFill(ctx, px, py, pw, ph, card, hi, H);
+    if (cardOn) cardFill(ctx, px, py, pw, ph, card, hi, H, true);
     const r = {x:px + side, y:py + topB, w:f.w, h:f.h};
     ctx.fillStyle = '#141110'; ctx.fillRect(r.x, r.y, r.w, r.h); drawCover(ctx, srcOf(p, hi), r, 0);
     ctx.save(); const gl = ctx.createLinearGradient(r.x, r.y, r.x + r.w, r.y + r.h); gl.addColorStop(0, 'rgba(255,255,255,.08)'); gl.addColorStop(.45, 'rgba(255,255,255,0)'); ctx.fillStyle = gl; ctx.fillRect(r.x, r.y, r.w, r.h);
@@ -4346,7 +4364,7 @@ function gridFichero(ctx, g, items, hi, H){
     const c = cells[i], n = numOf(p, g*4 + i), f = fits[i], cw = c.w, ch = fh + metaH, x = c.x, y = c.y;
     const card = cardOn ? gridCardHex(p) : '#FBF9F2', pen = penOn(card), dark = lumOf(card) <= 0.42;
     ctx.save(); ctx.shadowColor = 'rgba(30,20,10,.2)'; ctx.shadowBlur = 9*ds; ctx.shadowOffsetY = 3*ds; ctx.fillStyle = card; ctx.fillRect(x, y, cw, ch); ctx.restore();
-    if (cardOn) cardFill(ctx, x, y, cw, ch, card, hi, H);
+    if (cardOn) cardFill(ctx, x, y, cw, ch, card, hi, H, true);
     /* cabecera: número a máquina, año y la línea roja */
     ctx.save(); ctx.fillStyle = pen; ctx.textAlign = 'left'; ctx.font = `500 11px ${MONO}`; ctx.fillText('N.º ' + pad3(n), x + pad, y + 17);
     ctx.globalAlpha = 0.6; ctx.font = `400 8px ${MONO}`; spacedAt(ctx, 'ARCHIVO OJODECRISTI · ' + yr, x + cw - pad, y + 16.5, 1, 'right'); ctx.restore();
@@ -4391,7 +4409,7 @@ function gridMuestrario(ctx, g, items, hi, H){
     const c = cells[i], n = numOf(p, g*4 + i), f = fits[i], gw = f.w + stripW + 2*fr + 2, gh = f.h + 2*fr, gx = c.x + (c.w - gw)/2, gy = c.y;
     const card = cardOn ? gridCardHex(p) : '#FFFFFF';
     ctx.save(); ctx.shadowColor = 'rgba(30,20,10,.2)'; ctx.shadowBlur = 10*ds; ctx.shadowOffsetY = 3.5*ds; ctx.fillStyle = card; ctx.fillRect(gx, gy, gw, gh); ctx.restore();
-    if (cardOn) cardFill(ctx, gx, gy, gw, gh, card, hi, H);
+    if (cardOn) cardFill(ctx, gx, gy, gw, gh, card, hi, H, true);
     const r = {x:gx + fr, y:gy + fr, w:f.w, h:f.h}; drawCover(ctx, srcOf(p, hi), r, 0);
     /* la tira de muestras: un color debajo del otro, con su nombre y su código */
     const cols = (p.colors || []).slice(0, 3), sx = r.x + r.w + 2, sh = cols.length ? f.h/cols.length : 0;
